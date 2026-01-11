@@ -9,19 +9,44 @@ export const useGitHubStore = defineStore('github', () => {
   const selectedRepo = ref(null)
   const isLoading = ref(false)
   const error = ref(null)
+  const currentPage = ref(1)
+  const hasMoreRepos = ref(true)
+  const isLoadingMore = ref(false)
 
   const fetchRepositories = async () => {
     isLoading.value = true
     error.value = null
+    currentPage.value = 1
+    hasMoreRepos.value = true
 
     try {
       const data = await githubService.getRepositories()
       repositories.value = data
+      hasMoreRepos.value = data.length >= 30
     } catch (e) {
       error.value = e.message
       console.error('Failed to fetch repositories:', e)
     } finally {
       isLoading.value = false
+    }
+  }
+
+  const fetchMoreRepositories = async () => {
+    if (isLoadingMore.value || !hasMoreRepos.value) return
+    
+    isLoadingMore.value = true
+    currentPage.value++
+    
+    try {
+      const data = await githubService.getRepositories(30, currentPage.value)
+      repositories.value = [...repositories.value, ...data]
+      hasMoreRepos.value = data.length >= 30
+    } catch (e) {
+      error.value = e.message
+      currentPage.value--
+      console.error('Failed to fetch more repositories:', e)
+    } finally {
+      isLoadingMore.value = false
     }
   }
 
@@ -118,7 +143,11 @@ export const useGitHubStore = defineStore('github', () => {
     selectedRepo,
     isLoading,
     error,
+    currentPage,
+    hasMoreRepos,
+    isLoadingMore,
     fetchRepositories,
+    fetchMoreRepositories,
     fetchPinnedRepos,
     fetchRepository,
     fetchProfile,
