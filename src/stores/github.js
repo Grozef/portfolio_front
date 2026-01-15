@@ -1,3 +1,8 @@
+/**
+ * Store Pinia pour GitHub.
+ * Gere l'etat des repositories et du profil GitHub.
+ * @module stores/github
+ */
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { githubService } from '@/services/github'
@@ -9,57 +14,32 @@ export const useGitHubStore = defineStore('github', () => {
   const selectedRepo = ref(null)
   const isLoading = ref(false)
   const error = ref(null)
-  const currentPage = ref(1)
-  const hasMoreRepos = ref(true)
-  const isLoadingMore = ref(false)
+
+  const sortedRepositories = computed(() => {
+    return [...repositories.value].sort((a, b) => 
+      new Date(b.updated_at) - new Date(a.updated_at)
+    )
+  })
 
   const fetchRepositories = async () => {
     isLoading.value = true
     error.value = null
-    currentPage.value = 1
-    hasMoreRepos.value = true
-
     try {
-      const data = await githubService.getRepositories()
-      repositories.value = data
-      hasMoreRepos.value = data.length >= 30
+      repositories.value = await githubService.getRepositories()
     } catch (e) {
       error.value = e.message
-      console.error('Failed to fetch repositories:', e)
     } finally {
       isLoading.value = false
-    }
-  }
-
-  const fetchMoreRepositories = async () => {
-    if (isLoadingMore.value || !hasMoreRepos.value) return
-    
-    isLoadingMore.value = true
-    currentPage.value++
-    
-    try {
-      const data = await githubService.getRepositories(30, currentPage.value)
-      repositories.value = [...repositories.value, ...data]
-      hasMoreRepos.value = data.length >= 30
-    } catch (e) {
-      error.value = e.message
-      currentPage.value--
-      console.error('Failed to fetch more repositories:', e)
-    } finally {
-      isLoadingMore.value = false
     }
   }
 
   const fetchPinnedRepos = async () => {
     isLoading.value = true
     error.value = null
-
     try {
-      const data = await githubService.getPinnedRepositories()
-      pinnedRepos.value = data
+      pinnedRepos.value = await githubService.getPinnedRepositories()
     } catch (e) {
       error.value = e.message
-      console.error('Failed to fetch pinned repos:', e)
     } finally {
       isLoading.value = false
     }
@@ -68,14 +48,11 @@ export const useGitHubStore = defineStore('github', () => {
   const fetchRepository = async (name) => {
     isLoading.value = true
     error.value = null
-
     try {
-      const data = await githubService.getRepository(name)
-      selectedRepo.value = data
-      return data
+      selectedRepo.value = await githubService.getRepository(name)
+      return selectedRepo.value
     } catch (e) {
       error.value = e.message
-      console.error('Failed to fetch repository:', e)
       return null
     } finally {
       isLoading.value = false
@@ -85,13 +62,10 @@ export const useGitHubStore = defineStore('github', () => {
   const fetchProfile = async () => {
     isLoading.value = true
     error.value = null
-
     try {
-      const data = await githubService.getProfile()
-      profile.value = data
+      profile.value = await githubService.getProfile()
     } catch (e) {
       error.value = e.message
-      console.error('Failed to fetch profile:', e)
     } finally {
       isLoading.value = false
     }
@@ -108,53 +82,12 @@ export const useGitHubStore = defineStore('github', () => {
     }
   }
 
-  const clearSelectedRepo = () => {
-    selectedRepo.value = null
-  }
-
-  const sortedRepositories = computed(() => {
-    return [...repositories.value].sort((a, b) => {
-      return new Date(b.updated_at) - new Date(a.updated_at)
-    })
-  })
-
-  const topRepositories = computed(() => {
-    return [...repositories.value]
-      .sort((a, b) => b.stars - a.stars)
-      .slice(0, 6)
-  })
-
-  const languageStats = computed(() => {
-    const stats = {}
-    repositories.value.forEach(repo => {
-      if (repo.language) {
-        stats[repo.language] = (stats[repo.language] || 0) + 1
-      }
-    })
-    return Object.entries(stats)
-      .map(([name, count]) => ({ name, count }))
-      .sort((a, b) => b.count - a.count)
-  })
+  const clearSelectedRepo = () => { selectedRepo.value = null }
 
   return {
-    repositories,
-    pinnedRepos,
-    profile,
-    selectedRepo,
-    isLoading,
-    error,
-    currentPage,
-    hasMoreRepos,
-    isLoadingMore,
-    fetchRepositories,
-    fetchMoreRepositories,
-    fetchPinnedRepos,
-    fetchRepository,
-    fetchProfile,
-    selectRepository,
-    clearSelectedRepo,
+    repositories, pinnedRepos, profile, selectedRepo, isLoading, error,
     sortedRepositories,
-    topRepositories,
-    languageStats
+    fetchRepositories, fetchPinnedRepos, fetchRepository, fetchProfile,
+    selectRepository, clearSelectedRepo
   }
 })

@@ -1,56 +1,60 @@
-<script setup>
-import { ref, onMounted, provide } from 'vue'
-import { useTerminalStore } from '@/stores/terminal'
-import GrainOverlay from '@/components/GrainOverlay.vue'
-import CustomCursor from '@/components/CustomCursor.vue'
-
-const terminalStore = useTerminalStore()
-const isLoaded = ref(false)
-
-provide('terminalStore', terminalStore)
-
-onMounted(() => {
-  setTimeout(() => {
-    isLoaded.value = true
-  }, 100)
-})
-</script>
-
+<!--
+  App.vue - Composant racine de l'application
+  
+  Contient:
+  - Variables CSS globales (theme terminal)
+  - RouterView pour le rendu des pages
+  - Styles de base
+-->
 <template>
-  <div class="app" :class="{ loaded: isLoaded }">
-    <GrainOverlay />
-    <CustomCursor />
-    <router-view v-slot="{ Component }">
-      <transition name="page" mode="out-in">
-        <component :is="Component" />
-      </transition>
-    </router-view>
-  </div>
+  <RouterView />
 </template>
 
 <style lang="scss">
-.app {
-  min-height: 100vh;
-  opacity: 0;
-  transition: opacity 0.6s ease;
-
-  &.loaded {
-    opacity: 1;
-  }
+:root {
+  --terminal-bg: #0a0a0b;
+  --terminal-bg-secondary: #111113;
+  --terminal-text: #e8e6e3;
+  --terminal-text-dim: #6b6b6b;
+  --terminal-accent: #c9a227;
+  --terminal-accent-secondary: #4a9eff;
+  --terminal-border: #2a2a2a;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-display: 'Playfair Display', serif;
+  --font-serif: 'Crimson Pro', serif;
 }
 
-.page-enter-active,
-.page-leave-active {
-  transition: all 0.4s ease;
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-.page-enter-from {
-  opacity: 0;
-  transform: translateY(20px);
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-.page-leave-to {
-  opacity: 0;
-  transform: translateY(-20px);
+body {
+  font-family: var(--font-mono);
+  background: var(--terminal-bg);
+  color: var(--terminal-text);
+  line-height: 1.6;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  cursor: pointer;
+  font-family: inherit;
+}
+
+::selection {
+  background: var(--terminal-accent);
+  color: var(--terminal-bg);
 }
 </style>

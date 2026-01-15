@@ -1,13 +1,18 @@
+/**
+ * Point d'entree de l'application Vue.
+ * 
+ * Initialise Vue avec Pinia (store) et Vue Router.
+ * 
+ * @module main
+ */
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
-import './assets/main.scss'
 
 const app = createApp(App)
-const pinia = createPinia()
 
-app.use(pinia)
+app.use(createPinia())
 app.use(router)
 
 app.mount('#app')
