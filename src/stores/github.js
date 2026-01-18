@@ -5,7 +5,7 @@
  */
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { githubService } from '@/services/github'
+import githubService from '@/services/github'
 
 export const useGitHubStore = defineStore('github', () => {
   const repositories = ref([])
@@ -13,7 +13,11 @@ export const useGitHubStore = defineStore('github', () => {
   const profile = ref(null)
   const selectedRepo = ref(null)
   const isLoading = ref(false)
+  const isLoadingMore = ref(false)
   const error = ref(null)
+  const currentPage = ref(1)
+  const hasMoreRepos = ref(true)
+  const perPage = 30
 
   const sortedRepositories = computed(() => {
     return [...repositories.value].sort((a, b) => 
@@ -24,12 +28,41 @@ export const useGitHubStore = defineStore('github', () => {
   const fetchRepositories = async () => {
     isLoading.value = true
     error.value = null
+    currentPage.value = 1
+    hasMoreRepos.value = true
+    
     try {
-      repositories.value = await githubService.getRepositories()
+      const data = await githubService.getRepositories(perPage, 1)
+      repositories.value = data
+      hasMoreRepos.value = data.length === perPage
     } catch (e) {
       error.value = e.message
     } finally {
       isLoading.value = false
+    }
+  }
+
+  const fetchMoreRepositories = async () => {
+    if (!hasMoreRepos.value || isLoadingMore.value) return
+    
+    isLoadingMore.value = true
+    error.value = null
+    
+    try {
+      currentPage.value++
+      const newRepos = await githubService.getRepositories(perPage, currentPage.value)
+      
+      if (newRepos.length === 0) {
+        hasMoreRepos.value = false
+      } else {
+        repositories.value = [...repositories.value, ...newRepos]
+        hasMoreRepos.value = newRepos.length === perPage
+      }
+    } catch (e) {
+      error.value = e.message
+      currentPage.value--
+    } finally {
+      isLoadingMore.value = false
     }
   }
 
@@ -82,12 +115,38 @@ export const useGitHubStore = defineStore('github', () => {
     }
   }
 
-  const clearSelectedRepo = () => { selectedRepo.value = null }
+  const clearSelectedRepo = () => { 
+    selectedRepo.value = null 
+  }
+
+  const resetPagination = () => {
+    currentPage.value = 1
+    hasMoreRepos.value = true
+  }
 
   return {
-    repositories, pinnedRepos, profile, selectedRepo, isLoading, error,
+    // State
+    repositories, 
+    pinnedRepos, 
+    profile, 
+    selectedRepo, 
+    isLoading, 
+    isLoadingMore,
+    error,
+    currentPage,
+    hasMoreRepos,
+    
+    // Getters
     sortedRepositories,
-    fetchRepositories, fetchPinnedRepos, fetchRepository, fetchProfile,
-    selectRepository, clearSelectedRepo
+    
+    // Actions
+    fetchRepositories, 
+    fetchMoreRepositories,
+    fetchPinnedRepos, 
+    fetchRepository, 
+    fetchProfile,
+    selectRepository, 
+    clearSelectedRepo,
+    resetPagination
   }
 })

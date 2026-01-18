@@ -16,18 +16,22 @@ export const githubService = {
     })
     return response.data.data
   },
+
   async getPinnedRepositories() {
     const response = await api.get('/repositories/pinned')
     return response.data.data
   },
+
   async getRepository(name) {
     const response = await api.get(`/repositories/${name}`)
     return response.data.data
   },
+
   async getLanguages(name) {
     const response = await api.get(`/repositories/${name}/languages`)
     return response.data.data
   },
+
   async getProfile() {
     const response = await api.get('/profile')
     return response.data.data
