@@ -64,6 +64,12 @@ const router = createRouter({
       component: () => import('@/views/AdminMessagesView.vue'),
       meta: { requiresAuth: true }
     },
+    {
+      path: '/admin/carousel',
+      name: 'admin-carousel',
+      component: () => import('@/views/AdminCarouselView.vue'),
+      meta: { requiresAuth: true }
+    },
 
     // Catch-all redirect
     { 

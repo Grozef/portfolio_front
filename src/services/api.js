@@ -1,11 +1,7 @@
 /**
  * Service API centralise - Configuration axios partagee.
  * 
- * Fonctionnalites:
- * - Configuration axios unique
- * - Intercepteurs request pour ajouter le token
- * - Intercepteurs response pour gerer les erreurs 401
- * - Redirection automatique vers login si non authentifie
+ * FIX UPLOAD: Ne pas définir Content-Type pour FormData
  * 
  * @module services/api
  */
@@ -13,10 +9,11 @@ import axios from 'axios'
 import router from '@/router'
 
 const api = axios.create({
-  baseURL: '/api/v1',
+  baseURL: 'http://localhost:8000/api/v1',
   headers: { 
-    'Content-Type': 'application/json',
     'Accept': 'application/json'
+    // IMPORTANT: Ne PAS définir Content-Type ici
+    // Pour FormData, le navigateur doit gérer le Content-Type avec boundary
   },
   timeout: 30000
 })
@@ -28,6 +25,13 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
+    
+    // CRITICAL FIX: Définir Content-Type seulement pour non-FormData
+    if (!(config.data instanceof FormData)) {
+      config.headers['Content-Type'] = 'application/json'
+    }
+    // Si c'est du FormData, ne rien toucher - le navigateur gère tout
+    
     return config
   },
   (error) => {

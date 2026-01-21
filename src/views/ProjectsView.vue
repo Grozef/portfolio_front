@@ -58,6 +58,18 @@
     })
   }
   
+  const goToPrevProject = () => {
+    if (activeIndex.value > 0) {
+      scrollToProject(activeIndex.value - 1)
+    }
+  }
+  
+  const goToNextProject = () => {
+    if (activeIndex.value < projects.value.length - 1) {
+      scrollToProject(activeIndex.value + 1)
+    }
+  }
+  
   onMounted(async () => {
     await githubStore.fetchRepositories()
     isLoading.value = false
@@ -129,20 +141,44 @@
           </article>
         </div>
   
-        <!-- Navigation dots -->
+        <!-- Navigation dots with arrows -->
         <div class="scroll-nav">
-          <button
-            v-for="(project, index) in projects.slice(0, 10)"
-            :key="project.id"
-            class="nav-dot"
-            :class="{ active: activeIndex === index }"
-            @click="scrollToProject(index)"
+          <button 
+            class="nav-arrow nav-arrow-prev" 
+            :class="{ disabled: activeIndex === 0 }"
+            @click="goToPrevProject"
+            :disabled="activeIndex === 0"
             data-cursor-hover
-          ></button>
-          <span v-if="projects.length > 10" class="nav-more">+{{ projects.length - 10 }}</span>
-          <span v-if="githubStore.isLoadingMore" class="nav-loading">
-            <span class="loading-dot"></span>
-          </span>
+            title="Previous project"
+          >
+            <span>←</span>
+          </button>
+          
+          <div class="nav-dots-container">
+            <button
+              v-for="(project, index) in projects.slice(0, 10)"
+              :key="project.id"
+              class="nav-dot"
+              :class="{ active: activeIndex === index }"
+              @click="scrollToProject(index)"
+              data-cursor-hover
+            ></button>
+            <span v-if="projects.length > 10" class="nav-more">+{{ projects.length - 10 }}</span>
+            <span v-if="githubStore.isLoadingMore" class="nav-loading">
+              <span class="loading-dot"></span>
+            </span>
+          </div>
+          
+          <button 
+            class="nav-arrow nav-arrow-next" 
+            :class="{ disabled: activeIndex === projects.length - 1 }"
+            @click="goToNextProject"
+            :disabled="activeIndex === projects.length - 1"
+            data-cursor-hover
+            title="Next project"
+          >
+            <span>→</span>
+          </button>
         </div>
       </main>
   
@@ -429,8 +465,47 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 0.75rem;
+    gap: 1rem;
     padding: 1rem 0;
+  }
+  
+  .nav-dots-container {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  
+  .nav-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--terminal-border);
+    border-radius: 50%;
+    background: transparent;
+    color: var(--terminal-text);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    
+    &:hover:not(.disabled) {
+      border-color: var(--terminal-accent);
+      background: var(--terminal-accent);
+      color: var(--terminal-bg);
+      transform: scale(1.1);
+    }
+    
+    &.disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+      border-color: var(--terminal-border);
+    }
+    
+    span {
+      display: block;
+      line-height: 1;
+    }
   }
   
   .nav-dot {

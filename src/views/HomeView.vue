@@ -7,6 +7,7 @@
   const githubStore = useGitHubStore()
   const isModalOpen = ref(false)
   const selectedProject = ref(null)
+  const isMobileMenuOpen = ref(false)
   
   const handleOpenProject = (project) => {
     selectedProject.value = project
@@ -18,6 +19,14 @@
     setTimeout(() => {
       selectedProject.value = null
     }, 500)
+  }
+  
+  const toggleMobileMenu = () => {
+    isMobileMenuOpen.value = !isMobileMenuOpen.value
+  }
+  
+  const closeMobileMenu = () => {
+    isMobileMenuOpen.value = false
   }
   
   onMounted(() => {
@@ -33,18 +42,33 @@
             <span class="logo-symbol">◆</span>
             <span class="logo-text">portfolio</span>
           </div>
-          <nav class="nav">
+          
+          <nav class="nav desktop-nav">
             <router-link to="/" class="nav-link active" data-cursor-hover>terminal</router-link>
             <router-link to="/projects" class="nav-link" data-cursor-hover>projects</router-link>
             <router-link to="/books" class="nav-link" data-cursor-hover>books</router-link>
             <router-link to="/about" class="nav-link" data-cursor-hover>about</router-link>
             <router-link to="/contact" class="nav-link" data-cursor-hover>contact</router-link>
           </nav>
+          
+          <button class="mobile-menu-btn" @click="toggleMobileMenu" data-cursor-hover>
+            <span v-if="!isMobileMenuOpen">☰</span>
+            <span v-else>✕</span>
+          </button>
+          
           <div class="header-status">
             <span class="status-indicator"></span>
             <span class="status-text">Available for work</span>
           </div>
         </div>
+        
+        <nav class="mobile-nav" :class="{ open: isMobileMenuOpen }">
+          <router-link to="/" class="nav-link" @click="closeMobileMenu">terminal</router-link>
+          <router-link to="/projects" class="nav-link" @click="closeMobileMenu">projects</router-link>
+          <router-link to="/books" class="nav-link" @click="closeMobileMenu">books</router-link>
+          <router-link to="/about" class="nav-link" @click="closeMobileMenu">about</router-link>
+          <router-link to="/contact" class="nav-link" @click="closeMobileMenu">contact</router-link>
+        </nav>
       </header>
   
       <main class="home__main">
@@ -90,6 +114,10 @@
       background: rgba(10, 10, 15, 0.8);
       backdrop-filter: blur(10px);
       border-bottom: 1px solid var(--terminal-border);
+      
+      @media (max-width: 768px) {
+        padding: 1rem;
+      }
     }
   
     &__main {
@@ -98,11 +126,19 @@
       align-items: center;
       justify-content: center;
       padding: 6rem 2rem 4rem;
+      
+      @media (max-width: 768px) {
+        padding: 5rem 1rem 2rem;
+      }
     }
   
     &__footer {
       padding: 1rem 2rem;
       border-top: 1px solid var(--terminal-border);
+      
+      @media (max-width: 768px) {
+        padding: 1rem;
+      }
     }
   }
   
@@ -113,6 +149,10 @@
     align-items: center;
     justify-content: space-between;
     gap: 2rem;
+    
+    @media (max-width: 768px) {
+      gap: 1rem;
+    }
   }
   
   .logo {
@@ -129,15 +169,83 @@
       font-weight: 500;
       letter-spacing: 0.05em;
       color: var(--terminal-text);
+      
+      @media (max-width: 480px) {
+        font-size: 0.9rem;
+      }
     }
   }
   
-  .nav {
+  .desktop-nav {
     display: flex;
     gap: 2rem;
     
-    @media (max-width: 768px) {
+    @media (max-width: 968px) {
+      gap: 1.5rem;
+    }
+    
+    @media (max-width: 868px) {
       display: none;
+    }
+  }
+  
+  .mobile-menu-btn {
+    display: none;
+    background: transparent;
+    border: 1px solid var(--terminal-border);
+    color: var(--terminal-text);
+    width: 40px;
+    height: 40px;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      border-color: var(--terminal-accent);
+      color: var(--terminal-accent);
+    }
+    
+    @media (max-width: 868px) {
+      display: flex;
+    }
+  }
+  
+  .mobile-nav {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: rgba(10, 10, 15, 0.98);
+    border-bottom: 1px solid var(--terminal-border);
+    flex-direction: column;
+    padding: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+    
+    @media (max-width: 868px) {
+      display: flex;
+    }
+    
+    &.open {
+      max-height: 300px;
+      padding: 1rem 0;
+    }
+    
+    .nav-link {
+      padding: 1rem 2rem;
+      border-bottom: 1px solid var(--terminal-border);
+      
+      &:last-child {
+        border-bottom: none;
+      }
+      
+      &::after {
+        display: none;
+      }
     }
   }
   
@@ -177,7 +285,7 @@
     align-items: center;
     gap: 0.5rem;
     
-    @media (max-width: 768px) {
+    @media (max-width: 968px) {
       display: none;
     }
   }
@@ -186,7 +294,7 @@
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: var(--terminal-success);
+    background: #4ade80;
     animation: pulse 2s ease infinite;
   }
   
@@ -205,6 +313,16 @@
     max-width: 1000px;
     height: 70vh;
     min-height: 500px;
+    
+    @media (max-width: 768px) {
+      height: 60vh;
+      min-height: 400px;
+    }
+    
+    @media (max-width: 480px) {
+      height: 55vh;
+      min-height: 350px;
+    }
   }
   
   .footer-content {
@@ -215,11 +333,20 @@
     justify-content: space-between;
     font-size: 0.75rem;
     color: var(--terminal-text-dim);
+    
+    @media (max-width: 768px) {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
   }
   
   .footer-links {
     display: flex;
     gap: 1.5rem;
+    
+    @media (max-width: 480px) {
+      gap: 1rem;
+    }
     
     a {
       color: var(--terminal-text-dim);
