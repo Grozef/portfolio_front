@@ -1,8 +1,13 @@
 /**
- * Configuration du routeur Vue.
+ * Configuration du routeur Vue avec validation de token.
+ * 
+ * IMPORTANT: Le garde de navigation valide maintenant le token
+ * en appelant l'API /auth/me avant d'autoriser l'acces aux routes protegees.
+ * 
  * @module router
  */
 import { createRouter, createWebHistory } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -68,19 +73,34 @@ const router = createRouter({
   ]
 })
 
-// Navigation guard
+// Navigation guard avec validation de token
 router.beforeEach(async (to, from, next) => {
   const token = localStorage.getItem('auth_token')
-  const isAuthenticated = !!token
+  const authStore = useAuthStore()
 
   // Redirect authenticated users away from login page
-  if (to.meta.guest && isAuthenticated) {
+  if (to.meta.guest && token) {
     return next('/admin')
   }
 
-  // Protect admin routes
-  if (to.meta.requiresAuth && !isAuthenticated) {
-    return next('/login')
+  // Protect admin routes - VALIDATION CRITIQUE DU TOKEN
+  if (to.meta.requiresAuth) {
+    if (!token) {
+      return next('/login')
+    }
+
+    // IMPORTANT: Valide le token en appelant l'API
+    // Cela evite l'acces avec un token expire ou invalide
+    try {
+      const isValid = await authStore.checkAuth()
+      if (!isValid) {
+        return next('/login')
+      }
+    } catch (error) {
+      // Si l'API retourne une erreur, le token est invalide
+      localStorage.removeItem('auth_token')
+      return next('/login')
+    }
   }
 
   next()

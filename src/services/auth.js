@@ -1,27 +1,14 @@
 /**
  * Service d'authentification.
- * Le token est envoye via le header Authorization: Bearer <token>
+ * Utilise le service API centralise.
+ * 
  * @module services/auth
  */
-import axios from 'axios'
-
-const api = axios.create({
-  baseURL: '/api/v1/auth',
-  headers: { 'Content-Type': 'application/json' }
-})
-
-// Intercepteur: ajoute le token a chaque requete
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('auth_token')
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`
-  }
-  return config
-})
+import api from './api'
 
 export const authService = {
   async login(email, password) {
-    const response = await api.post('/login', { email, password })
+    const response = await api.post('/auth/login', { email, password })
     const { token, user } = response.data.data
     localStorage.setItem('auth_token', token)
     return user
@@ -29,14 +16,14 @@ export const authService = {
 
   async logout() {
     try {
-      await api.post('/logout')
+      await api.post('/auth/logout')
     } finally {
       localStorage.removeItem('auth_token')
     }
   },
 
   async me() {
-    const response = await api.get('/me')
+    const response = await api.get('/auth/me')
     return response.data.data
   },
 

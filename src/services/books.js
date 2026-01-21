@@ -1,53 +1,49 @@
 /**
- * Service de gestion des livres avec token Authorization.
+ * Service de gestion des livres.
+ * Utilise le service API centralise.
+ * 
  * @module services/books
  */
-import axios from 'axios'
-
-const api = axios.create({
-  baseURL: '/api/v1/books',
-  headers: { 'Content-Type': 'application/json' }
-})
-
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('auth_token')
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`
-  }
-  return config
-})
+import api from './api'
 
 export const booksService = {
   async getBooks(params = {}) {
-    const response = await api.get('/', { params })
+    const response = await api.get('/books', { params })
     return response.data.data
   },
+  
   async getFeaturedBooks() {
-    const response = await api.get('/featured')
+    const response = await api.get('/books/featured')
     return response.data.data
   },
+  
   async getBook(id) {
-    const response = await api.get(`/${id}`)
+    const response = await api.get(`/books/${id}`)
     return response.data.data
   },
+  
   async getStats() {
-    const response = await api.get('/stats')
+    const response = await api.get('/books/stats')
     return response.data.data
   },
+  
   async createBook(data) {
-    const response = await api.post('/', data)
+    const response = await api.post('/books', data)
     return response.data.data
   },
+  
   async updateBook(id, data) {
-    const response = await api.put(`/${id}`, data)
+    const response = await api.put(`/books/${id}`, data)
     return response.data.data
   },
+  
   async deleteBook(id) {
-    const response = await api.delete(`/${id}`)
+    const response = await api.delete(`/books/${id}`)
     return response.data
   },
+  
   async refreshBookCache(id) {
-    const response = await api.post(`/${id}/refresh`)
+    const response = await api.post(`/books/${id}/refresh`)
     return response.data.data
   }
 }
