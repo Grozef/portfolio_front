@@ -4,7 +4,7 @@
     import { useCarouselStore } from '@/stores/carousel'
     import { useAuthStore } from '@/stores/auth'
     import AdminLayout from '@/components/AdminLayout.vue'
-    
+    const BACKEND_URL = 'http://localhost/portfolios/dev_portfolio/backend/public'
     const router = useRouter()
     const carouselStore = useCarouselStore()
     const authStore = useAuthStore()
@@ -24,7 +24,12 @@
     })
     
     const images = computed(() => carouselStore.images)
-    
+    const getImageUrl = (url) => {
+  if (!url) return ''
+  if (url.startsWith('http')) return url
+  return BACKEND_URL + url
+}
+
     onMounted(async () => {
       await authStore.checkAuth()
       if (!authStore.isAuthenticated) {
@@ -185,7 +190,7 @@
                 :class="{ inactive: !image.is_active }"
               >
                 <div class="image-preview">
-                  <img :src="image.image_url" :alt="image.title || 'Carousel image'" />
+                  <img :src="getImageUrl(image.image_url)" :alt="image.title || 'Carousel image'" />
                   <div class="image-overlay">
                     <button 
                       class="btn-edit" 
@@ -273,6 +278,7 @@
                         @change="handleFileSelect"
                         :required="uploadMode === 'file' && !selectedFile"
                         class="file-input"
+                        :src="getImageUrl(newImage.image_url)"
                       />
                       <small>Max 5MB (jpg, png, gif, webp)</small>
                       

@@ -4,6 +4,7 @@
   import { useBooksStore } from '@/stores/books'
   import { useAuthStore } from '@/stores/auth'
   import { useCarouselStore } from '@/stores/carousel'
+  import { BACKEND_URL } from '@/services/api'
   
   const router = useRouter()
   const booksStore = useBooksStore()
@@ -50,6 +51,12 @@
     { key: 'reading', label: 'Reading' },
     { key: 'to-read', label: 'To Read' },
   ]
+
+  const getImageUrl = (url) => {
+  if (!url) return ''
+  if (url.startsWith('http')) return url
+  return BACKEND_URL + url
+}
   
   const setFilter = (filter) => booksStore.setFilter(filter)
   
@@ -214,7 +221,7 @@
           <div class="carousel-content">
             <div class="carousel-image">
               <img 
-                :src="currentCarouselImage.image_url" 
+              :src="getImageUrl(currentCarouselImage.image_url)" 
                 :alt="currentCarouselImage.title || 'Carousel image'"
               />
             </div>

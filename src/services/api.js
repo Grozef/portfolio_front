@@ -1,24 +1,30 @@
 /**
- * Service API centralise - Configuration axios partagee.
+ * Centralized API service - Shared axios configuration
  * 
- * FIX UPLOAD: Ne pas définir Content-Type pour FormData
+ * IMPROVEMENTS:
+ * - Uses environment variables for API URL
+ * - Fixed FormData Content-Type handling
  * 
  * @module services/api
  */
 import axios from 'axios'
 import router from '@/router'
 
+// Get backend URL from environment variable
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000'
+const API_VERSION = import.meta.env.VITE_API_VERSION || 'v1'
+
 const api = axios.create({
-  baseURL: 'http://localhost:8000/api/v1',
+  baseURL: `${BACKEND_URL}/api/${API_VERSION}`,
   headers: { 
     'Accept': 'application/json'
-    // IMPORTANT: Ne PAS définir Content-Type ici
-    // Pour FormData, le navigateur doit gérer le Content-Type avec boundary
+    // IMPORTANT: Do NOT set Content-Type here
+    // For FormData, browser must handle Content-Type with boundary
   },
   timeout: 30000
 })
 
-// Intercepteur request: ajoute le token a toutes les requetes
+// Request interceptor: add token to all requests
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('auth_token')
@@ -26,11 +32,11 @@ api.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`
     }
     
-    // CRITICAL FIX: Définir Content-Type seulement pour non-FormData
+    // CRITICAL FIX: Set Content-Type only for non-FormData
     if (!(config.data instanceof FormData)) {
       config.headers['Content-Type'] = 'application/json'
     }
-    // Si c'est du FormData, ne rien toucher - le navigateur gère tout
+    // If FormData, browser handles everything
     
     return config
   },
@@ -39,26 +45,26 @@ api.interceptors.request.use(
   }
 )
 
-// Intercepteur response: gere les erreurs globalement
+// Response interceptor: handle errors globally
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Gestion des erreurs 401 (non authentifie ou token expire)
+    // Handle 401 errors (unauthenticated or expired token)
     if (error.response?.status === 401) {
       localStorage.removeItem('auth_token')
       
-      // Evite la boucle de redirection si deja sur la page login
+      // Avoid redirect loop if already on login page
       if (router.currentRoute.value.path !== '/login') {
         router.push('/login')
       }
     }
 
-    // Gestion des erreurs 429 (rate limiting)
+    // Handle 429 errors (rate limiting)
     if (error.response?.status === 429) {
       console.warn('Rate limit exceeded', error.response.data)
     }
 
-    // Gestion des erreurs 500 (serveur)
+    // Handle 500+ errors (server errors)
     if (error.response?.status >= 500) {
       console.error('Server error', error.response.data)
     }
@@ -68,3 +74,6 @@ api.interceptors.response.use(
 )
 
 export default api
+
+// Export backend URL for direct file access (images, etc.)
+export { BACKEND_URL }
