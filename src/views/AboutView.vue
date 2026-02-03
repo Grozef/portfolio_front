@@ -1,45 +1,3 @@
-<script setup>
-import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-
-const router = useRouter()
-const isVisible = ref(false)
-
-const skills = {
-  frontend: ['Vue.js', 'React', 'TypeScript', 'Tailwind CSS', 'GSAP', 'Three.js'],
-  backend: ['Laravel', 'Node.js', 'PostgreSQL', 'Redis', 'GraphQL', 'REST APIs'],
-  devops: ['Docker', 'AWS', 'CI/CD', 'Nginx', 'Linux', 'Kubernetes'],
-  tools: ['Git', 'Figma', 'VS Code', 'Webpack', 'Vite', 'Jest']
-}
-
-const experience = [
-  {
-    title: 'Senior Full Stack Developer',
-    company: 'Tech Company',
-    period: '2022 - Present',
-    description: 'Leading development of microservices architecture and mentoring junior developers.'
-  },
-  {
-    title: 'Full Stack Developer',
-    company: 'Startup Inc',
-    period: '2020 - 2022',
-    description: 'Built and scaled SaaS platform from 0 to 100k users.'
-  },
-  {
-    title: 'Frontend Developer',
-    company: 'Digital Agency',
-    period: '2018 - 2020',
-    description: 'Developed interactive web experiences for major brands.'
-  }
-]
-
-onMounted(() => {
-  setTimeout(() => {
-    isVisible.value = true
-  }, 100)
-})
-</script>
-
 <template>
   <div class="about-page" :class="{ visible: isVisible }">
     <header class="page-header">
@@ -55,9 +13,9 @@ onMounted(() => {
       <!-- Hero section -->
       <section class="hero-section">
         <div class="hero-content">
-          <span class="hero-label">Hello, I'm</span>
+          <span class="hero-label">Hello, I'm a</span>
           <h2 class="hero-name">Full Stack Developer</h2>
-          <p class="hero-tagline">Creative Technologist & Problem Solver</p>
+          <p class="hero-tagline">The one you need.</p>
         </div>
         <div class="hero-visual">
           <div class="visual-ring"></div>
@@ -72,14 +30,15 @@ onMounted(() => {
         <div class="section-content">
           <h3 class="section-title">Who I Am</h3>
           <p class="bio-text">
-            I'm a passionate developer with over 6 years of experience building elegant 
-            digital solutions. I specialize in creating performant, accessible, and 
-            visually stunning web applications that make a difference.
+            I’m a passionate developer with over 3 years of experience.
+            I first studied at the Chambre de Commerce et d’Industrie (CCI) of Lyon, where i 
+            developed my skills (pun intended) in both frontend and backend development, where 
+            i first earned a degree in Web and Mobile Development (Developpeur Web et Web Mobile, DWWM - RNCP level 5) in 2024. I then continued my studies at the IT 
+            Academy (Concepteur Developpeur d'Applications CDA - RNCP level 6), completing a 
+            two-year work-study program in 2026.
           </p>
           <p class="bio-text">
-            My approach combines technical excellence with creative thinking, ensuring 
-            every project I work on is both functional and beautiful. I believe in clean 
-            code, thoughtful architecture, and continuous learning.
+            Over the years, i specialized in various frameworks including Vue.js (Vue3, Quasar, Ionic), Symfony and Laravel.
           </p>
         </div>
       </section>
@@ -124,8 +83,8 @@ onMounted(() => {
       <!-- Quote section -->
       <section class="quote-section">
         <blockquote class="quote">
-          <p>"The best way to predict the future is to create it."</p>
-          <cite>— Peter Drucker</cite>
+          <p>« Talk is cheap. Show me the code. » </p>
+          <cite>— Linus Torvarlds</cite>
         </blockquote>
       </section>
 
@@ -149,6 +108,52 @@ onMounted(() => {
     </footer>
   </div>
 </template>
+
+<script setup>
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+const isVisible = ref(false)
+
+const skills = {
+  frontend: ['JavaScript', 'Vue.js', 'TypeScript', 'Quasar', 'Ionic', 'TypeScript'],
+  backend: ['PHP', 'Laravel', 'Symfony', 'MySQL', 'REST APIs'],
+  devops: ['Docker', 'AWS', 'CI/CD', 'Apache', 'Linux'],
+  tools: ['Git', 'GitHub', 'Figma', 'VS Code', 'Webpack', 'Vite', 'Cypress'],
+  mobile: ['Android Studio', 'Dart', 'Flutter', 'Ionic', 'Capacitor'],
+  localEnv: ['Laragon'],
+}
+
+const experience = [
+  {
+    title: "Full Stack Developer",
+    company: "Lab",
+    period: "2024 – Present",
+    description:
+      "Designed and developed an internal SaaS platforms for warranty management.\n" +
+      "Maintenance of the company's spare parts management app.\n" +
+      "Built a mobile application for factory inspections, enabling offline data collection with sync capabilities to a central server.\n" +
+      "Technologies: Vue3, Quasar, Ionic, Laravel, REST APIs, Pinia (state management), Cypress (testing).\n" +
+      "Environment: Docker, GitHub (collaboration), Laragon (local development)."
+  },
+  {
+    title: "Backend Developer",
+    company: "High Connexion",
+    period: "2023",
+    description:
+      "Developed a CLI tool for automated phone number processing (validation, formatting, and export).\n" +
+      "Optimized performance and integrated with third-party systems.\n" +
+      "Technologies: Symfony 7.4, MySQL."
+  }
+];
+
+onMounted(() => {
+  setTimeout(() => {
+    isVisible.value = true
+  }, 100)
+})
+</script>
 
 <style lang="scss" scoped>
 .about-page {

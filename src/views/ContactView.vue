@@ -60,10 +60,10 @@ const handleSubmit = async () => {
 }
 
 const socialLinks = [
-  { name: 'GitHub', url: 'https://github.com', icon: '◆' },
-  { name: 'LinkedIn', url: 'https://linkedin.com', icon: '◇' },
-  { name: 'Twitter', url: 'https://twitter.com', icon: '○' },
-  { name: 'Email', url: 'mailto:hello@example.com', icon: '◈' }
+  { name: 'GitHub', url: 'https://github.com/Grozef', icon: '◆' },
+  { name: 'LinkedIn', url: 'https://www.linkedin.com/in/françois-lisowski-39a88576', icon: '◇' },
+  // { name: 'Twitter', url: 'https://twitter.com', icon: '○' },
+  { name: 'Email', url: 'mailto:francois.lisowski@proton.me', icon: '◈' }
 ]
 </script>
 

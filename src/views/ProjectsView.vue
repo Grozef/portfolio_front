@@ -185,7 +185,7 @@
       <!-- Quote section -->
       <section class="quote-section">
         <blockquote class="quote">
-          <p>"Code is poetry written in logic."</p>
+          <p>"Tout ce qui arrive est necessaire" Un Stoïcien.</p>
         </blockquote>
       </section>
   
