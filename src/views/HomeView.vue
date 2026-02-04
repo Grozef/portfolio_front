@@ -41,22 +41,6 @@
       </div>
     </main>
 
-    <footer class="home__footer">
-      <div class="footer-content">
-        <span class="copyright">© {{ new Date().getFullYear() }}</span>
-        <div class="footer-links">
-          <a href="https://github.com/Grozef" target="_blank" rel="noopener" data-cursor-hover>GitHub</a>
-          <a href="www.linkedin.com/in/françois-lisowski-39a88576" target="_blank" rel="noopener"
-            data-cursor-hover>LinkedIn</a>
-          <!-- <a href="https://twitter.com" target="_blank" rel="noopener" data-cursor-hover>Twitter</a> -->
-          <a href="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?autoplay=1&mute=1" target="_blank" rel="noopener"
-            data-cursor-hover>X</a>
-
-        </div>
-        <span class="version">v1.0.0</span>
-      </div>
-    </footer>
-
     <ProjectModal :project="selectedProject" :is-open="isModalOpen" @close="handleCloseModal" />
   </div>
 </template>
@@ -330,42 +314,5 @@ onMounted(() => {
     height: 55vh;
     min-height: 350px;
   }
-}
-
-.footer-content {
-  max-width: 1400px;
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 0.75rem;
-  color: var(--terminal-text-dim);
-
-  @media (max-width: 768px) {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-}
-
-.footer-links {
-  display: flex;
-  gap: 1.5rem;
-
-  @media (max-width: 480px) {
-    gap: 1rem;
-  }
-
-  a {
-    color: var(--terminal-text-dim);
-    transition: color 0.3s ease;
-
-    &:hover {
-      color: var(--terminal-accent);
-    }
-  }
-}
-
-.version {
-  font-family: var(--font-mono);
 }
 </style>

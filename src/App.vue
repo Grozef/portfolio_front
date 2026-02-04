@@ -7,10 +7,23 @@
   - Styles de base
 -->
 <template>
-  <RouterView />
+  <div id="app">
+    <RouterView />
+    <FooterComponent />
+  </div>
 </template>
 
+<script setup>
+import FooterComponent from '@/components/FooterComponent.vue'
+</script>
+
 <style lang="scss">
+#app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
 :root {
   --terminal-bg: #0a0a0b;
   --terminal-bg-secondary: #111113;

@@ -71,6 +71,28 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
 
+    // Legal pages
+    { 
+      path: '/privacy-policy', 
+      name: 'privacy-policy', 
+      component: () => import('@/views/PrivacyPolicyView.vue') 
+    },
+    { 
+      path: '/legal-notice', 
+      name: 'legal-notice', 
+      component: () => import('@/views/LegalNoticeView.vue') 
+    },
+    { 
+      path: '/cookies', 
+      name: 'cookies', 
+      component: () => import('@/views/CookiesView.vue') 
+    },
+    { 
+      path: '/terms', 
+      name: 'terms', 
+      component: () => import('@/views/TermsView.vue') 
+    },
+
     // Catch-all redirect
     { 
       path: '/:pathMatch(.*)*', 

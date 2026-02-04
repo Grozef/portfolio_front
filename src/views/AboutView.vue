@@ -98,14 +98,6 @@
         </router-link>
       </section>
     </main>
-
-    <footer class="page-footer">
-      <div class="footer-nav">
-        <router-link to="/" data-cursor-hover>Terminal</router-link>
-        <router-link to="/projects" data-cursor-hover>Projects</router-link>
-        <router-link to="/contact" data-cursor-hover>Contact</router-link>
-      </div>
-    </footer>
   </div>
 </template>
 
@@ -532,31 +524,6 @@ onMounted(() => {
     
     .btn-arrow {
       transform: translateX(4px);
-    }
-  }
-}
-
-// Footer
-.page-footer {
-  padding: 2rem;
-  border-top: 1px solid var(--terminal-border);
-}
-
-.footer-nav {
-  display: flex;
-  justify-content: center;
-  gap: 3rem;
-  
-  a {
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
-    color: var(--terminal-text-dim);
-    transition: color 0.3s ease;
-    
-    &:hover {
-      color: var(--terminal-accent);
     }
   }
 }

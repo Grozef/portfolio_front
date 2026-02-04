@@ -1,0 +1,1125 @@
+<template>
+  <Transition name="konami-fade">
+    <div v-if="show" class="konami-animation gradius">
+      <!-- Starfield background -->
+      <div class="starfield">
+        <div 
+          v-for="i in 100" 
+          :key="i" 
+          class="star"
+          :style="getStarStyle(i)"
+        ></div>
+      </div>
+      
+      <!-- Vic Viper ship (pixel art sprite) -->
+      <div class="vic-viper" ref="vicViper">
+        <div class="ship-sprite">
+          <!-- Main body -->
+          <div class="sprite-row row-1">
+            <span class="pixel"></span>
+          </div>
+          <div class="sprite-row row-2">
+            <span class="pixel"></span>
+            <span class="pixel"></span>
+            <span class="pixel"></span>
+          </div>
+          <div class="sprite-row row-3">
+            <span class="pixel wing"></span>
+            <span class="pixel body"></span>
+            <span class="pixel body"></span>
+            <span class="pixel body"></span>
+            <span class="pixel body"></span>
+            <span class="pixel body"></span>
+            <span class="pixel wing"></span>
+          </div>
+          <div class="sprite-row row-4">
+            <span class="pixel wing"></span>
+            <span class="pixel wing"></span>
+            <span class="pixel body"></span>
+            <span class="pixel body"></span>
+            <span class="pixel body"></span>
+            <span class="pixel cockpit"></span>
+            <span class="pixel wing"></span>
+            <span class="pixel wing"></span>
+          </div>
+          <div class="sprite-row row-5">
+            <span class="pixel"></span>
+            <span class="pixel wing"></span>
+            <span class="pixel body"></span>
+            <span class="pixel body"></span>
+            <span class="pixel body"></span>
+            <span class="pixel body"></span>
+            <span class="pixel body"></span>
+            <span class="pixel wing"></span>
+            <span class="pixel"></span>
+          </div>
+          <div class="sprite-row row-6">
+            <span class="pixel wing"></span>
+            <span class="pixel wing"></span>
+            <span class="pixel body"></span>
+            <span class="pixel body"></span>
+            <span class="pixel body"></span>
+            <span class="pixel body"></span>
+            <span class="pixel wing"></span>
+            <span class="pixel wing"></span>
+          </div>
+          <div class="sprite-row row-7">
+            <span class="pixel wing"></span>
+            <span class="pixel body"></span>
+            <span class="pixel body"></span>
+            <span class="pixel body"></span>
+            <span class="pixel body"></span>
+            <span class="pixel body"></span>
+            <span class="pixel wing"></span>
+          </div>
+          <div class="sprite-row row-8">
+            <span class="pixel"></span>
+            <span class="pixel"></span>
+            <span class="pixel"></span>
+          </div>
+          <div class="sprite-row row-9">
+            <span class="pixel"></span>
+          </div>
+          
+          <!-- Engine flames -->
+          <div class="engine-left">
+            <div class="flame-particle"></div>
+            <div class="flame-particle"></div>
+            <div class="flame-particle"></div>
+          </div>
+          <div class="engine-right">
+            <div class="flame-particle"></div>
+            <div class="flame-particle"></div>
+            <div class="flame-particle"></div>
+          </div>
+        </div>
+        
+        <!-- Laser beams -->
+        <div class="lasers">
+          <div class="laser laser-1"></div>
+          <div class="laser laser-2"></div>
+        </div>
+      </div>
+      
+      <!-- Options (orange spheres following ship) -->
+      <div 
+        v-for="i in 4" 
+        :key="'option-' + i"
+        class="option"
+        :style="getOptionStyle(i)"
+      >
+        <div class="option-core"></div>
+      </div>
+      
+      <!-- Power-ups floating -->
+      <div class="powerups-container">
+        <div 
+          v-for="(powerup, index) in powerups" 
+          :key="'powerup-' + index"
+          class="powerup-capsule"
+          :style="getPowerupStyle(index)"
+        >
+          <div class="capsule-body">
+            <span class="capsule-letter">{{ powerup }}</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Main message with Gradius UI -->
+      <div class="gradius-ui">
+        <!-- Power-up bar -->
+        <div class="powerup-bar">
+          <div class="bar-title">POWER UP</div>
+          <div class="bar-items">
+            <div 
+              v-for="(item, index) in powerupBar" 
+              :key="index"
+              class="bar-item"
+              :class="{ active: activeBarIndex >= index }"
+            >
+              {{ item }}
+            </div>
+          </div>
+        </div>
+        
+        <!-- Main message -->
+        <div class="gradius-message">
+          <div class="message-box">
+            <div class="box-border"></div>
+            <div class="box-content">
+              <div class="title-text">
+                <span class="letter" v-for="(letter, i) in 'KONAMI CODE'" :key="i" :style="{ animationDelay: i * 0.05 + 's' }">
+                  {{ letter === ' ' ? '\u00A0' : letter }}
+                </span>
+              </div>
+              <div class="subtitle-text">ACTIVATED</div>
+              <div class="lives-display">
+                <div class="lives-icon">
+                  <span v-for="i in 3" :key="i" class="life-ship">▶</span>
+                </div>
+                <div class="lives-count">× 30</div>
+              </div>
+              <div class="sequence">↑↑↓↓←→←→BA</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Enemy formations -->
+      <div class="enemies">
+        <div 
+          v-for="i in 8" 
+          :key="'enemy-' + i"
+          class="enemy"
+          :style="getEnemyStyle(i)"
+        >
+          <div class="enemy-body">◆</div>
+        </div>
+      </div>
+      
+      <!-- Explosions -->
+      <div class="explosions-container">
+        <div 
+          v-for="i in 5" 
+          :key="'explosion-' + i"
+          class="explosion"
+          :style="getExplosionStyle(i)"
+        >
+          <div class="explosion-particle" v-for="j in 8" :key="j"></div>
+        </div>
+      </div>
+    </div>
+  </Transition>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+
+const props = defineProps({
+  show: Boolean
+})
+
+const powerups = ['S', 'M', 'D', 'L', 'O', '!']
+const powerupBar = ['SPEED UP', 'MISSILE', 'DOUBLE', 'LASER', 'OPTION', 'SHIELD']
+const activeBarIndex = ref(5)
+
+const getStarStyle = (index) => {
+  const size = Math.random() * 3 + 1
+  const top = Math.random() * 100 + '%'
+  const left = Math.random() * 100 + '%'
+  const duration = Math.random() * 2 + 1 + 's'
+  const delay = Math.random() * 2 + 's'
+  
+  return {
+    width: size + 'px',
+    height: size + 'px',
+    top: top,
+    left: left,
+    '--duration': duration,
+    '--delay': delay
+  }
+}
+
+const getPowerupStyle = (index) => {
+  const delay = (index * 0.5) + 's'
+  const top = (20 + (index * 10) % 60) + '%'
+  const duration = (3 + Math.random()) + 's'
+  
+  return {
+    top: top,
+    '--delay': delay,
+    '--duration': duration
+  }
+}
+
+const getOptionStyle = (index) => {
+  const delay = (index * 0.15) + 's'
+  const offset = index * 60
+  
+  return {
+    '--delay': delay,
+    '--offset': offset + 'px'
+  }
+}
+
+const getEnemyStyle = (index) => {
+  const row = Math.floor((index - 1) / 4)
+  const col = (index - 1) % 4
+  const top = (15 + row * 20) + '%'
+  const delay = (index * 0.2) + 's'
+  
+  return {
+    top: top,
+    '--delay': delay
+  }
+}
+
+const getExplosionStyle = (index) => {
+  const top = (20 + index * 15) + '%'
+  const left = (30 + index * 15) + '%'
+  const delay = (0.5 + index * 0.3) + 's'
+  
+  return {
+    top: top,
+    left: left,
+    '--delay': delay
+  }
+}
+</script>
+
+<style scoped lang="scss">
+.konami-animation.gradius {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 9999;
+  pointer-events: none;
+  overflow: hidden;
+  background: 
+    radial-gradient(ellipse at 20% 50%, rgba(0, 50, 100, 0.3) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 50%, rgba(50, 0, 100, 0.3) 0%, transparent 50%),
+    linear-gradient(180deg, #000510 0%, #001428 30%, #002050 50%, #001428 70%, #000510 100%);
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+      repeating-linear-gradient(
+        90deg,
+        transparent 0px,
+        transparent 2px,
+        rgba(0, 255, 255, 0.03) 2px,
+        rgba(0, 255, 255, 0.03) 3px
+      );
+    animation: scan-lines 10s linear infinite;
+  }
+}
+
+// Starfield
+.starfield {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.star {
+  position: absolute;
+  background: white;
+  border-radius: 50%;
+  animation: star-move var(--duration) linear var(--delay) infinite;
+  box-shadow: 0 0 2px white;
+}
+
+// Vic Viper ship (pixel art)
+.vic-viper {
+  position: absolute;
+  left: 15%;
+  top: 50%;
+  transform: translateY(-50%);
+  animation: ship-enter 1s ease-out, ship-hover 3s ease-in-out 1s infinite;
+  z-index: 10;
+  filter: drop-shadow(0 0 8px rgba(0, 255, 255, 0.6));
+}
+
+.ship-sprite {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.sprite-row {
+  display: flex;
+  gap: 0;
+  height: 6px;
+  justify-content: center;
+  
+  @media (max-width: 768px) {
+    height: 4px;
+  }
+}
+
+.pixel {
+  width: 6px;
+  height: 6px;
+  background: transparent;
+  
+  @media (max-width: 768px) {
+    width: 4px;
+    height: 4px;
+  }
+  
+  &.body {
+    background: linear-gradient(135deg, #00d4ff 0%, #0088cc 100%);
+    box-shadow: 
+      inset 1px 1px 0 rgba(255, 255, 255, 0.5),
+      inset -1px -1px 0 rgba(0, 0, 0, 0.3);
+  }
+  
+  &.wing {
+    background: linear-gradient(135deg, #0099ff 0%, #0055aa 100%);
+    box-shadow: 
+      inset 1px 1px 0 rgba(255, 255, 255, 0.4),
+      inset -1px -1px 0 rgba(0, 0, 0, 0.3);
+  }
+  
+  &.cockpit {
+    background: linear-gradient(135deg, #ffff00 0%, #ffaa00 100%);
+    box-shadow: 
+      0 0 4px #ffff00,
+      inset 1px 1px 0 rgba(255, 255, 255, 0.6);
+    animation: cockpit-glow 1s ease-in-out infinite alternate;
+  }
+}
+
+// Engine flames
+.engine-left,
+.engine-right {
+  position: absolute;
+  top: 50%;
+  left: -8px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.engine-left { 
+  transform: translateY(-8px);
+  
+  @media (max-width: 768px) {
+    transform: translateY(-6px);
+  }
+}
+
+.engine-right { 
+  transform: translateY(2px);
+  
+  @media (max-width: 768px) {
+    transform: translateY(1px);
+  }
+}
+
+.flame-particle {
+  width: 8px;
+  height: 2px;
+  background: linear-gradient(90deg, #ff6600 0%, #ffff00 50%, transparent 100%);
+  animation: flame-flicker 0.15s infinite alternate;
+  box-shadow: 0 0 4px #ff8800;
+  
+  @media (max-width: 768px) {
+    width: 6px;
+  }
+  
+  &:nth-child(1) { animation-delay: 0s; width: 8px; }
+  &:nth-child(2) { animation-delay: 0.05s; width: 12px; }
+  &:nth-child(3) { animation-delay: 0.1s; width: 6px; }
+}
+
+// Laser beams
+.lasers {
+  position: absolute;
+  top: 50%;
+  left: 100%;
+  transform: translateY(-50%);
+}
+
+.laser {
+  position: absolute;
+  width: 40px;
+  height: 3px;
+  background: linear-gradient(90deg, #00ffff 0%, rgba(0, 255, 255, 0) 100%);
+  box-shadow: 0 0 8px #00ffff;
+  animation: laser-shoot 0.8s linear infinite;
+  
+  @media (max-width: 768px) {
+    width: 30px;
+    height: 2px;
+  }
+}
+
+.laser-1 {
+  top: -8px;
+  animation-delay: 0s;
+}
+
+.laser-2 {
+  top: 8px;
+  animation-delay: 0.4s;
+}
+
+// Options (orange spheres)
+.option {
+  position: absolute;
+  left: 15%;
+  top: 50%;
+  transform: translateY(-50%);
+  animation: option-follow 2s ease-in-out var(--delay) infinite;
+  z-index: 9;
+}
+
+.option-core {
+  width: 24px;
+  height: 24px;
+  background: 
+    radial-gradient(circle at 30% 30%, #ffdd00 0%, #ffaa00 30%, #ff6600 60%, #cc4400 100%);
+  border-radius: 50%;
+  position: relative;
+  box-shadow: 
+    0 0 12px #ff8800,
+    0 0 20px rgba(255, 136, 0, 0.5),
+    inset 0 0 8px rgba(255, 221, 0, 0.4),
+    inset -6px -6px 12px rgba(0, 0, 0, 0.3);
+  animation: option-pulse 0.8s ease-in-out infinite alternate;
+  
+  @media (max-width: 768px) {
+    width: 16px;
+    height: 16px;
+  }
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 20%;
+    left: 20%;
+    width: 40%;
+    height: 40%;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 50%;
+    filter: blur(2px);
+  }
+  
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 170, 0, 0.3);
+    animation: option-ring 1.5s ease-out infinite;
+  }
+}
+
+// Power-up capsules
+.powerups-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.powerup-capsule {
+  position: absolute;
+  right: -100px;
+  animation: powerup-move var(--duration) linear var(--delay) infinite;
+}
+
+.capsule-body {
+  width: 32px;
+  height: 32px;
+  background: 
+    linear-gradient(135deg, 
+      #ffaa00 0%, 
+      #ff8800 25%,
+      #ffdd00 50%,
+      #ff8800 75%,
+      #ff6600 100%
+    );
+  border-radius: 4px;
+  border: 2px solid #ffdd00;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  box-shadow: 
+    0 0 16px rgba(255, 136, 0, 0.8),
+    inset 0 0 8px rgba(255, 255, 255, 0.3),
+    inset 0 -8px 8px rgba(0, 0, 0, 0.2);
+  animation: capsule-float 2s ease-in-out infinite;
+  
+  @media (max-width: 768px) {
+    width: 24px;
+    height: 24px;
+  }
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    right: 3px;
+    height: 40%;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.4) 0%, transparent 100%);
+    border-radius: 2px 2px 0 0;
+  }
+  
+  &::after {
+    content: '';
+    position: absolute;
+    inset: -6px;
+    border: 2px solid rgba(255, 170, 0, 0.3);
+    border-radius: 6px;
+    animation: capsule-glow 1.5s ease-in-out infinite;
+  }
+}
+
+.capsule-letter {
+  font-size: 1.3rem;
+  font-weight: bold;
+  font-family: monospace;
+  color: #fff;
+  text-shadow: 
+    1px 1px 2px rgba(0, 0, 0, 0.8),
+    0 0 4px rgba(255, 255, 255, 0.5);
+  z-index: 1;
+  
+  @media (max-width: 768px) {
+    font-size: 1rem;
+  }
+}
+
+// Gradius UI
+.gradius-ui {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  animation: ui-appear 0.8s ease-out;
+}
+
+// Power-up bar (classic Gradius)
+.powerup-bar {
+  background: linear-gradient(180deg, #1a1a3e 0%, #0a0a1e 100%);
+  border: 4px solid #00ffff;
+  padding: 1rem 1.5rem;
+  box-shadow: 
+    0 0 30px rgba(0, 255, 255, 0.6),
+    inset 0 0 20px rgba(0, 255, 255, 0.1);
+  
+  @media (max-width: 768px) {
+    padding: 0.5rem 1rem;
+  }
+}
+
+.bar-title {
+  text-align: center;
+  font-size: 1rem;
+  font-weight: bold;
+  color: #ffff00;
+  letter-spacing: 0.2em;
+  margin-bottom: 0.5rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+  
+  @media (max-width: 768px) {
+    font-size: 0.8rem;
+  }
+}
+
+.bar-items {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.bar-item {
+  padding: 0.5rem 1rem;
+  background: #1a1a3e;
+  border: 2px solid #444466;
+  color: #666688;
+  font-size: 0.9rem;
+  font-weight: bold;
+  white-space: nowrap;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+  transition: all 0.3s ease;
+  
+  &.active {
+    background: linear-gradient(180deg, #ff8800 0%, #ff6600 100%);
+    border-color: #ffaa00;
+    color: #fff;
+    box-shadow: 
+      0 0 15px #ff8800,
+      inset 0 0 10px rgba(255, 255, 255, 0.3);
+    animation: bar-item-pulse 0.5s ease-in-out infinite alternate;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 0.3rem 0.5rem;
+    font-size: 0.6rem;
+  }
+}
+
+// Message box
+.gradius-message {
+  animation: message-zoom 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.message-box {
+  position: relative;
+  background: linear-gradient(180deg, #001a33 0%, #000d1a 100%);
+  border: 4px solid #00ffff;
+  padding: 2rem 3rem;
+  box-shadow: 
+    0 0 40px rgba(0, 255, 255, 0.8),
+    inset 0 0 30px rgba(0, 255, 255, 0.1);
+  
+  @media (max-width: 768px) {
+    padding: 1.5rem 2rem;
+  }
+}
+
+.box-border {
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border: 2px solid #ffff00;
+  pointer-events: none;
+}
+
+.box-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.title-text {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #00ffff;
+  letter-spacing: 0.3em;
+  text-shadow: 
+    2px 2px 0 #0099ff,
+    4px 4px 20px rgba(0, 255, 255, 0.8);
+  display: flex;
+  
+  @media (max-width: 768px) {
+    font-size: 1.5rem;
+  }
+}
+
+.letter {
+  display: inline-block;
+  animation: letter-bounce 0.6s ease-out both;
+}
+
+.subtitle-text {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #ffff00;
+  letter-spacing: 0.5em;
+  text-shadow: 2px 2px 10px rgba(255, 255, 0, 0.8);
+  animation: subtitle-flash 1s ease-in-out infinite alternate;
+  
+  @media (max-width: 768px) {
+    font-size: 1rem;
+  }
+}
+
+.lives-display {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 2rem;
+  background: rgba(0, 0, 0, 0.5);
+  border: 2px solid #ff8800;
+  border-radius: 10px;
+}
+
+.lives-icon {
+  display: flex;
+  gap: 0.3rem;
+}
+
+.life-ship {
+  font-size: 1.5rem;
+  color: #00ffff;
+  filter: drop-shadow(0 0 5px #00ffff);
+  animation: life-blink 1s ease-in-out infinite;
+  
+  &:nth-child(2) { animation-delay: 0.2s; }
+  &:nth-child(3) { animation-delay: 0.4s; }
+  
+  @media (max-width: 768px) {
+    font-size: 1rem;
+  }
+}
+
+.lives-count {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #ff8800;
+  text-shadow: 2px 2px 10px rgba(255, 136, 0, 0.8);
+  
+  @media (max-width: 768px) {
+    font-size: 1.5rem;
+  }
+}
+
+.sequence {
+  font-size: 1.5rem;
+  color: #ffaa00;
+  letter-spacing: 0.3em;
+  text-shadow: 0 0 10px #ff8800;
+  animation: sequence-glow 1.5s ease-in-out infinite alternate;
+  
+  @media (max-width: 768px) {
+    font-size: 1rem;
+  }
+}
+
+// Enemies
+.enemies {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.enemy {
+  position: absolute;
+  right: -50px;
+  animation: enemy-move 4s linear var(--delay) infinite;
+}
+
+.enemy-body {
+  font-size: 2rem;
+  color: #ff0066;
+  filter: drop-shadow(0 0 8px #ff0066) drop-shadow(0 0 12px #ff3388);
+  animation: enemy-pulse 1s ease-in-out infinite;
+  position: relative;
+  
+  @media (max-width: 768px) {
+    font-size: 1.5rem;
+  }
+  
+  &::before {
+    content: '◆';
+    position: absolute;
+    top: 0;
+    left: 0;
+    color: #ff0066;
+    filter: blur(2px);
+    opacity: 0.5;
+  }
+}
+
+// Explosions
+.explosions-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.explosion {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  animation: explosion-fade 0.6s ease-out var(--delay);
+}
+
+.explosion-particle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  background: #ffff00;
+  border-radius: 50%;
+  animation: particle-explode 0.6s ease-out forwards;
+  box-shadow: 0 0 10px #ffaa00;
+  
+  @for $i from 1 through 8 {
+    &:nth-child(#{$i}) {
+      --angle: #{($i - 1) * 45}deg;
+      animation-delay: #{($i - 1) * 0.05}s;
+    }
+  }
+}
+
+// Animations
+@keyframes scan-lines {
+  from { transform: translateX(0); }
+  to { transform: translateX(10px); }
+}
+
+@keyframes star-move {
+  from { transform: translateX(0); }
+  to { transform: translateX(-100vw); }
+}
+
+@keyframes ship-enter {
+  from {
+    left: -200px;
+    opacity: 0;
+  }
+  to {
+    left: 15%;
+    opacity: 1;
+  }
+}
+
+@keyframes ship-hover {
+  0%, 100% {
+    transform: translateY(-50%);
+  }
+  50% {
+    transform: translateY(calc(-50% + 10px));
+  }
+}
+
+@keyframes cockpit-glow {
+  from { 
+    box-shadow: 
+      0 0 4px #ffff00,
+      inset 1px 1px 0 rgba(255, 255, 255, 0.6);
+  }
+  to { 
+    box-shadow: 
+      0 0 8px #ffff00,
+      0 0 12px #ffaa00,
+      inset 1px 1px 0 rgba(255, 255, 255, 0.8);
+  }
+}
+
+@keyframes ship-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes laser-shoot {
+  0% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100px);
+    opacity: 0;
+  }
+}
+
+@keyframes flame-flicker {
+  0% { width: 20px; opacity: 1; }
+  100% { width: 15px; opacity: 0.7; }
+}
+
+@keyframes option-follow {
+  0%, 100% {
+    transform: translate(calc(-1 * var(--offset)), -50%);
+  }
+  50% {
+    transform: translate(calc(-1 * var(--offset) - 10px), calc(-50% + 8px));
+  }
+}
+
+@keyframes option-pulse {
+  from { 
+    transform: scale(1);
+    box-shadow: 
+      0 0 12px #ff8800,
+      0 0 20px rgba(255, 136, 0, 0.5),
+      inset 0 0 8px rgba(255, 221, 0, 0.4),
+      inset -6px -6px 12px rgba(0, 0, 0, 0.3);
+  }
+  to { 
+    transform: scale(1.1);
+    box-shadow: 
+      0 0 16px #ffaa00,
+      0 0 28px rgba(255, 170, 0, 0.6),
+      inset 0 0 12px rgba(255, 255, 0, 0.5),
+      inset -6px -6px 12px rgba(0, 0, 0, 0.3);
+  }
+}
+
+@keyframes option-ring {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+@keyframes option-glow {
+  from { box-shadow: 0 0 20px #ff8800, inset 0 0 10px #ffdd00; }
+  to { box-shadow: 0 0 30px #ffaa00, inset 0 0 15px #ffff00; }
+}
+
+@keyframes powerup-move {
+  from { transform: translateX(0); }
+  to { transform: translateX(calc(-100vw - 100px)); }
+}
+
+@keyframes capsule-float {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-4px) rotate(-2deg);
+  }
+  75% {
+    transform: translateY(4px) rotate(2deg);
+  }
+}
+
+@keyframes capsule-glow {
+  0%, 100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+@keyframes capsule-rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes ui-appear {
+  from {
+    transform: translate(-50%, -50%) scale(0) rotate(-10deg);
+    opacity: 0;
+  }
+  to {
+    transform: translate(-50%, -50%) scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+@keyframes bar-item-pulse {
+  from { transform: scale(1); }
+  to { transform: scale(1.05); }
+}
+
+@keyframes message-zoom {
+  0% {
+    transform: scale(0) rotate(-5deg);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.1) rotate(2deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+@keyframes letter-bounce {
+  0% {
+    transform: translateY(-50px) rotate(-10deg);
+    opacity: 0;
+  }
+  60% {
+    transform: translateY(5px) rotate(2deg);
+  }
+  100% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+@keyframes subtitle-flash {
+  from { opacity: 0.8; }
+  to { opacity: 1; }
+}
+
+@keyframes life-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes sequence-glow {
+  from {
+    text-shadow: 0 0 10px #ff8800;
+  }
+  to {
+    text-shadow: 
+      0 0 20px #ff8800,
+      0 0 30px #ffaa00;
+  }
+}
+
+@keyframes enemy-move {
+  from { 
+    transform: translateX(0) translateY(0); 
+    right: -50px;
+  }
+  25% { 
+    transform: translateX(-30vw) translateY(-30px); 
+  }
+  50% { 
+    transform: translateX(-50vw) translateY(0); 
+  }
+  75% { 
+    transform: translateX(-70vw) translateY(30px); 
+  }
+  to { 
+    transform: translateX(-100vw) translateY(0); 
+  }
+}
+
+@keyframes enemy-pulse {
+  0%, 100% { 
+    transform: scale(1) rotate(0deg); 
+    opacity: 1;
+  }
+  50% { 
+    transform: scale(1.1) rotate(180deg); 
+    opacity: 0.8;
+  }
+}
+
+@keyframes enemy-rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes explosion-fade {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes particle-explode {
+  0% {
+    transform: translate(-50%, -50%) rotate(var(--angle)) translateX(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(var(--angle)) translateX(50px);
+    opacity: 0;
+  }
+}
+
+.konami-fade-enter-active,
+.konami-fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.konami-fade-enter-from,
+.konami-fade-leave-to {
+  opacity: 0;
+}
+</style>
