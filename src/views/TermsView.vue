@@ -2,306 +2,90 @@
   <div class="terms">
     <div class="container">
       <div class="header">
-        <h1>Conditions d'utilisation</h1>
-        <p class="last-updated">Dernière mise à jour : {{ lastUpdated }}</p>
+        <h1>{{ t.title }}</h1>
+        <p class="last-updated">{{ t.lastUpdated }}: 04/02/2026</p>
+        
+        <button @click="toggleLanguage" class="lang-toggle">
+          {{ currentLang === 'fr' ? '🇬🇧 English' : '🇫🇷 Français' }}
+        </button>
       </div>
 
       <div class="content">
         <section>
-          <h2>1. Acceptation des conditions</h2>
-          <p>
-            En accédant et en utilisant ce site web (ci-après "le Site"), vous acceptez d'être 
-            lié par les présentes conditions d'utilisation. Si vous n'acceptez pas ces conditions, 
-            veuillez ne pas utiliser le Site.
-          </p>
-          <p>
-            Ces conditions peuvent être modifiées à tout moment. Il est de votre responsabilité 
-            de les consulter régulièrement pour vous tenir informé des mises à jour.
-          </p>
+          <h2>1. {{ t.acceptance }}</h2>
+          <p>{{ t.acceptanceText }}</p>
         </section>
 
         <section>
-          <h2>2. Objet du site</h2>
-          <p>
-            Ce site est un portfolio professionnel destiné à présenter :
-          </p>
+          <h2>2. {{ t.services }}</h2>
+          <p>{{ t.servicesText }}</p>
           <ul>
-            <li>Les projets et réalisations de l'éditeur</li>
-            <li>Les compétences et expériences professionnelles</li>
-            <li>Une sélection de livres et lectures</li>
-            <li>Un formulaire de contact</li>
-          </ul>
-          <p>
-            Le Site est fourni à titre informatif et de présentation professionnelle uniquement.
-          </p>
-        </section>
-
-        <section>
-          <h2>3. Accès au site</h2>
-          
-          <h3>3.1 Disponibilité</h3>
-          <p>
-            Nous nous efforçons de maintenir le Site accessible 24h/24 et 7j/7. Toutefois, 
-            l'accès peut être temporairement suspendu pour des raisons de maintenance, de mise 
-            à jour, ou en cas de force majeure.
-          </p>
-
-          <h3>3.2 Responsabilité d'accès</h3>
-          <p>
-            Vous êtes responsable de :
-          </p>
-          <ul>
-            <li>L'accès à Internet et des frais associés</li>
-            <li>La sécurité de votre équipement et connexion</li>
-            <li>La compatibilité de votre matériel et logiciels</li>
-          </ul>
-
-          <h3>3.3 Restrictions d'accès</h3>
-          <p>
-            L'accès à certaines sections du Site (espace administrateur) est restreint et 
-            nécessite une authentification.
-          </p>
-        </section>
-
-        <section>
-          <h2>4. Utilisation autorisée</h2>
-          
-          <h3>4.1 Usage personnel</h3>
-          <p>
-            L'utilisation du Site est autorisée à des fins personnelles et non commerciales. 
-            Vous pouvez :
-          </p>
-          <ul>
-            <li>Consulter les informations présentées</li>
-            <li>Utiliser le formulaire de contact</li>
-            <li>Partager les liens du Site</li>
-          </ul>
-
-          <h3>4.2 Interdictions</h3>
-          <p>
-            Il est strictement interdit de :
-          </p>
-          <ul>
-            <li>Extraire, copier ou reproduire le contenu du Site sans autorisation</li>
-            <li>Utiliser des robots, scrapers ou outils automatisés</li>
-            <li>Tenter d'accéder aux zones restreintes sans autorisation</li>
-            <li>Transmettre des virus, malwares ou codes malveillants</li>
-            <li>Surcharger le serveur (attaques DDoS)</li>
-            <li>Usurper l'identité de l'éditeur ou d'un tiers</li>
-            <li>Utiliser le Site à des fins illégales</li>
-            <li>Collecter des données personnelles d'autres utilisateurs</li>
+            <li>{{ t.service1 }}</li>
+            <li>{{ t.service2 }}</li>
+            <li>{{ t.service3 }}</li>
+            <li>{{ t.service4 }}</li>
           </ul>
         </section>
 
         <section>
-          <h2>5. Propriété intellectuelle</h2>
-          
-          <h3>5.1 Droits de l'éditeur</h3>
-          <p>
-            Tous les contenus présents sur le Site (textes, images, logos, design, code, etc.) 
-            sont la propriété exclusive de l'éditeur ou de ses partenaires et sont protégés par 
-            les lois sur la propriété intellectuelle.
-          </p>
-
-          <h3>5.2 Utilisation des contenus</h3>
-          <p>
-            Toute reproduction, représentation, modification, publication ou adaptation de tout 
-            ou partie des éléments du Site, par quelque moyen que ce soit, est interdite sans 
-            l'autorisation écrite préalable de l'éditeur.
-          </p>
-
-          <h3>5.3 Contenus open source</h3>
-          <p>
-            Certains projets présentés peuvent être sous licence open source. Dans ce cas, les 
-            conditions de la licence spécifique s'appliquent et sont indiquées dans les dépôts 
-            GitHub correspondants.
-          </p>
-
-          <h3>5.4 Contenus tiers</h3>
-          <p>
-            Les contenus provenant de sources tierces (GitHub API, Google Books API) restent 
-            la propriété de leurs auteurs respectifs.
-          </p>
-        </section>
-
-        <section>
-          <h2>6. Formulaire de contact</h2>
-          
-          <h3>6.1 Utilisation du formulaire</h3>
-          <p>
-            Le formulaire de contact est destiné aux demandes professionnelles légitimes. 
-            Vous vous engagez à :
-          </p>
+          <h2>3. {{ t.userAccount }}</h2>
+          <p>{{ t.userAccountText }}</p>
           <ul>
-            <li>Fournir des informations exactes</li>
-            <li>Ne pas envoyer de spam ou messages abusifs</li>
-            <li>Respecter les règles de courtoisie</li>
-            <li>Ne pas utiliser le formulaire à des fins publicitaires</li>
-          </ul>
-
-          <h3>6.2 Traitement des messages</h3>
-          <p>
-            Les messages reçus sont traités conformément à notre 
-            <router-link to="/privacy-policy">politique de confidentialité</router-link>.
-          </p>
-          <p>
-            Aucune garantie n'est donnée quant aux délais de réponse. L'éditeur se réserve le 
-            droit de ne pas répondre aux messages inappropriés.
-          </p>
-        </section>
-
-        <section>
-          <h2>7. Liens externes</h2>
-          
-          <h3>7.1 Liens vers des sites tiers</h3>
-          <p>
-            Le Site peut contenir des liens vers des sites web tiers (GitHub, réseaux sociaux, etc.). 
-            Ces liens sont fournis à titre informatif uniquement.
-          </p>
-          <p>
-            L'éditeur n'exerce aucun contrôle sur ces sites et décline toute responsabilité quant 
-            à leur contenu, disponibilité ou sécurité.
-          </p>
-
-          <h3>7.2 Liens vers notre site</h3>
-          <p>
-            Vous pouvez créer des liens vers la page d'accueil du Site sans autorisation préalable, 
-            à condition que :
-          </p>
-          <ul>
-            <li>Le lien ne soit pas trompeur</li>
-            <li>Il ne suggère pas d'association ou d'approbation de votre part</li>
-            <li>Il ne soit pas placé sur un site au contenu illégal ou offensant</li>
+            <li>{{ t.account1 }}</li>
+            <li>{{ t.account2 }}</li>
+            <li>{{ t.account3 }}</li>
           </ul>
         </section>
 
         <section>
-          <h2>8. Responsabilité</h2>
-          
-          <h3>8.1 Exactitude des informations</h3>
-          <p>
-            L'éditeur s'efforce de fournir des informations exactes et à jour. Toutefois, 
-            il ne garantit pas :
-          </p>
+          <h2>4. {{ t.prohibitedUse }}</h2>
+          <p>{{ t.prohibitedUseText }}</p>
           <ul>
-            <li>L'exactitude, la complétude ou l'actualité des informations</li>
-            <li>L'absence d'erreurs ou d'omissions</li>
-            <li>La disponibilité continue du Site</li>
+            <li>{{ t.prohibited1 }}</li>
+            <li>{{ t.prohibited2 }}</li>
+            <li>{{ t.prohibited3 }}</li>
+            <li>{{ t.prohibited4 }}</li>
+            <li>{{ t.prohibited5 }}</li>
           </ul>
+        </section>
 
-          <h3>8.2 Limitation de responsabilité</h3>
-          <p>
-            Dans toute la mesure permise par la loi, l'éditeur ne saurait être tenu responsable :
-          </p>
+        <section>
+          <h2>5. {{ t.intellectualProperty }}</h2>
+          <p>{{ t.intellectualPropertyText }}</p>
+          <p>{{ t.intellectualPropertyText2 }}</p>
+        </section>
+
+        <section>
+          <h2>6. {{ t.liability }}</h2>
+          <p>{{ t.liabilityText }}</p>
           <ul>
-            <li>Des dommages directs ou indirects résultant de l'utilisation du Site</li>
-            <li>De l'impossibilité d'accéder au Site</li>
-            <li>Des virus ou programmes malveillants</li>
-            <li>Des pertes de données ou interruptions de service</li>
-            <li>Des contenus sur les sites tiers liés</li>
+            <li>{{ t.liability1 }}</li>
+            <li>{{ t.liability2 }}</li>
+            <li>{{ t.liability3 }}</li>
           </ul>
-
-          <h3>8.3 Utilisation à vos risques</h3>
-          <p>
-            Vous utilisez le Site à vos propres risques. Le Site est fourni "tel quel" sans 
-            garantie d'aucune sorte.
-          </p>
         </section>
 
         <section>
-          <h2>9. Données personnelles</h2>
-          <p>
-            Le traitement de vos données personnelles est décrit dans notre 
-            <router-link to="/privacy-policy">politique de confidentialité</router-link>, 
-            qui fait partie intégrante des présentes conditions.
-          </p>
-          <p>
-            En utilisant le Site, vous consentez au traitement de vos données conformément 
-            à cette politique.
-          </p>
+          <h2>7. {{ t.modification }}</h2>
+          <p>{{ t.modificationText }}</p>
         </section>
 
         <section>
-          <h2>10. Cookies</h2>
-          <p>
-            Le Site utilise des cookies. Pour plus d'informations, consultez notre 
-            <router-link to="/cookies">politique de cookies</router-link>.
-          </p>
+          <h2>8. {{ t.termination }}</h2>
+          <p>{{ t.terminationText }}</p>
         </section>
 
         <section>
-          <h2>11. Modification du site</h2>
-          <p>
-            L'éditeur se réserve le droit de :
-          </p>
-          <ul>
-            <li>Modifier ou supprimer tout contenu du Site</li>
-            <li>Suspendre ou arrêter le Site à tout moment</li>
-            <li>Modifier les fonctionnalités disponibles</li>
-          </ul>
-          <p>
-            Ces modifications peuvent intervenir sans préavis.
-          </p>
+          <h2>9. {{ t.law }}</h2>
+          <p>{{ t.lawText }}</p>
         </section>
 
         <section>
-          <h2>12. Suspension d'accès</h2>
-          <p>
-            L'éditeur se réserve le droit de suspendre ou de bloquer l'accès au Site à tout 
-            utilisateur qui :
-          </p>
-          <ul>
-            <li>Ne respecte pas les présentes conditions</li>
-            <li>Adopte un comportement nuisible ou abusif</li>
-            <li>Tente de porter atteinte à la sécurité du Site</li>
-          </ul>
-          <p>
-            Cette suspension peut intervenir sans préavis ni justification.
-          </p>
-        </section>
-
-        <section>
-          <h2>13. Loi applicable et juridiction</h2>
-          <p>
-            Les présentes conditions d'utilisation sont régies par le droit français.
-          </p>
-          <p>
-            En cas de litige, et à défaut d'accord amiable, les tribunaux français seront 
-            seuls compétents, conformément aux règles de compétence en vigueur.
-          </p>
-        </section>
-
-        <section>
-          <h2>14. Divisibilité</h2>
-          <p>
-            Si une disposition des présentes conditions est jugée invalide ou inapplicable, 
-            les autres dispositions resteront pleinement en vigueur.
-          </p>
-        </section>
-
-        <section>
-          <h2>15. Intégralité</h2>
-          <p>
-            Les présentes conditions d'utilisation, ainsi que la politique de confidentialité 
-            et la politique de cookies, constituent l'intégralité de l'accord entre vous et 
-            l'éditeur concernant l'utilisation du Site.
-          </p>
-        </section>
-
-        <section>
-          <h2>16. Contact</h2>
-          <p>
-            Pour toute question concernant ces conditions d'utilisation :
-          </p>
-          <div class="info-box">
-            <p><strong>Email :</strong> <a href="mailto:contact@example.com">contact@example.com</a></p>
-          </div>
+          <h2>10. Contact</h2>
+          <p>{{ t.contactText }}</p>
           <div class="contact-buttons">
             <router-link to="/contact" class="btn btn-primary">
-              Nous contacter
-            </router-link>
-            <router-link to="/legal-notice" class="btn btn-secondary">
-              Mentions légales
+              {{ t.contactUs }}
             </router-link>
           </div>
         </section>
@@ -311,9 +95,98 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 
-const lastUpdated = ref('04 février 2026')
+const currentLang = ref('fr')
+
+const translations = {
+  fr: {
+    title: 'Conditions d\'utilisation',
+    lastUpdated: 'Dernière mise à jour',
+    acceptance: 'Acceptation des conditions',
+    acceptanceText: 'En accédant et en utilisant ce site, vous acceptez d\'être lié par les présentes conditions d\'utilisation. Si vous n\'acceptez pas ces conditions, veuillez ne pas utiliser ce site.',
+    services: 'Services proposés',
+    servicesText: 'Ce site vous permet de :',
+    service1: 'Consulter les projets et travaux présentés',
+    service2: 'Découvrir les livres et lectures recommandés',
+    service3: 'Nous contacter via le formulaire de contact',
+    service4: 'Accéder aux informations publiques partagées',
+    userAccount: 'Compte utilisateur',
+    userAccountText: 'L\'accès à l\'interface d\'administration nécessite un compte. Vous êtes responsable de :',
+    account1: 'Maintenir la confidentialité de vos identifiants',
+    account2: 'Toutes les activités effectuées sous votre compte',
+    account3: 'Nous informer immédiatement de toute utilisation non autorisée',
+    prohibitedUse: 'Utilisations interdites',
+    prohibitedUseText: 'Vous vous engagez à ne pas :',
+    prohibited1: 'Utiliser le site à des fins illégales ou non autorisées',
+    prohibited2: 'Tenter d\'accéder à des zones restreintes sans autorisation',
+    prohibited3: 'Interférer avec le fonctionnement du site',
+    prohibited4: 'Transmettre des virus ou codes malveillants',
+    prohibited5: 'Collecter des informations sur d\'autres utilisateurs',
+    intellectualProperty: 'Propriété intellectuelle',
+    intellectualPropertyText: 'Tous les contenus du site (textes, images, code, etc.) sont protégés par les droits de propriété intellectuelle.',
+    intellectualPropertyText2: 'Toute reproduction ou utilisation sans autorisation est interdite, sauf exception prévue par la loi.',
+    liability: 'Limitation de responsabilité',
+    liabilityText: 'Nous déclinons toute responsabilité concernant :',
+    liability1: 'L\'exactitude ou la complétude des informations fournies',
+    liability2: 'Les dommages résultant de l\'utilisation ou de l\'impossibilité d\'utiliser le site',
+    liability3: 'Les contenus des sites tiers accessibles via des liens',
+    modification: 'Modification des conditions',
+    modificationText: 'Nous nous réservons le droit de modifier ces conditions à tout moment. Les modifications prennent effet dès leur publication sur le site.',
+    termination: 'Résiliation',
+    terminationText: 'Nous pouvons suspendre ou résilier votre accès au site en cas de violation de ces conditions, sans préavis ni indemnité.',
+    law: 'Droit applicable',
+    lawText: 'Les présentes conditions sont régies par le droit français. Tout litige sera soumis à la compétence des tribunaux français.',
+    contactText: 'Pour toute question concernant ces conditions :',
+    contactUs: 'Nous contacter'
+  },
+  en: {
+    title: 'Terms of Use',
+    lastUpdated: 'Last updated',
+    acceptance: 'Acceptance of Terms',
+    acceptanceText: 'By accessing and using this site, you agree to be bound by these terms of use. If you do not agree to these terms, please do not use this site.',
+    services: 'Services Provided',
+    servicesText: 'This site allows you to:',
+    service1: 'View presented projects and works',
+    service2: 'Discover recommended books and readings',
+    service3: 'Contact us via the contact form',
+    service4: 'Access shared public information',
+    userAccount: 'User Account',
+    userAccountText: 'Access to the administration interface requires an account. You are responsible for:',
+    account1: 'Maintaining the confidentiality of your credentials',
+    account2: 'All activities performed under your account',
+    account3: 'Immediately notifying us of any unauthorized use',
+    prohibitedUse: 'Prohibited Uses',
+    prohibitedUseText: 'You agree not to:',
+    prohibited1: 'Use the site for illegal or unauthorized purposes',
+    prohibited2: 'Attempt to access restricted areas without authorization',
+    prohibited3: 'Interfere with the operation of the site',
+    prohibited4: 'Transmit viruses or malicious code',
+    prohibited5: 'Collect information about other users',
+    intellectualProperty: 'Intellectual Property',
+    intellectualPropertyText: 'All content on the site (text, images, code, etc.) is protected by intellectual property rights.',
+    intellectualPropertyText2: 'Any reproduction or use without authorization is prohibited, except as provided by law.',
+    liability: 'Limitation of Liability',
+    liabilityText: 'We disclaim all liability concerning:',
+    liability1: 'The accuracy or completeness of the information provided',
+    liability2: 'Damages resulting from the use or inability to use the site',
+    liability3: 'Content of third-party sites accessible via links',
+    modification: 'Modification of Terms',
+    modificationText: 'We reserve the right to modify these terms at any time. Modifications take effect upon publication on the site.',
+    termination: 'Termination',
+    terminationText: 'We may suspend or terminate your access to the site in case of violation of these terms, without notice or compensation.',
+    law: 'Applicable Law',
+    lawText: 'These terms are governed by French law. Any dispute will be subject to the jurisdiction of French courts.',
+    contactText: 'For any questions regarding these terms:',
+    contactUs: 'Contact us'
+  }
+}
+
+const t = computed(() => translations[currentLang.value])
+
+const toggleLanguage = () => {
+  currentLang.value = currentLang.value === 'fr' ? 'en' : 'fr'
+}
 </script>
 
 <style scoped lang="scss">
@@ -353,6 +226,26 @@ const lastUpdated = ref('04 février 2026')
   .last-updated {
     color: rgba(255, 255, 255, 0.6);
     font-size: 0.9rem;
+    margin-bottom: 1rem;
+  }
+  
+  .lang-toggle {
+    margin-top: 1rem;
+    padding: 0.5rem 1.5rem;
+    background: rgba(0, 255, 255, 0.1);
+    border: 2px solid #00ffff;
+    border-radius: 25px;
+    color: #00ffff;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      background: rgba(0, 255, 255, 0.2);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 255, 255, 0.3);
+    }
   }
 }
 
@@ -420,27 +313,10 @@ const lastUpdated = ref('04 février 2026')
   }
 }
 
-.info-box {
-  background: rgba(0, 255, 255, 0.05);
-  border: 1px solid rgba(0, 255, 255, 0.2);
-  border-radius: 8px;
-  padding: 1.5rem;
-  margin: 1rem 0;
-  
-  p {
-    margin-bottom: 0.5rem;
-    
-    &:last-child {
-      margin-bottom: 0;
-    }
-  }
-}
-
 .contact-buttons {
   display: flex;
   gap: 1rem;
   margin-top: 1.5rem;
-  flex-wrap: wrap;
 }
 
 .btn {
@@ -459,17 +335,6 @@ const lastUpdated = ref('04 février 2026')
       background: #00ccff;
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(0, 255, 255, 0.3);
-    }
-  }
-  
-  &.btn-secondary {
-    background: transparent;
-    color: #00ffff;
-    border: 2px solid #00ffff;
-    
-    &:hover {
-      background: rgba(0, 255, 255, 0.1);
-      transform: translateY(-2px);
     }
   }
 }
