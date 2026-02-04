@@ -1,5 +1,8 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
+import { useEasterEggs } from '@/composables/useEasterEggs'
+
+const { discoverEgg, EASTER_EGGS } = useEasterEggs()
 
 const cursorX = ref(0)
 const cursorY = ref(0)
@@ -9,12 +12,19 @@ const isHovering = ref(false)
 const isClicking = ref(false)
 const isVisible = ref(false)
 const isMobile = ref(true)
+const isSleeping = ref(false) // Sleeping cursor state
 
 let rafId = null
+let inactivityTimeout = null
+const INACTIVITY_DELAY = 30000 // 30 seconds
 
 const updateCursor = (e) => {
   cursorX.value = e.clientX
   cursorY.value = e.clientY
+  
+  // Reset inactivity timer on mouse move
+  resetInactivityTimer()
+  wakeCursor()
 }
 
 const animateDot = () => {
@@ -33,6 +43,7 @@ const handleMouseLeave = () => {
 
 const handleMouseDown = () => {
   isClicking.value = true
+  wakeCursor()
 }
 
 const handleMouseUp = () => {
@@ -43,6 +54,28 @@ const checkHoverable = (e) => {
   const target = e.target
   const isHoverable = target.closest('a, button, [data-cursor-hover], input, textarea, select')
   isHovering.value = !!isHoverable
+}
+
+// Sleeping cursor feature
+const startSleeping = () => {
+  if (!isSleeping.value) {
+    isSleeping.value = true
+    discoverEgg(EASTER_EGGS.SLEEPING_CURSOR)
+  }
+}
+
+const wakeCursor = () => {
+  isSleeping.value = false
+}
+
+const resetInactivityTimer = () => {
+  if (inactivityTimeout) {
+    clearTimeout(inactivityTimeout)
+  }
+  
+  inactivityTimeout = setTimeout(() => {
+    startSleeping()
+  }, INACTIVITY_DELAY)
 }
 
 onMounted(() => {
@@ -57,6 +90,10 @@ onMounted(() => {
     document.addEventListener('mouseleave', handleMouseLeave)
     document.addEventListener('mousedown', handleMouseDown)
     document.addEventListener('mouseup', handleMouseUp)
+    
+    // Start inactivity timer
+    resetInactivityTimer()
+    
     animateDot()
   }
 })
@@ -69,23 +106,37 @@ onUnmounted(() => {
     document.removeEventListener('mouseleave', handleMouseLeave)
     document.removeEventListener('mousedown', handleMouseDown)
     document.removeEventListener('mouseup', handleMouseUp)
+    
     if (rafId) cancelAnimationFrame(rafId)
+    if (inactivityTimeout) clearTimeout(inactivityTimeout)
   }
 })
 </script>
 
 <template>
   <div v-if="!isMobile" class="custom-cursor" :class="{ visible: isVisible }">
-    <div
+    <!-- Normal cursor -->
+    <div v-if="!isSleeping"
       class="cursor-ring"
       :class="{ hovering: isHovering, clicking: isClicking }"
       :style="{ transform: `translate(${cursorDotX}px, ${cursorDotY}px)` }"
     ></div>
-    <div
+    <div v-if="!isSleeping"
       class="cursor-dot"
       :class="{ hovering: isHovering, clicking: isClicking }"
       :style="{ transform: `translate(${cursorX}px, ${cursorY}px)` }"
     ></div>
+    
+    <!-- Sleeping cat cursor -->
+    <div v-if="isSleeping"
+      class="sleeping-cat"
+      :style="{ transform: `translate(${cursorX}px, ${cursorY}px)` }"
+    >
+      <div class="cat-body">😴</div>
+      <div class="zzz">z</div>
+      <div class="zzz zzz-2">z</div>
+      <div class="zzz zzz-3">z</div>
+    </div>
   </div>
 </template>
 
@@ -154,6 +205,60 @@ onUnmounted(() => {
     width: 10px;
     height: 10px;
     margin: -5px 0 0 -5px;
+  }
+}
+
+// Sleeping cat cursor
+.sleeping-cat {
+  position: absolute;
+  margin: -20px 0 0 -20px;
+  animation: sleepFloat 3s ease-in-out infinite;
+}
+
+.cat-body {
+  font-size: 2rem;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.zzz {
+  position: absolute;
+  font-size: 1rem;
+  color: var(--terminal-accent);
+  opacity: 0;
+  animation: zzz-float 2s ease-in-out infinite;
+}
+
+.zzz-2 {
+  font-size: 0.875rem;
+  animation-delay: 0.3s;
+}
+
+.zzz-3 {
+  font-size: 0.75rem;
+  animation-delay: 0.6s;
+}
+
+@keyframes sleepFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes zzz-float {
+  0% {
+    opacity: 0;
+    transform: translate(10px, 0);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(15px, -20px);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(20px, -40px);
   }
 }
 </style>

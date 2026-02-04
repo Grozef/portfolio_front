@@ -86,18 +86,26 @@
                   <span class="btn-arrow">→</span>
                 </span>
               </button>
+              <button type="button" class="progressive-btn" @click="handleProgressiveClick" data-cursor-hover>
+                {{ progressiveButtonText }}
+              </button>
+
             </form>
           </Transition>
         </div>
+        <!-- BSOD Easter Egg -->
+        <BluescreenOfDeath :show="showBSOD" :click-count="3" @close="closeBSOD" />
       </div>
     </main>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
+import BluescreenOfDeath from '@/components/BluescreenOfDeath.vue'
+import { useEasterEggs } from '@/composables/useEasterEggs'
 
 const router = useRouter()
 
@@ -111,6 +119,36 @@ const form = reactive({
 const errors = reactive({})
 const isSubmitting = ref(false)
 const isSuccess = ref(false)
+
+const progressiveClickCount = ref(0)
+const showBSOD = ref(false)
+const { discoverEgg, EASTER_EGGS } = useEasterEggs()
+
+const progressiveButtonText = computed(() => {
+  switch (progressiveClickCount.value) {
+    case 0: return 'Contact me faster'
+    case 1: return 'Please stop'
+    case 2: return 'Ok, you asked for it...'
+    default: return 'Contact me faster'
+  }
+})
+
+const handleProgressiveClick = () => {
+  progressiveClickCount.value++
+
+  if (progressiveClickCount.value === 1) {
+    discoverEgg(EASTER_EGGS.PROGRESSIVE_BUTTON)
+  }
+
+  if (progressiveClickCount.value >= 3) {
+    showBSOD.value = true
+    progressiveClickCount.value = 0
+  }
+}
+
+const closeBSOD = () => {
+  showBSOD.value = false
+}
 
 const validateForm = () => {
   const newErrors = {}
@@ -517,6 +555,23 @@ const socialLinks = [
   font-size: 1rem;
   color: var(--terminal-text-dim);
   margin-bottom: 2rem;
+}
+
+.progressive-btn {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  color: var(--terminal-text-dim);
+  background: transparent;
+  border: 1px solid var(--terminal-border);
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  margin-top: 0.5rem;
+
+  &:hover {
+    border-color: var(--terminal-accent);
+    color: var(--terminal-accent);
+  }
 }
 
 .reset-btn {

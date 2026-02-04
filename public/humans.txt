@@ -1,0 +1,38 @@
+/* TEAM */
+Developer: François Lisowski
+Site: https://github.com/Grozef
+Location: France
+
+/* THANKS */
+Easter Egg Hunters: Thanks to all the curious explorers who discovered the hidden gems!
+Open Source Community: For amazing tools and inspiration
+Coffee: For making late-night coding sessions possible
+
+/* TECHNOLOGY */
+Frontend: Vue.js 3, Vite
+State Management: Pinia
+Styling: SCSS
+Routing: Vue Router
+Backend: Node.js, Express
+Database: PostgreSQL
+
+/* EASTER EGGS */
+This portfolio contains 10 hidden easter eggs!
+Can you find them all? 🥚
+
+1. Vim Command (ESC + :q)
+2. ASCII Art Console Welcome
+3. Fleeing Button
+4. Progressive Contact Button
+5. Extreme Dark Mode (CTRL+Z)
+6. Sleeping Cursor
+7. This File (humans.txt)
+8. Interactive 404 Page
+9. Enhanced whoami
+10. Master Easter Egg (Find all others first!)
+
+/* SITE */
+Last Update: 2026
+Standards: HTML5, CSS3, ES6+
+Components: Vue 3 Composition API
+IDE: VS Code

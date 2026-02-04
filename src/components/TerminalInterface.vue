@@ -121,6 +121,76 @@
           </div>
         </template>
 
+        <!-- Whoami output -->
+<template v-else-if="entry.format === 'whoami'">
+  <div class="whoami-output">
+    <div class="whoami-header">
+      <span class="whoami-title">👤 Visitor Information</span>
+    </div>
+    <div class="whoami-grid">
+      <div class="whoami-item">
+        <span class="whoami-label">User:</span>
+        <span class="whoami-value">{{ entry.content.user }}</span>
+      </div>
+      <div class="whoami-item">
+        <span class="whoami-label">Role:</span>
+        <span class="whoami-value">{{ entry.content.role }}</span>
+      </div>
+      <div class="whoami-item">
+        <span class="whoami-label">Device:</span>
+        <span class="whoami-value">{{ entry.content.deviceType }}</span>
+      </div>
+      <div class="whoami-item">
+        <span class="whoami-label">Platform:</span>
+        <span class="whoami-value">{{ entry.content.platform }}</span>
+      </div>
+      <div class="whoami-item">
+        <span class="whoami-label">Browser:</span>
+        <span class="whoami-value">{{ entry.content.browser }}</span>
+      </div>
+      <div class="whoami-item">
+        <span class="whoami-label">Language:</span>
+        <span class="whoami-value">{{ entry.content.language }}</span>
+      </div>
+      <div class="whoami-item">
+        <span class="whoami-label">Screen:</span>
+        <span class="whoami-value">{{ entry.content.screen }}</span>
+      </div>
+      <div class="whoami-item">
+        <span class="whoami-label">Viewport:</span>
+        <span class="whoami-value">{{ entry.content.viewport }}</span>
+      </div>
+      <div class="whoami-item">
+        <span class="whoami-label">Color Depth:</span>
+        <span class="whoami-value">{{ entry.content.colorDepth }}</span>
+      </div>
+      <div class="whoami-item">
+        <span class="whoami-label">Timezone:</span>
+        <span class="whoami-value">{{ entry.content.timezone }}</span>
+      </div>
+      <div class="whoami-item">
+        <span class="whoami-label">Connection:</span>
+        <span class="whoami-value">{{ entry.content.connection }}</span>
+      </div>
+      <div class="whoami-item">
+        <span class="whoami-label">Device Memory:</span>
+        <span class="whoami-value">{{ entry.content.deviceMemory }}</span>
+      </div>
+      <div class="whoami-item">
+        <span class="whoami-label">Status:</span>
+        <span class="whoami-value">{{ entry.content.online }}</span>
+      </div>
+      <div class="whoami-item">
+        <span class="whoami-label">Cookies:</span>
+        <span class="whoami-value">{{ entry.content.cookiesEnabled }}</span>
+      </div>
+    </div>
+    <div class="whoami-footer">
+      <small>🔒 Your privacy is important. This information is only displayed to you.</small>
+    </div>
+  </div>
+</template>
+
         <!-- Error output -->
         <template v-else-if="entry.type === 'error'">
           <span class="error-text">{{ entry.content }}</span>
@@ -153,6 +223,7 @@ import { useGitHubStore } from '@/stores/github'
 import { useRouter } from 'vue-router'
 import { useKonamiCode } from '@/composables/useKonamiCode'
 import KonamiAnimation from './KonamiAnimationGradius.vue'
+import { useEasterEggs } from '@/composables/useEasterEggs'
 
 const emit = defineEmits(['openProject'])
 
@@ -267,10 +338,7 @@ const executeCommand = async (input) => {
       break
 
     case 'whoami':
-      terminalStore.addToHistory({
-        type: 'output',
-        content: 'visitor — Welcome to my portfolio!'
-      })
+      await outputEnhancedWhoami()
       break
 
     case 'date':
@@ -316,6 +384,65 @@ const executeCommand = async (input) => {
         content: `Command not found: ${command}. Type 'help' for available commands.`
       })
   }
+}
+
+const outputEnhancedWhoami = async () => {
+  const { discoverEgg, EASTER_EGGS } = useEasterEggs()
+  
+  const info = {
+    user: 'visitor',
+    role: 'Portfolio Explorer',
+    browser: navigator.userAgent.split(' ').slice(-2).join(' '),
+    platform: navigator.platform,
+    language: navigator.language,
+    screen: `${window.screen.width}x${window.screen.height}`,
+    viewport: `${window.innerWidth}x${window.innerHeight}`,
+    colorDepth: `${window.screen.colorDepth}-bit`,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    online: navigator.onLine ? 'Online' : 'Offline',
+    cookiesEnabled: navigator.cookieEnabled ? 'Yes' : 'No'
+  }
+
+  // Try to get additional info
+  let locationInfo = 'Permission required'
+  let connectionInfo = 'Unknown'
+  let deviceMemory = 'Unknown'
+
+  // Check for connection info
+  if ('connection' in navigator) {
+    const conn = navigator.connection
+    connectionInfo = conn.effectiveType || 'Unknown'
+    if (conn.downlink) {
+      connectionInfo += ` (${conn.downlink} Mbps)`
+    }
+  }
+
+  // Check for device memory
+  if ('deviceMemory' in navigator) {
+    deviceMemory = `${navigator.deviceMemory} GB`
+  }
+
+  // Device type detection
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+  const isTablet = /(tablet|ipad|playbook|silk)|(android(?!.*mobi))/i.test(navigator.userAgent)
+  let deviceType = 'Desktop'
+  if (isMobile && !isTablet) deviceType = 'Mobile'
+  if (isTablet) deviceType = 'Tablet'
+
+  terminalStore.addToHistory({
+    type: 'output',
+    format: 'whoami',
+    content: {
+      ...info,
+      deviceType,
+      connection: connectionInfo,
+      deviceMemory,
+      location: locationInfo
+    }
+  })
+
+  // Discover easter egg
+  discoverEgg(EASTER_EGGS.ENHANCED_WHOAMI)
 }
 
 const outputHelp = (specificCommand) => {
@@ -787,6 +914,67 @@ onMounted(() => {
   color: var(--terminal-text-dim);
   margin-top: 0.5rem;
   opacity: 0.7;
+}
+
+// Whoami styles
+.whoami-output {
+  margin-top: 0.5rem;
+  padding: 1rem;
+  background: var(--terminal-bg-secondary);
+  border: 1px solid var(--terminal-border);
+  border-radius: 6px;
+}
+
+.whoami-header {
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--terminal-border);
+}
+
+.whoami-title {
+  color: var(--terminal-accent);
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.whoami-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 0.75rem;
+}
+
+.whoami-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem;
+  background: var(--terminal-bg);
+  border-radius: 4px;
+}
+
+.whoami-label {
+  color: var(--terminal-text-dim);
+  font-size: 0.875rem;
+}
+
+.whoami-value {
+  color: var(--terminal-text);
+  font-weight: 500;
+  text-align: right;
+  max-width: 60%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.whoami-footer {
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--terminal-border);
+  
+  small {
+    color: var(--terminal-text-dim);
+    font-size: 0.75rem;
+  }
 }
 
 // Skills styles
