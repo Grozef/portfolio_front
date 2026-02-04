@@ -22,6 +22,9 @@
                         <li><router-link to="/privacy-policy">Privacy</router-link></li>
                         <li><router-link to="/cookies">Cookies</router-link></li>
                         <li><router-link to="/terms">Terms of Use</router-link></li>
+                        <li><router-link to="/404" class="footer-link footer-link--game" data-cursor-hover>
+                            Legal Actions
+                        </router-link> </li>
                     </ul>
                 </div>
 
@@ -55,20 +58,21 @@
                                 </svg>
                                 LinkedIn
                             </a>
-                                  <a 
-        href="/humans.txt" 
-        target="_blank"
-        class="footer-link"
-        @click="handleHumansTxtClick"
-        data-cursor-hover
-      >
-        Credits
-      </a>
+                        </li>
+                        <li>
+                            <a href="/humans.txt" target="_blank" class="footer-link" @click="handleHumansTxtClick"
+                                data-cursor-hover>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
+                                    fill="currentColor">
+                                    <path
+                                        d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-7 5c1.657 0 3 1.343 3 3s-1.343 3-3 3-3-1.343-3-3 1.343-3 3-3zm6 12.5c0 2.485-2.686 4.5-6 4.5s-6-2.015-6-4.5v-.5h12v.5z" />
+                                </svg>
+                                Credits
+                            </a>
                         </li>
                     </ul>
                 </div>
             </div>
-
             <!-- Bottom Bar -->
             <div class="footer-bottom">
                 <p class="copyright">
@@ -89,8 +93,8 @@ import { useEasterEggs } from '@/composables/useEasterEggs'
 const { discoverEgg, EASTER_EGGS } = useEasterEggs()
 
 const handleHumansTxtClick = () => {
-  // Discover easter egg when link is clicked
-  discoverEgg(EASTER_EGGS.HUMANS_TXT)
+    // Discover easter egg when link is clicked
+    discoverEgg(EASTER_EGGS.HUMANS_TXT)
 }
 
 const currentYear = computed(() => new Date().getFullYear())
@@ -189,10 +193,10 @@ const currentYear = computed(() => new Date().getFullYear())
         justify-content: center;
         gap: 0.5rem;
 
-        .heart {
-            color: #ff0066;
-            animation: heartbeat 1.5s ease-in-out infinite;
-        }
+        //        .heart {
+        //            color: #ff0066;
+        //            animation: heartbeat 1.5s ease-in-out infinite;
+        //        }
     }
 }
 

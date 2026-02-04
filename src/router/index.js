@@ -1,10 +1,6 @@
 /**
- * Configuration du routeur Vue avec validation de token.
- * 
- * IMPORTANT: Le garde de navigation valide maintenant le token
- * en appelant l'API /auth/me avant d'autoriser l'acces aux routes protegees.
- * 
- * @module router
+ * FIX: Router configuration for accessible 404 page
+ * File: src/router/index.js
  */
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
@@ -93,10 +89,18 @@ const router = createRouter({
       component: () => import('@/views/TermsView.vue') 
     },
 
-    // Catch-all redirect
+    // FIX: 404 Page - accessible directement ET comme catch-all
     { 
-      path: '/:pathMatch(.*)*', 
-      redirect: '/' 
+      path: '/404', 
+      name: 'not-found', 
+      component: () => import('@/views/NotFoundView.vue') 
+    },
+
+    // FIX: Catch-all - affiche le composant 404 directement (pas de redirect)
+    { 
+      path: '/:pathMatch(.*)*',
+      name: 'catch-all',
+      component: () => import('@/views/NotFoundView.vue')
     }
   ]
 })
@@ -111,21 +115,18 @@ router.beforeEach(async (to, from, next) => {
     return next('/admin')
   }
 
-  // Protect admin routes - VALIDATION CRITIQUE DU TOKEN
+  // Protect admin routes
   if (to.meta.requiresAuth) {
     if (!token) {
       return next('/login')
     }
 
-    // IMPORTANT: Valide le token en appelant l'API
-    // Cela evite l'acces avec un token expire ou invalide
     try {
       const isValid = await authStore.checkAuth()
       if (!isValid) {
         return next('/login')
       }
     } catch (error) {
-      // Si l'API retourne une erreur, le token est invalide
       localStorage.removeItem('auth_token')
       return next('/login')
     }

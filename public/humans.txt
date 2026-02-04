@@ -17,8 +17,8 @@ Backend: Node.js, Express
 Database: PostgreSQL
 
 /* EASTER EGGS */
-This portfolio contains 10 hidden easter eggs!
-Can you find them all? 🥚
+This portfolio contains 11 hidden easter eggs!
+Can you find them all?
 
 1. Vim Command (ESC + :q)
 2. ASCII Art Console Welcome
@@ -29,10 +29,11 @@ Can you find them all? 🥚
 7. This File (humans.txt)
 8. Interactive 404 Page
 9. Enhanced whoami
-10. Master Easter Egg (Find all others first!)
+10. Konami Code (↑ ↑ ↓ ↓ ← → ← → B A)
+11. Master Easter Egg (Find all others first!)
 
 /* SITE */
-Last Update: 2026
+Last Update: 2024
 Standards: HTML5, CSS3, ES6+
 Components: Vue 3 Composition API
 IDE: VS Code

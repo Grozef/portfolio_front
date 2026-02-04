@@ -1,0 +1,41 @@
+/* FIX: Global cursor override - hide ALL default cursors */
+/* This ensures only the custom cursor is visible throughout the site */
+
+* {
+  cursor: none !important;
+}
+
+html,
+body,
+div,
+span,
+a,
+button,
+input,
+textarea,
+select,
+[data-cursor-hover],
+[role="button"],
+.clickable {
+  cursor: none !important;
+}
+
+/* Ensure custom cursor is always on top */
+.custom-cursor {
+  z-index: 10000 !important;
+  pointer-events: none !important;
+}
+
+/* Remove any competing cursor styles */
+a:hover,
+button:hover,
+input:hover,
+textarea:hover,
+select:hover {
+  cursor: none !important;
+}
+
+/* Override any framework or library cursor styles */
+[style*="cursor"] {
+  cursor: none !important;
+}

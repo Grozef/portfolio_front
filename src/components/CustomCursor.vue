@@ -12,7 +12,11 @@ const isHovering = ref(false)
 const isClicking = ref(false)
 const isVisible = ref(false)
 const isMobile = ref(true)
-const isSleeping = ref(false) // Sleeping cursor state
+const isSleeping = ref(false)
+
+// FIX: Store last known cursor position for sleeping state
+const lastCursorX = ref(0)
+const lastCursorY = ref(0)
 
 let rafId = null
 let inactivityTimeout = null
@@ -21,6 +25,10 @@ const INACTIVITY_DELAY = 30000 // 30 seconds
 const updateCursor = (e) => {
   cursorX.value = e.clientX
   cursorY.value = e.clientY
+  
+  // FIX: Always update last known position while active
+  lastCursorX.value = e.clientX
+  lastCursorY.value = e.clientY
   
   // Reset inactivity timer on mouse move
   resetInactivityTimer()
@@ -127,13 +135,13 @@ onUnmounted(() => {
       :style="{ transform: `translate(${cursorX}px, ${cursorY}px)` }"
     ></div>
     
-    <!-- Sleeping cat cursor -->
+    <!-- FIX: Sleeping cursor at last known position with Zzz instead of cat -->
     <div v-if="isSleeping"
-      class="sleeping-cat"
-      :style="{ transform: `translate(${cursorX}px, ${cursorY}px)` }"
+      class="sleeping-cursor"
+      :style="{ transform: `translate(${lastCursorX}px, ${lastCursorY}px)` }"
     >
-      <div class="cat-body">😴</div>
-      <div class="zzz">z</div>
+      <div class="sleep-text">Zzz</div>
+      <div class="zzz zzz-1">z</div>
       <div class="zzz zzz-2">z</div>
       <div class="zzz zzz-3">z</div>
     </div>
@@ -208,16 +216,19 @@ onUnmounted(() => {
   }
 }
 
-// Sleeping cat cursor
-.sleeping-cat {
+// FIX: Sleeping cursor with Zzz text instead of emoji
+.sleeping-cursor {
   position: absolute;
   margin: -20px 0 0 -20px;
   animation: sleepFloat 3s ease-in-out infinite;
 }
 
-.cat-body {
-  font-size: 2rem;
+.sleep-text {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--terminal-accent);
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  font-family: var(--font-mono);
 }
 
 .zzz {
@@ -226,15 +237,21 @@ onUnmounted(() => {
   color: var(--terminal-accent);
   opacity: 0;
   animation: zzz-float 2s ease-in-out infinite;
+  font-family: var(--font-mono);
+}
+
+.zzz-1 {
+  font-size: 0.875rem;
+  animation-delay: 0s;
 }
 
 .zzz-2 {
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   animation-delay: 0.3s;
 }
 
 .zzz-3 {
-  font-size: 0.75rem;
+  font-size: 0.625rem;
   animation-delay: 0.6s;
 }
 

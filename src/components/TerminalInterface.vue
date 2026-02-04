@@ -121,75 +121,143 @@
           </div>
         </template>
 
-        <!-- Whoami output -->
-<template v-else-if="entry.format === 'whoami'">
-  <div class="whoami-output">
-    <div class="whoami-header">
-      <span class="whoami-title">👤 Visitor Information</span>
-    </div>
-    <div class="whoami-grid">
-      <div class="whoami-item">
-        <span class="whoami-label">User:</span>
-        <span class="whoami-value">{{ entry.content.user }}</span>
-      </div>
-      <div class="whoami-item">
-        <span class="whoami-label">Role:</span>
-        <span class="whoami-value">{{ entry.content.role }}</span>
-      </div>
-      <div class="whoami-item">
-        <span class="whoami-label">Device:</span>
-        <span class="whoami-value">{{ entry.content.deviceType }}</span>
-      </div>
-      <div class="whoami-item">
-        <span class="whoami-label">Platform:</span>
-        <span class="whoami-value">{{ entry.content.platform }}</span>
-      </div>
-      <div class="whoami-item">
-        <span class="whoami-label">Browser:</span>
-        <span class="whoami-value">{{ entry.content.browser }}</span>
-      </div>
-      <div class="whoami-item">
-        <span class="whoami-label">Language:</span>
-        <span class="whoami-value">{{ entry.content.language }}</span>
-      </div>
-      <div class="whoami-item">
-        <span class="whoami-label">Screen:</span>
-        <span class="whoami-value">{{ entry.content.screen }}</span>
-      </div>
-      <div class="whoami-item">
-        <span class="whoami-label">Viewport:</span>
-        <span class="whoami-value">{{ entry.content.viewport }}</span>
-      </div>
-      <div class="whoami-item">
-        <span class="whoami-label">Color Depth:</span>
-        <span class="whoami-value">{{ entry.content.colorDepth }}</span>
-      </div>
-      <div class="whoami-item">
-        <span class="whoami-label">Timezone:</span>
-        <span class="whoami-value">{{ entry.content.timezone }}</span>
-      </div>
-      <div class="whoami-item">
-        <span class="whoami-label">Connection:</span>
-        <span class="whoami-value">{{ entry.content.connection }}</span>
-      </div>
-      <div class="whoami-item">
-        <span class="whoami-label">Device Memory:</span>
-        <span class="whoami-value">{{ entry.content.deviceMemory }}</span>
-      </div>
-      <div class="whoami-item">
-        <span class="whoami-label">Status:</span>
-        <span class="whoami-value">{{ entry.content.online }}</span>
-      </div>
-      <div class="whoami-item">
-        <span class="whoami-label">Cookies:</span>
-        <span class="whoami-value">{{ entry.content.cookiesEnabled }}</span>
-      </div>
-    </div>
-    <div class="whoami-footer">
-      <small>🔒 Your privacy is important. This information is only displayed to you.</small>
-    </div>
-  </div>
-</template>
+        <template v-else-if="entry.format === 'whoami'">
+          <div class="whoami-output">
+            <div class="whoami-header">
+              <span class="whoami-title">=== WHOAMI OUTPUT ===</span>
+            </div>
+
+            <!-- Browser Info Section -->
+            <div class="whoami-section">
+              <div class="section-title">[Browser Info]</div>
+              <div class="whoami-grid">
+                <div class="whoami-item">
+                  <span class="whoami-label">Browser:</span>
+                  <span class="whoami-value">{{ entry.content.browser }} {{ entry.content.browserVersion }}</span>
+                </div>
+                <div class="whoami-item">
+                  <span class="whoami-label">Engine:</span>
+                  <span class="whoami-value">{{ entry.content.engine }}</span>
+                </div>
+                <div class="whoami-item">
+                  <span class="whoami-label">Cookies:</span>
+                  <span class="whoami-value">{{ entry.content.cookiesEnabled }}</span>
+                </div>
+                <div class="whoami-item">
+                  <span class="whoami-label">Do Not Track:</span>
+                  <span class="whoami-value">{{ entry.content.doNotTrack }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- System Info Section -->
+            <div class="whoami-section">
+              <div class="section-title">[System Info]</div>
+              <div class="whoami-grid">
+                <div class="whoami-item">
+                  <span class="whoami-label">Platform:</span>
+                  <span class="whoami-value">{{ entry.content.platform }}</span>
+                </div>
+                <div class="whoami-item">
+                  <span class="whoami-label">Device Type:</span>
+                  <span class="whoami-value">{{ entry.content.deviceType }}</span>
+                </div>
+                <div class="whoami-item">
+                  <span class="whoami-label">CPU Cores:</span>
+                  <span class="whoami-value">{{ entry.content.cpuCores }}</span>
+                </div>
+                <div class="whoami-item">
+                  <span class="whoami-label">Memory:</span>
+                  <span class="whoami-value">{{ entry.content.deviceMemory }}</span>
+                </div>
+                <div class="whoami-item">
+                  <span class="whoami-label">Touch Support:</span>
+                  <span class="whoami-value">{{ entry.content.touchSupport }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Display Info Section -->
+            <div class="whoami-section">
+              <div class="section-title">[Display Info]</div>
+              <div class="whoami-grid">
+                <div class="whoami-item">
+                  <span class="whoami-label">Screen:</span>
+                  <span class="whoami-value">{{ entry.content.screen }}</span>
+                </div>
+                <div class="whoami-item">
+                  <span class="whoami-label">Viewport:</span>
+                  <span class="whoami-value">{{ entry.content.viewport }}</span>
+                </div>
+                <div class="whoami-item">
+                  <span class="whoami-label">Color Depth:</span>
+                  <span class="whoami-value">{{ entry.content.colorDepth }}</span>
+                </div>
+                <div class="whoami-item">
+                  <span class="whoami-label">Pixel Ratio:</span>
+                  <span class="whoami-value">{{ entry.content.pixelRatio }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Network Info Section -->
+            <div class="whoami-section">
+              <div class="section-title">[Network Info]</div>
+              <div class="whoami-grid">
+                <div class="whoami-item">
+                  <span class="whoami-label">Status:</span>
+                  <span class="whoami-value">{{ entry.content.online }}</span>
+                </div>
+                <div class="whoami-item">
+                  <span class="whoami-label">Type:</span>
+                  <span class="whoami-value">{{ entry.content.connectionType }}</span>
+                </div>
+                <div class="whoami-item">
+                  <span class="whoami-label">Speed:</span>
+                  <span class="whoami-value">{{ entry.content.connectionSpeed }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Location Info Section -->
+            <div class="whoami-section">
+              <div class="section-title">[Location Info]</div>
+              <div class="whoami-grid">
+                <div class="whoami-item">
+                  <span class="whoami-label">Timezone:</span>
+                  <span class="whoami-value">{{ entry.content.timezone }}</span>
+                </div>
+                <div class="whoami-item">
+                  <span class="whoami-label">Language:</span>
+                  <span class="whoami-value">{{ entry.content.language }}</span>
+                </div>
+                <div class="whoami-item wide">
+                  <span class="whoami-label">Languages:</span>
+                  <span class="whoami-value">{{ entry.content.languages }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Privacy Section -->
+            <div class="whoami-section">
+              <div class="section-title">[Privacy Settings]</div>
+              <div class="whoami-grid">
+                <div class="whoami-item wide">
+                  <span class="whoami-label">Referrer:</span>
+                  <span class="whoami-value">{{ entry.content.referrer }}</span>
+                </div>
+                <div class="whoami-item wide">
+                  <span class="whoami-label">User Agent:</span>
+                  <span class="whoami-value small">{{ entry.content.userAgent }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="whoami-footer">
+              <small>Your privacy is important. This information is only displayed to you.</small>
+            </div>
+          </div>
+        </template>
 
         <!-- Error output -->
         <template v-else-if="entry.type === 'error'">
@@ -238,6 +306,10 @@ const showKonamiAnimation = ref(false)
 
 // Konami Code activation
 const handleKonamiActivation = () => {
+  
+  const { discoverEgg, EASTER_EGGS } = useEasterEggs()
+  discoverEgg(EASTER_EGGS.KONAMI_CODE)
+
   showKonamiAnimation.value = true
   terminalStore.addToHistory({
     type: 'output',
@@ -388,43 +460,51 @@ const executeCommand = async (input) => {
 
 const outputEnhancedWhoami = async () => {
   const { discoverEgg, EASTER_EGGS } = useEasterEggs()
-  
-  const info = {
-    user: 'visitor',
-    role: 'Portfolio Explorer',
-    browser: navigator.userAgent.split(' ').slice(-2).join(' '),
-    platform: navigator.platform,
-    language: navigator.language,
-    screen: `${window.screen.width}x${window.screen.height}`,
-    viewport: `${window.innerWidth}x${window.innerHeight}`,
-    colorDepth: `${window.screen.colorDepth}-bit`,
-    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-    online: navigator.onLine ? 'Online' : 'Offline',
-    cookiesEnabled: navigator.cookieEnabled ? 'Yes' : 'No'
-  }
 
-  // Try to get additional info
-  let locationInfo = 'Permission required'
-  let connectionInfo = 'Unknown'
-  let deviceMemory = 'Unknown'
+  // Browser Info
+  const userAgent = navigator.userAgent
+  const browserInfo = getBrowserInfo(userAgent)
 
-  // Check for connection info
-  if ('connection' in navigator) {
-    const conn = navigator.connection
-    connectionInfo = conn.effectiveType || 'Unknown'
+  // System Info
+  const platform = navigator.platform
+  const cpuCores = navigator.hardwareConcurrency || 'Unknown'
+  const deviceMemory = navigator.deviceMemory ? `${navigator.deviceMemory} GB` : 'Unknown'
+  const touchSupport = 'ontouchstart' in window || navigator.maxTouchPoints > 0 ? 'Yes' : 'No'
+
+  // Display Info
+  const screenWidth = window.screen.width
+  const screenHeight = window.screen.height
+  const viewportWidth = window.innerWidth
+  const viewportHeight = window.innerHeight
+  const colorDepth = `${window.screen.colorDepth}-bit`
+  const pixelRatio = window.devicePixelRatio || 1
+
+  // Network Info
+  const isOnline = navigator.onLine ? 'Online' : 'Offline'
+  let connectionType = 'Unknown'
+  let connectionSpeed = 'Unknown'
+
+  if ('connection' in navigator || 'mozConnection' in navigator || 'webkitConnection' in navigator) {
+    const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection
+    connectionType = conn.effectiveType || 'Unknown'
     if (conn.downlink) {
-      connectionInfo += ` (${conn.downlink} Mbps)`
+      connectionSpeed = `${conn.downlink} Mbps`
     }
   }
 
-  // Check for device memory
-  if ('deviceMemory' in navigator) {
-    deviceMemory = `${navigator.deviceMemory} GB`
-  }
+  // Privacy Settings
+  const cookiesEnabled = navigator.cookieEnabled ? 'Enabled' : 'Disabled'
+  const doNotTrack = navigator.doNotTrack || 'Not Set'
+  const referrer = document.referrer || 'Direct'
 
-  // Device type detection
-  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-  const isTablet = /(tablet|ipad|playbook|silk)|(android(?!.*mobi))/i.test(navigator.userAgent)
+  // Location Info
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
+  const language = navigator.language
+  const languages = navigator.languages ? navigator.languages.join(', ') : language
+
+  // Device Type
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent)
+  const isTablet = /(tablet|ipad|playbook|silk)|(android(?!.*mobi))/i.test(userAgent)
   let deviceType = 'Desktop'
   if (isMobile && !isTablet) deviceType = 'Mobile'
   if (isTablet) deviceType = 'Tablet'
@@ -433,16 +513,75 @@ const outputEnhancedWhoami = async () => {
     type: 'output',
     format: 'whoami',
     content: {
-      ...info,
+      // Browser Info
+      userAgent,
+      browser: browserInfo.name,
+      browserVersion: browserInfo.version,
+      engine: browserInfo.engine,
+
+      // System Info
+      platform,
       deviceType,
-      connection: connectionInfo,
+      cpuCores,
       deviceMemory,
-      location: locationInfo
+      touchSupport,
+
+      // Display Info
+      screen: `${screenWidth}x${screenHeight}`,
+      viewport: `${viewportWidth}x${viewportHeight}`,
+      colorDepth,
+      pixelRatio,
+
+      // Network Info
+      online: isOnline,
+      connectionType,
+      connectionSpeed,
+
+      // Privacy Settings
+      cookiesEnabled,
+      doNotTrack,
+      referrer: referrer.substring(0, 50) + (referrer.length > 50 ? '...' : ''),
+
+      // Location Info
+      timezone,
+      language,
+      languages
     }
   })
 
-  // Discover easter egg
   discoverEgg(EASTER_EGGS.ENHANCED_WHOAMI)
+}
+
+// FIX: Helper function to parse browser info
+const getBrowserInfo = (ua) => {
+  let name = 'Unknown'
+  let version = 'Unknown'
+  let engine = 'Unknown'
+
+  // Detect browser
+  if (ua.indexOf('Firefox') > -1) {
+    name = 'Firefox'
+    version = ua.match(/Firefox\/(\d+\.\d+)/)?.[1] || 'Unknown'
+    engine = 'Gecko'
+  } else if (ua.indexOf('Edg') > -1) {
+    name = 'Edge'
+    version = ua.match(/Edg\/(\d+\.\d+)/)?.[1] || 'Unknown'
+    engine = 'Blink'
+  } else if (ua.indexOf('Chrome') > -1) {
+    name = 'Chrome'
+    version = ua.match(/Chrome\/(\d+\.\d+)/)?.[1] || 'Unknown'
+    engine = 'Blink'
+  } else if (ua.indexOf('Safari') > -1) {
+    name = 'Safari'
+    version = ua.match(/Version\/(\d+\.\d+)/)?.[1] || 'Unknown'
+    engine = 'WebKit'
+  } else if (ua.indexOf('Opera') > -1 || ua.indexOf('OPR') > -1) {
+    name = 'Opera'
+    version = ua.match(/(?:Opera|OPR)\/(\d+\.\d+)/)?.[1] || 'Unknown'
+    engine = 'Blink'
+  }
+
+  return { name, version, engine }
 }
 
 const outputHelp = (specificCommand) => {
@@ -916,7 +1055,8 @@ onMounted(() => {
   opacity: 0.7;
 }
 
-// Whoami styles
+/* whoami styles  */
+
 .whoami-output {
   margin-top: 0.5rem;
   padding: 1rem;
@@ -926,54 +1066,113 @@ onMounted(() => {
 }
 
 .whoami-header {
-  margin-bottom: 1rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid var(--terminal-border);
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid var(--terminal-accent);
 }
 
 .whoami-title {
   color: var(--terminal-accent);
-  font-weight: 600;
+  font-weight: 700;
   font-size: 1rem;
+  letter-spacing: 0.05em;
+  font-family: var(--font-mono);
+}
+
+.whoami-section {
+  margin-bottom: 1.5rem;
+  
+  &:last-of-type {
+    margin-bottom: 0;
+  }
+}
+
+.section-title {
+  color: var(--terminal-accent-secondary);
+  font-weight: 600;
+  font-size: 0.875rem;
+  margin-bottom: 0.75rem;
+  padding: 0.25rem 0;
+  border-bottom: 1px solid var(--terminal-border);
+  font-family: var(--font-mono);
 }
 
 .whoami-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 0.75rem;
+  gap: 0.5rem;
 }
 
 .whoami-item {
   display: flex;
   justify-content: space-between;
-  padding: 0.5rem;
+  padding: 0.4rem 0.75rem;
   background: var(--terminal-bg);
   border-radius: 4px;
+  border-left: 2px solid transparent;
+  transition: border-color 0.2s ease;
+  
+  &:hover {
+    border-left-color: var(--terminal-accent);
+  }
+  
+  &.wide {
+    grid-column: 1 / -1;
+  }
 }
 
 .whoami-label {
   color: var(--terminal-text-dim);
-  font-size: 0.875rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  min-width: 120px;
+  font-family: var(--font-mono);
 }
 
 .whoami-value {
   color: var(--terminal-text);
-  font-weight: 500;
+  font-weight: 400;
   text-align: right;
-  max-width: 60%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  flex: 1;
+  font-size: 0.85rem;
+  font-family: var(--font-mono);
+  
+  &.small {
+    font-size: 0.7rem;
+    word-break: break-all;
+  }
 }
 
 .whoami-footer {
-  margin-top: 1rem;
+  margin-top: 1.5rem;
   padding-top: 0.75rem;
   border-top: 1px solid var(--terminal-border);
+  text-align: center;
   
   small {
     color: var(--terminal-text-dim);
     font-size: 0.75rem;
+    font-style: italic;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .whoami-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .whoami-item {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  
+  .whoami-label {
+    min-width: auto;
+  }
+  
+  .whoami-value {
+    text-align: left;
   }
 }
 

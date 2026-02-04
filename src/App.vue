@@ -6,6 +6,9 @@
     <!-- Extreme Dark Mode Overlay -->
     <ExtremeDarkMode />
     
+    <!-- FIX: Dark Mode Toggle Button -->
+    <DarkModeToggle />
+    
     <!-- Master Easter Egg Modal -->
     <MasterEasterEgg 
       :show="showMasterEgg" 
@@ -32,6 +35,7 @@ import FooterComponent from '@/components/FooterComponent.vue'
 import CookieBanner from '@/components/CookieBanner.vue'
 import ExtremeDarkMode from '@/components/ExtremeDarkMode.vue'
 import MasterEasterEgg from '@/components/MasterEasterEgg.vue'
+import DarkModeToggle from '@/components/DarkModeToggle.vue' // FIX: Added import
 import { useVimQuit } from '@/composables/useVimQuit'
 import { useEasterEggs } from '@/composables/useEasterEggs'
 
@@ -49,7 +53,7 @@ const displayASCIIWelcome = () => {
   const asciiArt = `
    ╔════════════════════════════════════════════════════════╗
    ║                                                        ║
-   ║              Welcome to François's Portfolio           ║
+   ║              Welcome to François's Portfolio          ║
    ║                                                        ║
    ║                    ___________________                 ║
    ║                   |  _____________  |                  ║
@@ -64,14 +68,14 @@ const displayASCIIWelcome = () => {
    ║                                                        ║
    ║              Type 'help' to get started                ║
    ║                                                        ║
-   ║               Hint: 10 easter eggs are hidden          ║
+   ║           Hint: 10 easter eggs are hidden              ║
    ║                  Can you find them all?                ║
    ║                                                        ║
    ╚════════════════════════════════════════════════════════╝
   `
 
   console.log('%c' + asciiArt, 'color: #c9a227; font-family: monospace; font-size: 12px; line-height: 1.2;')
-  console.log('%c Easter Egg Discovered: ASCII Art Console Welcome', 'color: #27ca40; font-weight: bold; font-size: 14px;')
+  console.log('%cEaster Egg Discovered: ASCII Art Console Welcome', 'color: #27ca40; font-weight: bold; font-size: 14px;')
   console.log('%cPro tip: Check out /humans.txt for more info!', 'color: #4a9eff; font-size: 12px;')
   
   // Discover ASCII art easter egg
@@ -101,6 +105,9 @@ onMounted(() => {
 
 <style lang="scss">
 @import '@/assets/main.scss';
+
+/* FIX: Import global cursor fix */
+@import '@/assets/global-cursor-fix.css';
 
 #app {
   min-height: 100vh;
