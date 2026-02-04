@@ -3,6 +3,8 @@
   import { useTerminalStore } from '@/stores/terminal'
   import { useGitHubStore } from '@/stores/github'
   import { useRouter } from 'vue-router'
+  import { useKonamiCode } from '@/composables/useKonamiCode'
+  import KonamiAnimation from './KonamiAnimation.vue'
   
   const emit = defineEmits(['openProject'])
   
@@ -13,6 +15,39 @@
   const inputRef = ref(null)
   const outputRef = ref(null)
   const localInput = ref('')
+  const showKonamiAnimation = ref(false)
+  
+  // Konami Code activation
+  const handleKonamiActivation = () => {
+    showKonamiAnimation.value = true
+    terminalStore.addToHistory({
+      type: 'output',
+      format: 'ascii',
+      content: `
+  ⠀⠀⠀⠀⠀⢀⣀⣤⣤⣤⣤⣤⣤⣀⣀⠀⠀⠀⠀⠀
+  ⠀⠀⢀⣤⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣤⡀⠀⠀
+  ⠀⣰⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣆⠀
+  ⢰⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡆
+  ⢸⣿⣿⣿⡿⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⢿⣿⣿⣿⡇
+  ⠘⣿⣿⣿⡇⠀⠀K O N A M I⠀⠀⢸⣿⣿⣿⠃
+  ⠀⢿⣿⣿⣿⣄⠀ C O D E⠀⣠⣿⣿⣿⡿⠀
+  ⠀⠀⢿⣿⣿⣿⣷⣄⣀⣀⣀⣀⣠⣾⣿⣿⣿⡿⠀⠀
+  ⠀⠀⠀⠻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠟⠀⠀⠀
+  ⠀⠀⠀⠀⠈⠛⠿⣿⣿⣿⣿⣿⣿⠿⠛⠁⠀⠀⠀⠀
+  
+  🎮 KONAMI CODE ACTIVATED! 🎮
+  You've unlocked the secret developer mode!
+  
+  ⬆⬆⬇⬇⬅➡⬅➡🅱🅰
+      `
+    })
+    
+    setTimeout(() => {
+      showKonamiAnimation.value = false
+    }, 5000)
+  }
+  
+  useKonamiCode(handleKonamiActivation)
   
   const prompt = computed(() => {
     const time = new Date().toLocaleTimeString('en-US', { 
@@ -498,6 +533,9 @@
         <span class="cursor cursor-blink">█</span>
       </div>
     </div>
+    
+    <!-- Konami Code Animation -->
+    <KonamiAnimation :show="showKonamiAnimation" />
   </template>
   
   <style lang="scss" scoped>

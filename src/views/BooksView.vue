@@ -1,4 +1,166 @@
-<script setup>
+  <template>
+    <div class="books-page">
+      <header class="page-header">
+        <button class="back-btn" @click="goToTerminal" data-cursor-hover>
+          <span class="back-icon">&larr;</span>
+          <span class="back-text">Terminal</span>
+        </button>
+        <h1 class="page-title">Library</h1>
+        <div class="header-actions">
+          <template v-if="isAuthenticated">
+            <button class="add-btn" @click="openAddModal" data-cursor-hover>+ Add Book</button>
+            <button class="add-btn" @click="goToAdminCarousel" data-cursor-hover>Carousel</button>
+            <button class="logout-btn" @click="handleLogout" data-cursor-hover>Logout</button>
+          </template>
+          <button v-else class="login-btn" @click="goToLogin" data-cursor-hover>Admin</button>
+        </div>
+      </header>
+  
+      <!-- Carrousel d'images -->
+      <div class="carousel-section" v-if="carouselImages.length > 0 && currentCarouselImage">
+        <div class="carousel-container">
+          <button 
+            class="carousel-arrow carousel-prev" 
+            @click="prevCarouselImage"
+            data-cursor-hover
+          >
+            ←
+          </button>
+          
+          <div class="carousel-content">
+            <div class="carousel-image">
+              <img 
+              :src="getImageUrl(currentCarouselImage.image_url)" 
+                :alt="currentCarouselImage.title || 'Carousel image'"
+              />
+            </div>
+            <div class="carousel-info" v-if="currentCarouselImage.title">
+              <h3>{{ currentCarouselImage.title }}</h3>
+            </div>
+          </div>
+          
+          <button 
+            class="carousel-arrow carousel-next" 
+            @click="nextCarouselImage"
+            data-cursor-hover
+          >
+            →
+          </button>
+        </div>
+        
+        <div class="carousel-indicators">
+          <button
+            v-for="(image, index) in carouselImages"
+            :key="image.id"
+            class="carousel-dot"
+            :class="{ active: index === carouselIndex % carouselImages.length }"
+            @click="carouselIndex = index"
+          ></button>
+        </div>
+      </div>
+  
+      <div class="stats-bar" v-if="stats">
+        <div class="stat-item"><span class="stat-value">{{ stats.read }}</span><span class="stat-label">Read</span></div>
+        <div class="stat-item"><span class="stat-value">{{ stats.reading }}</span><span class="stat-label">Reading</span></div>
+        <div class="stat-item"><span class="stat-value">{{ stats.to_read }}</span><span class="stat-label">To Read</span></div>
+      </div>
+  
+      <div class="filters">
+        <button v-for="filter in filters" :key="filter.key" class="filter-btn" :class="{ active: activeFilter === filter.key }" @click="setFilter(filter.key)" data-cursor-hover>{{ filter.label }}</button>
+      </div>
+  
+      <div v-if="isLoading" class="loading-state"><div class="loader"></div><p>Loading library...</p></div>
+  
+      <main v-else class="books-main">
+        <div class="books-grid">
+          <article v-for="book in books" :key="book.id" class="book-card" @click="openBookModal(book)" data-cursor-hover>
+            <div class="book-cover">
+              <img v-if="book.display_cover_url" :src="book.display_cover_url" :alt="book.display_title" loading="lazy" />
+              <div v-else class="cover-placeholder"><span>{{ book.display_title?.charAt(0) || '?' }}</span></div>
+              <div class="book-status" :style="{ background: getStatusColor(book.status) }">{{ getStatusLabel(book.status) }}</div>
+              <div v-if="book.is_featured" class="book-featured">&#9733;</div>
+            </div>
+            <div class="book-info">
+              <h3 class="book-title">{{ book.display_title }}</h3>
+              <p class="book-author">{{ book.display_author }}</p>
+              <div class="book-rating" v-if="book.rating"><span v-for="i in 5" :key="i" class="star" :class="{ filled: i <= book.rating }">&#9733;</span></div>
+            </div>
+          </article>
+        </div>
+        <div v-if="books.length === 0" class="empty-state"><p>No books found.</p></div>
+      </main>
+  
+      <section class="quote-section">
+        <blockquote class="quote">
+          <p>" Tout ce qui arrive est nécessaire. "</p>
+          <cite>&mdash; Un stoïcien</cite>
+        </blockquote>
+      </section>
+  
+      <!-- Modals - unchanged -->
+      <transition name="modal">
+        <div v-if="isModalOpen" class="modal-overlay" @click.self="closeModal">
+          <div class="modal-content book-modal">
+            <button class="modal-close" @click="closeModal" data-cursor-hover>×</button>
+            <div class="modal-body" v-if="selectedBook">
+              <div class="book-modal-cover">
+                <img v-if="selectedBook.display_cover_url" :src="selectedBook.display_cover_url" :alt="selectedBook.display_title" />
+                <div v-else class="cover-placeholder large"><span>{{ selectedBook.display_title?.charAt(0) || '?' }}</span></div>
+              </div>
+              <div class="book-modal-info">
+                <h2>{{ selectedBook.display_title }}</h2>
+                <p class="author">{{ selectedBook.display_author }}</p>
+                <div class="isbn" v-if="selectedBook.isbn">ISBN: {{ selectedBook.isbn }}</div>
+                <div class="form-group" v-if="!isEditMode"><label>Status</label><div class="status-badge" :style="{ background: getStatusColor(selectedBook.status) }">{{ getStatusLabel(selectedBook.status) }}</div></div>
+                <div class="form-group" v-else><label for="status">Status</label><select id="status" v-model="selectedBook.status"><option value="to-read">To Read</option><option value="reading">Reading</option><option value="read">Read</option></select></div>
+                <div class="form-group" v-if="!isEditMode && selectedBook.rating"><label>Rating</label><div class="book-rating large"><span v-for="i in 5" :key="i" class="star" :class="{ filled: i <= selectedBook.rating }">&#9733;</span></div></div>
+                <div class="form-group" v-else-if="isEditMode"><label for="rating">Rating</label><select id="rating" v-model.number="selectedBook.rating"><option :value="null">No rating</option><option v-for="i in 5" :key="i" :value="i">{{ i }} star{{ i > 1 ? 's' : '' }}</option></select></div>
+                <div class="form-group" v-if="selectedBook.description && !isEditMode"><label>Description</label><p class="description">{{ selectedBook.description }}</p></div>
+                <div class="form-group" v-if="!isEditMode && selectedBook.review"><label>Review</label><p class="review">{{ selectedBook.review }}</p></div>
+                <div class="form-group" v-else-if="isEditMode"><label for="review">Review</label><textarea id="review" v-model="selectedBook.review" rows="4" placeholder="Your thoughts..."></textarea></div>
+                <div class="form-group checkbox" v-if="isEditMode && isAuthenticated"><label><input type="checkbox" v-model="selectedBook.is_featured" /> Featured</label></div>
+                <div class="modal-actions" v-if="isAuthenticated">
+                  <button v-if="!isEditMode" class="btn-primary" @click="toggleEditMode" data-cursor-hover>Edit</button>
+                  <template v-else>
+                    <button class="btn-primary" @click="handleUpdateBook" data-cursor-hover>Save</button>
+                    <button class="btn-secondary" @click="toggleEditMode" data-cursor-hover>Cancel</button>
+                  </template>
+                  <button class="btn-danger" @click="handleDeleteBook" data-cursor-hover>Delete</button>
+                  <button v-if="selectedBook.isbn" class="btn-secondary" @click="handleRefreshCache" data-cursor-hover>Refresh Cache</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </transition>
+  
+      <transition name="modal">
+        <div v-if="isAddModalOpen" class="modal-overlay" @click.self="closeAddModal">
+          <div class="modal-content add-modal">
+            <button class="modal-close" @click="closeAddModal" data-cursor-hover>×</button>
+            <div class="modal-body">
+              <h2>Add Book</h2>
+              <form @submit.prevent="handleAddBook">
+                <div class="form-group"><label for="isbn">ISBN</label><input id="isbn" v-model="newBook.isbn" type="text" placeholder="978-0123456789" :disabled="requireManualEntry" /><small v-if="!requireManualEntry">Leave empty to enter manually</small></div>
+                <div v-if="requireManualEntry || !newBook.isbn" class="manual-entry">
+                  <div class="form-group"><label for="title">Title *</label><input id="title" v-model="newBook.title" type="text" required /></div>
+                  <div class="form-group"><label for="author">Author</label><input id="author" v-model="newBook.author" type="text" /></div>
+                  <div class="form-group"><label for="cover_url">Cover URL</label><input id="cover_url" v-model="newBook.cover_url" type="url" placeholder="https://..." /></div>
+                </div>
+                <div class="form-group"><label for="status">Status</label><select id="status" v-model="newBook.status"><option value="to-read">To Read</option><option value="reading">Reading</option><option value="read">Read</option></select></div>
+                <div class="form-group"><label for="rating">Rating</label><select id="rating" v-model.number="newBook.rating"><option :value="null">No rating</option><option v-for="i in 5" :key="i" :value="i">{{ i }} star{{ i > 1 ? 's' : '' }}</option></select></div>
+                <div class="form-group"><label for="review">Review</label><textarea id="review" v-model="newBook.review" rows="3"></textarea></div>
+                <div class="error-message" v-if="booksStore.error">{{ booksStore.error }}</div>
+                <div class="modal-actions"><button type="submit" class="btn-primary" :disabled="booksStore.isLoading" data-cursor-hover>{{ booksStore.isLoading ? 'Adding...' : 'Add Book' }}</button><button type="button" class="btn-secondary" @click="closeAddModal" data-cursor-hover>Cancel</button></div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </transition>
+    </div>
+  </template>
+  
+  <script setup>
   import { ref, onMounted, computed, onUnmounted } from 'vue'
   import { useRouter } from 'vue-router'
   import { useBooksStore } from '@/stores/books'
@@ -188,169 +350,7 @@
     stopCarouselAutoplay()
   })
   </script>
-  
-  <template>
-    <div class="books-page">
-      <header class="page-header">
-        <button class="back-btn" @click="goToTerminal" data-cursor-hover>
-          <span class="back-icon">&larr;</span>
-          <span class="back-text">Terminal</span>
-        </button>
-        <h1 class="page-title">Library</h1>
-        <div class="header-actions">
-          <template v-if="isAuthenticated">
-            <button class="add-btn" @click="openAddModal" data-cursor-hover>+ Add Book</button>
-            <button class="add-btn" @click="goToAdminCarousel" data-cursor-hover>Carousel</button>
-            <button class="logout-btn" @click="handleLogout" data-cursor-hover>Logout</button>
-          </template>
-          <button v-else class="login-btn" @click="goToLogin" data-cursor-hover>Admin</button>
-        </div>
-      </header>
-  
-      <!-- Carrousel d'images -->
-      <div class="carousel-section" v-if="carouselImages.length > 0 && currentCarouselImage">
-        <div class="carousel-container">
-          <button 
-            class="carousel-arrow carousel-prev" 
-            @click="prevCarouselImage"
-            data-cursor-hover
-          >
-            ←
-          </button>
-          
-          <div class="carousel-content">
-            <div class="carousel-image">
-              <img 
-              :src="getImageUrl(currentCarouselImage.image_url)" 
-                :alt="currentCarouselImage.title || 'Carousel image'"
-              />
-            </div>
-            <div class="carousel-info" v-if="currentCarouselImage.title">
-              <h3>{{ currentCarouselImage.title }}</h3>
-            </div>
-          </div>
-          
-          <button 
-            class="carousel-arrow carousel-next" 
-            @click="nextCarouselImage"
-            data-cursor-hover
-          >
-            →
-          </button>
-        </div>
-        
-        <div class="carousel-indicators">
-          <button
-            v-for="(image, index) in carouselImages"
-            :key="image.id"
-            class="carousel-dot"
-            :class="{ active: index === carouselIndex % carouselImages.length }"
-            @click="carouselIndex = index"
-          ></button>
-        </div>
-      </div>
-  
-      <div class="stats-bar" v-if="stats">
-        <div class="stat-item"><span class="stat-value">{{ stats.read }}</span><span class="stat-label">Read</span></div>
-        <div class="stat-item"><span class="stat-value">{{ stats.reading }}</span><span class="stat-label">Reading</span></div>
-        <div class="stat-item"><span class="stat-value">{{ stats.to_read }}</span><span class="stat-label">To Read</span></div>
-      </div>
-  
-      <div class="filters">
-        <button v-for="filter in filters" :key="filter.key" class="filter-btn" :class="{ active: activeFilter === filter.key }" @click="setFilter(filter.key)" data-cursor-hover>{{ filter.label }}</button>
-      </div>
-  
-      <div v-if="isLoading" class="loading-state"><div class="loader"></div><p>Loading library...</p></div>
-  
-      <main v-else class="books-main">
-        <div class="books-grid">
-          <article v-for="book in books" :key="book.id" class="book-card" @click="openBookModal(book)" data-cursor-hover>
-            <div class="book-cover">
-              <img v-if="book.display_cover_url" :src="book.display_cover_url" :alt="book.display_title" loading="lazy" />
-              <div v-else class="cover-placeholder"><span>{{ book.display_title?.charAt(0) || '?' }}</span></div>
-              <div class="book-status" :style="{ background: getStatusColor(book.status) }">{{ getStatusLabel(book.status) }}</div>
-              <div v-if="book.is_featured" class="book-featured">&#9733;</div>
-            </div>
-            <div class="book-info">
-              <h3 class="book-title">{{ book.display_title }}</h3>
-              <p class="book-author">{{ book.display_author }}</p>
-              <div class="book-rating" v-if="book.rating"><span v-for="i in 5" :key="i" class="star" :class="{ filled: i <= book.rating }">&#9733;</span></div>
-            </div>
-          </article>
-        </div>
-        <div v-if="books.length === 0" class="empty-state"><p>No books found.</p></div>
-      </main>
-  
-      <section class="quote-section">
-        <blockquote class="quote">
-          <p>"A reader lives a thousand lives before he dies."</p>
-          <cite>&mdash; George R.R. Martin</cite>
-        </blockquote>
-      </section>
-  
-      <!-- Modals - unchanged -->
-      <transition name="modal">
-        <div v-if="isModalOpen" class="modal-overlay" @click.self="closeModal">
-          <div class="modal-content book-modal">
-            <button class="modal-close" @click="closeModal" data-cursor-hover>×</button>
-            <div class="modal-body" v-if="selectedBook">
-              <div class="book-modal-cover">
-                <img v-if="selectedBook.display_cover_url" :src="selectedBook.display_cover_url" :alt="selectedBook.display_title" />
-                <div v-else class="cover-placeholder large"><span>{{ selectedBook.display_title?.charAt(0) || '?' }}</span></div>
-              </div>
-              <div class="book-modal-info">
-                <h2>{{ selectedBook.display_title }}</h2>
-                <p class="author">{{ selectedBook.display_author }}</p>
-                <div class="isbn" v-if="selectedBook.isbn">ISBN: {{ selectedBook.isbn }}</div>
-                <div class="form-group" v-if="!isEditMode"><label>Status</label><div class="status-badge" :style="{ background: getStatusColor(selectedBook.status) }">{{ getStatusLabel(selectedBook.status) }}</div></div>
-                <div class="form-group" v-else><label for="status">Status</label><select id="status" v-model="selectedBook.status"><option value="to-read">To Read</option><option value="reading">Reading</option><option value="read">Read</option></select></div>
-                <div class="form-group" v-if="!isEditMode && selectedBook.rating"><label>Rating</label><div class="book-rating large"><span v-for="i in 5" :key="i" class="star" :class="{ filled: i <= selectedBook.rating }">&#9733;</span></div></div>
-                <div class="form-group" v-else-if="isEditMode"><label for="rating">Rating</label><select id="rating" v-model.number="selectedBook.rating"><option :value="null">No rating</option><option v-for="i in 5" :key="i" :value="i">{{ i }} star{{ i > 1 ? 's' : '' }}</option></select></div>
-                <div class="form-group" v-if="selectedBook.description && !isEditMode"><label>Description</label><p class="description">{{ selectedBook.description }}</p></div>
-                <div class="form-group" v-if="!isEditMode && selectedBook.review"><label>Review</label><p class="review">{{ selectedBook.review }}</p></div>
-                <div class="form-group" v-else-if="isEditMode"><label for="review">Review</label><textarea id="review" v-model="selectedBook.review" rows="4" placeholder="Your thoughts..."></textarea></div>
-                <div class="form-group checkbox" v-if="isEditMode && isAuthenticated"><label><input type="checkbox" v-model="selectedBook.is_featured" /> Featured</label></div>
-                <div class="modal-actions" v-if="isAuthenticated">
-                  <button v-if="!isEditMode" class="btn-primary" @click="toggleEditMode" data-cursor-hover>Edit</button>
-                  <template v-else>
-                    <button class="btn-primary" @click="handleUpdateBook" data-cursor-hover>Save</button>
-                    <button class="btn-secondary" @click="toggleEditMode" data-cursor-hover>Cancel</button>
-                  </template>
-                  <button class="btn-danger" @click="handleDeleteBook" data-cursor-hover>Delete</button>
-                  <button v-if="selectedBook.isbn" class="btn-secondary" @click="handleRefreshCache" data-cursor-hover>Refresh Cache</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </transition>
-  
-      <transition name="modal">
-        <div v-if="isAddModalOpen" class="modal-overlay" @click.self="closeAddModal">
-          <div class="modal-content add-modal">
-            <button class="modal-close" @click="closeAddModal" data-cursor-hover>×</button>
-            <div class="modal-body">
-              <h2>Add Book</h2>
-              <form @submit.prevent="handleAddBook">
-                <div class="form-group"><label for="isbn">ISBN</label><input id="isbn" v-model="newBook.isbn" type="text" placeholder="978-0123456789" :disabled="requireManualEntry" /><small v-if="!requireManualEntry">Leave empty to enter manually</small></div>
-                <div v-if="requireManualEntry || !newBook.isbn" class="manual-entry">
-                  <div class="form-group"><label for="title">Title *</label><input id="title" v-model="newBook.title" type="text" required /></div>
-                  <div class="form-group"><label for="author">Author</label><input id="author" v-model="newBook.author" type="text" /></div>
-                  <div class="form-group"><label for="cover_url">Cover URL</label><input id="cover_url" v-model="newBook.cover_url" type="url" placeholder="https://..." /></div>
-                </div>
-                <div class="form-group"><label for="status">Status</label><select id="status" v-model="newBook.status"><option value="to-read">To Read</option><option value="reading">Reading</option><option value="read">Read</option></select></div>
-                <div class="form-group"><label for="rating">Rating</label><select id="rating" v-model.number="newBook.rating"><option :value="null">No rating</option><option v-for="i in 5" :key="i" :value="i">{{ i }} star{{ i > 1 ? 's' : '' }}</option></select></div>
-                <div class="form-group"><label for="review">Review</label><textarea id="review" v-model="newBook.review" rows="3"></textarea></div>
-                <div class="error-message" v-if="booksStore.error">{{ booksStore.error }}</div>
-                <div class="modal-actions"><button type="submit" class="btn-primary" :disabled="booksStore.isLoading" data-cursor-hover>{{ booksStore.isLoading ? 'Adding...' : 'Add Book' }}</button><button type="button" class="btn-secondary" @click="closeAddModal" data-cursor-hover>Cancel</button></div>
-              </form>
-            </div>
-          </div>
-        </div>
-      </transition>
-    </div>
-  </template>
-  
+
   <style lang="scss" scoped>
   .books-page {
     min-height: 100vh;
