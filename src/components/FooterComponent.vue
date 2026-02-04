@@ -55,6 +55,15 @@
                                 </svg>
                                 LinkedIn
                             </a>
+                                  <a 
+        href="/humans.txt" 
+        target="_blank"
+        class="footer-link"
+        @click="handleHumansTxtClick"
+        data-cursor-hover
+      >
+        Credits
+      </a>
                         </li>
                     </ul>
                 </div>
@@ -75,6 +84,14 @@
 
 <script setup>
 import { computed } from 'vue'
+import { useEasterEggs } from '@/composables/useEasterEggs'
+
+const { discoverEgg, EASTER_EGGS } = useEasterEggs()
+
+const handleHumansTxtClick = () => {
+  // Discover easter egg when link is clicked
+  discoverEgg(EASTER_EGGS.HUMANS_TXT)
+}
 
 const currentYear = computed(() => new Date().getFullYear())
 </script>
