@@ -128,6 +128,12 @@
             </router-link>
           </div>
         </section>
+        <section>
+            <div class="legal-notice">
+    <AdBlockDetector />
+    <!-- rest of content -->
+  </div>
+        </section>
       </div>
     </div>
   </div>
@@ -135,6 +141,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import AdBlockDetector from '@/components/AdBlockDetector.vue'
 
 const currentLang = ref('fr')
 const lastUpdated = ref('04/02/2026')

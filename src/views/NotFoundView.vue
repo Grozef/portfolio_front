@@ -4,7 +4,7 @@
       <div class="error-header">
         <h1 class="error-code">404</h1>
         <p class="error-message">Page not found</p>
-        <p class="error-subtitle">But you found a secret game instead! 🎮</p>
+        <p class="error-subtitle">But you found a secret game instead!</p>
       </div>
 
       <div class="game-container">
@@ -60,7 +60,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useEasterEggs } from '@/composables/useEasterEggs'
 
 const { discoverEgg, EASTER_EGGS } = useEasterEggs()
@@ -74,16 +74,23 @@ const isGameOver = ref(false)
 // Game state
 const gridSize = 20
 const tileCount = 20
-let snake = [{ x: 10, y: 10 }]
+let snake = []
 let food = { x: 15, y: 15 }
 let dx = 0
 let dy = 0
 let gameLoop = null
 
+// FIX: Initialize game properly
 const initGame = () => {
-  snake = [{ x: 10, y: 10 }]
+  // FIX: Start with a 3-segment snake in the middle
+  snake = [
+    { x: 10, y: 10 },
+    { x: 9, y: 10 },
+    { x: 8, y: 10 }
+  ]
   food = generateFood()
-  dx = 0
+  // FIX: Start moving to the right
+  dx = 1
   dy = 0
   score.value = 0
   isGameOver.value = false
@@ -110,9 +117,6 @@ const startGame = () => {
     isPlaying.value = true
     if (gameLoop) clearInterval(gameLoop)
     gameLoop = setInterval(update, 100)
-    
-    // Discover easter egg on first game play
-    discoverEgg(EASTER_EGGS.FOUND_404)
   }
 }
 
@@ -128,10 +132,12 @@ const update = () => {
     return
   }
 
-  // Check collision with self
-  if (snake.some(segment => segment.x === head.x && segment.y === head.y)) {
-    gameOver()
-    return
+  // FIX: Check collision with self (skip the last segment as it will move)
+  for (let i = 0; i < snake.length - 1; i++) {
+    if (snake[i].x === head.x && snake[i].y === head.y) {
+      gameOver()
+      return
+    }
   }
 
   snake.unshift(head)
@@ -211,17 +217,17 @@ const handleKeyDown = (event) => {
 
   const key = event.key.toLowerCase()
 
-  // Prevent reverse direction
-  if ((key === 'arrowup' || key === 'w') && dy === 0) {
+  // FIX: Prevent reverse direction AND moving into yourself
+  if ((key === 'arrowup' || key === 'w') && dy !== 1) {
     dx = 0
     dy = -1
-  } else if ((key === 'arrowdown' || key === 's') && dy === 0) {
+  } else if ((key === 'arrowdown' || key === 's') && dy !== -1) {
     dx = 0
     dy = 1
-  } else if ((key === 'arrowleft' || key === 'a') && dx === 0) {
+  } else if ((key === 'arrowleft' || key === 'a') && dx !== 1) {
     dx = -1
     dy = 0
-  } else if ((key === 'arrowright' || key === 'd') && dx === 0) {
+  } else if ((key === 'arrowright' || key === 'd') && dx !== -1) {
     dx = 1
     dy = 0
   }
@@ -232,8 +238,13 @@ onMounted(() => {
   if (canvas) {
     canvas.width = gridSize * tileCount
     canvas.height = gridSize * tileCount
+    // FIX: Initialize game state and draw
+    initGame()
     draw()
   }
+
+  // Discover easter egg on page load
+  discoverEgg(EASTER_EGGS.FOUND_404)
 
   document.addEventListener('keydown', handleKeyDown)
 })

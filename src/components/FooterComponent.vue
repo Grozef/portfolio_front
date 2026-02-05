@@ -81,6 +81,12 @@
                 <p class="tagline">
                     Built with Vue.js & Laravel
                 </p>
+                  <button 
+    @mouseenter="playHoverSound"
+    data-cursor-hover
+  >
+    Menu Item
+  </button>
             </div>
         </div>
     </footer>
@@ -89,6 +95,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useEasterEggs } from '@/composables/useEasterEggs'
+import { use8BitSounds } from '@/composables/use8BitSounds'
 
 const { discoverEgg, EASTER_EGGS } = useEasterEggs()
 
@@ -98,6 +105,9 @@ const handleHumansTxtClick = () => {
 }
 
 const currentYear = computed(() => new Date().getFullYear())
+
+const { playHoverSound } = use8BitSounds()
+
 </script>
 
 <style scoped lang="scss">

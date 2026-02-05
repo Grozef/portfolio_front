@@ -9,8 +9,12 @@
       <div class="header-spacer"></div>
     </header>
 
+
+
     <main class="about-main">
       <!-- Hero section -->
+           <HiddenMusicPlayer musicSrc="/audio/hold-music.mp3" />
+           
       <section class="hero-section">
         <div class="hero-content">
           <span class="hero-label">Hello, I'm a</span>
@@ -104,6 +108,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import HiddenMusicPlayer from '@/components/HiddenMusicPlayer.vue'
 
 const router = useRouter()
 const isVisible = ref(false)

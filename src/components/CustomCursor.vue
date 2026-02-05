@@ -14,7 +14,7 @@ const isVisible = ref(false)
 const isMobile = ref(true)
 const isSleeping = ref(false)
 
-// FIX: Store last known cursor position for sleeping state
+// Store last known cursor position for sleeping state
 const lastCursorX = ref(0)
 const lastCursorY = ref(0)
 
@@ -26,7 +26,7 @@ const updateCursor = (e) => {
   cursorX.value = e.clientX
   cursorY.value = e.clientY
   
-  // FIX: Always update last known position while active
+  // Always update last known position while active
   lastCursorX.value = e.clientX
   lastCursorY.value = e.clientY
   
@@ -135,10 +135,13 @@ onUnmounted(() => {
       :style="{ transform: `translate(${cursorX}px, ${cursorY}px)` }"
     ></div>
     
-    <!-- FIX: Sleeping cursor at last known position with Zzz instead of cat -->
+    <!-- Sleeping cursor positioned at actual mouse location -->
     <div v-if="isSleeping"
       class="sleeping-cursor"
-      :style="{ transform: `translate(${lastCursorX}px, ${lastCursorY}px)` }"
+      :style="{ 
+        left: lastCursorX + 'px',
+        top: lastCursorY + 'px'
+      }"
     >
       <div class="sleep-text">Zzz</div>
       <div class="zzz zzz-1">z</div>
@@ -216,10 +219,10 @@ onUnmounted(() => {
   }
 }
 
-// FIX: Sleeping cursor with Zzz text instead of emoji
+// Sleeping cursor positioned at actual mouse location
 .sleeping-cursor {
   position: absolute;
-  margin: -20px 0 0 -20px;
+  transform: translate(-20px, -20px);
   animation: sleepFloat 3s ease-in-out infinite;
 }
 
@@ -257,10 +260,10 @@ onUnmounted(() => {
 
 @keyframes sleepFloat {
   0%, 100% {
-    transform: translateY(0);
+    transform: translate(-20px, -20px) translateY(0);
   }
   50% {
-    transform: translateY(-5px);
+    transform: translate(-20px, -20px) translateY(-5px);
   }
 }
 

@@ -11,7 +11,7 @@
 
             <div class="bsod-body">
               <p class="bsod-message">
-                Just kidding! This is what you get for being too persistent. 😄
+                Just kidding! This is what you get for being too persistent. You clicked the "Contact me faster" button {{ clickCount }} times, which is a bit excessive. Please take a deep breath and try again later.
               </p>
 
               <div class="bsod-info">

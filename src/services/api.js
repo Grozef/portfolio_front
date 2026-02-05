@@ -13,6 +13,7 @@ import router from '@/router'
 // Get backend URL from environment variable
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000'
 const API_VERSION = import.meta.env.VITE_API_VERSION || 'v1'
+// const API_BASE_URL = process.env.VUE_APP_API_URL || 'http://localhost:8000/api'
 
 const api = axios.create({
   baseURL: `${BACKEND_URL}/api/${API_VERSION}`,

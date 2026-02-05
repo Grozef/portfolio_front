@@ -1,6 +1,11 @@
 /**
- * FIX: Router configuration for accessible 404 page
- * File: src/router/index.js
+ * Vue Router Configuration
+ * 
+ * Fixed: Admin-layout child route naming
+ * Added: Fake admin terminal at /admin
+ * Added: Real admin moved to /Moi
+ * 
+ * @module router
  */
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
@@ -41,30 +46,40 @@ const router = createRouter({
       meta: { guest: true }
     },
 
-    // Admin routes
+    // Fake admin terminal (Easter Egg #18)
     {
       path: '/admin',
-      name: 'admin',
-      component: () => import('@/views/AdminDashboard.vue'),
-      meta: { requiresAuth: true }
+      name: 'fake-admin',
+      component: () => import('@/components/FakeAdminTerminal.vue')
     },
+
+    // Real admin routes - moved to /Moi for security
     {
-      path: '/admin/books',
-      name: 'admin-books',
-      component: () => import('@/views/AdminBooksView.vue'),
-      meta: { requiresAuth: true }
-    },
-    {
-      path: '/admin/messages',
-      name: 'admin-messages',
-      component: () => import('@/views/AdminMessagesView.vue'),
-      meta: { requiresAuth: true }
-    },
-    {
-      path: '/admin/carousel',
-      name: 'admin-carousel',
-      component: () => import('@/views/AdminCarouselView.vue'),
-      meta: { requiresAuth: true }
+      path: '/Moi',
+      component: () => import('@/views/AdminLayout.vue'),
+      meta: { requiresAuth: true },
+      children: [
+        {
+          path: '',
+          name: 'admin-dashboard',
+          component: () => import('@/views/AdminDashboard.vue')
+        },
+        {
+          path: 'books',
+          name: 'admin-books',
+          component: () => import('@/views/AdminBooksView.vue')
+        },
+        {
+          path: 'messages',
+          name: 'admin-messages',
+          component: () => import('@/views/AdminMessagesView.vue')
+        },
+        {
+          path: 'carousel',
+          name: 'admin-carousel',
+          component: () => import('@/views/AdminCarouselView.vue')
+        }
+      ]
     },
 
     // Legal pages
@@ -89,30 +104,37 @@ const router = createRouter({
       component: () => import('@/views/TermsView.vue') 
     },
 
-    // FIX: 404 Page - accessible directement ET comme catch-all
+    // 404 Page - accessible directly and as catch-all
     { 
       path: '/404', 
       name: 'not-found', 
       component: () => import('@/views/NotFoundView.vue') 
     },
 
-    // FIX: Catch-all - affiche le composant 404 directement (pas de redirect)
+    // Catch-all for undefined routes
     { 
       path: '/:pathMatch(.*)*',
       name: 'catch-all',
       component: () => import('@/views/NotFoundView.vue')
     }
-  ]
+  ],
+  scrollBehavior(to, from, savedPosition) {
+    if (savedPosition) {
+      return savedPosition
+    } else {
+      return { top: 0 }
+    }
+  }
 })
 
-// Navigation guard avec validation de token
+// Navigation guard with token validation
 router.beforeEach(async (to, from, next) => {
   const token = localStorage.getItem('auth_token')
   const authStore = useAuthStore()
 
   // Redirect authenticated users away from login page
   if (to.meta.guest && token) {
-    return next('/admin')
+    return next('/Moi')
   }
 
   // Protect admin routes

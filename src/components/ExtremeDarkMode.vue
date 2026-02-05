@@ -2,7 +2,7 @@
   <div v-if="isActive" class="extreme-dark-mode">
     <canvas ref="canvasRef" class="flashlight-canvas"></canvas>
     <div class="dark-mode-hint">
-      <span class="hint-text">Press CTRL+Z to exit Extreme Dark Mode</span>
+      <span class="hint-text">Press CTRL+Z to toggle Extreme Dark Mode</span>
     </div>
   </div>
 </template>
@@ -139,13 +139,14 @@ onUnmounted(() => {
 
 .hint-text {
   padding: 0.75rem 1.5rem;
-  background: rgba(201, 162, 39, 0.2);
+  background: rgba(201, 162, 39, 0.8);
   border: 1px solid var(--terminal-accent);
-  color: var(--terminal-accent);
+  color: var(--terminal-bg);
   font-family: var(--font-mono);
   font-size: 0.875rem;
   border-radius: 4px;
   backdrop-filter: blur(10px);
+  font-weight: 600;
 }
 
 @keyframes fadeIn {
@@ -159,7 +160,7 @@ onUnmounted(() => {
 
 @keyframes pulse {
   0%, 100% {
-    opacity: 0.6;
+    opacity: 0.9;
   }
   50% {
     opacity: 1;

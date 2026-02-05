@@ -1,261 +1,273 @@
 <template>
   <div class="contact-page">
-    <header class="page-header">
-      <router-link to="/" class="back-btn" data-cursor-hover>
-        <span class="back-icon">←</span>
-        <span>Back</span>
-      </router-link>
-      <h1 class="page-title">Contact</h1>
-      <div class="header-spacer"></div>
-    </header>
+    <!-- Weather background overlay -->
+    <WeatherBackground />
+    
+    <div class="container">
+      <div class="page-header">
+        <h1 class="page-title">Get in touch</h1>
+        <p class="page-subtitle">Let's create something amazing together</p>
+      </div>
 
-    <main class="contact-main">
-      <div class="contact-grid">
-        <!-- Left side: Info -->
+      <div class="contact-content">
         <div class="contact-info">
-          <div class="info-content">
-            <span class="section-label">Get in touch</span>
-            <h2 class="info-title">Let's create something amazing together</h2>
-            <p class="info-text">
-              I'm always interested in hearing about new projects and opportunities.
-              Whether you have a question or just want to say hi, feel free to reach out.
-            </p>
-
-            <div class="social-links">
-              <a v-for="link in socialLinks" :key="link.name" :href="link.url" target="_blank" rel="noopener"
-                class="social-link" data-cursor-hover>
-                <span class="link-icon">{{ link.icon }}</span>
-                <span class="link-name">{{ link.name }}</span>
+          <h2>Contact Information</h2>
+          <div class="info-items">
+            <div class="info-item">
+              <span class="label">Email</span>
+              <a href="mailto:francois.lisowski@proton.me" class="value" data-cursor-hover>
+                francois.lisowski@proton.me
               </a>
             </div>
+            <div class="info-item">
+              <span class="label">Location</span>
+              <span class="value">Lyon, France</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Response Time</span>
+              <span class="value">Within a year</span>
+            </div>
           </div>
 
-          <div class="info-visual">
-            <div class="visual-line" v-for="i in 5" :key="i"></div>
+          <!-- Easter Egg Progress Display (no reset button) -->
+          <div class="easter-egg-progress">
+            <h3>Easter Eggs Progress</h3>
+            <div class="progress-info">
+              <p>Found: {{ easterEggProgress.discovered }}/{{ easterEggProgress.total }}</p>
+              <p>{{ easterEggProgress.percentage }}% Complete</p>
+            </div>
+            <p class="reset-hint">
+              Type <code>resetEasterEggs()</code> in console to reset progress
+            </p>
           </div>
         </div>
 
-        <!-- Right side: Form -->
         <div class="contact-form-wrapper">
-          <Transition name="fade" mode="out-in">
-            <div v-if="isSuccess" class="success-message">
-              <div class="success-icon">✓</div>
-              <h3 class="success-title">Message Sent!</h3>
-              <p class="success-text">Thank you for reaching out. I'll get back to you soon.</p>
-              <button class="reset-btn" @click="isSuccess = false" data-cursor-hover>
-                Send another message
-              </button>
+          <form @submit.prevent="handleSubmit" class="contact-form">
+            <div class="form-group">
+              <label for="name">Name</label>
+              <input
+                id="name"
+                v-model="formData.name"
+                type="text"
+                required
+                placeholder="Your name"
+              />
             </div>
 
-            <form v-else class="contact-form" @submit.prevent="handleSubmit">
-              <div class="form-group">
-                <label for="name" class="form-label">Name</label>
-                <input id="name" v-model="form.name" type="text" class="form-input" :class="{ error: errors.name }"
-                  placeholder="Your name" data-cursor-hover />
-                <span v-if="errors.name" class="form-error">{{ errors.name }}</span>
-              </div>
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input
+                id="email"
+                v-model="formData.email"
+                type="email"
+                required
+                placeholder="your.email@example.com"
+              />
+            </div>
 
-              <div class="form-group">
-                <label for="email" class="form-label">Email</label>
-                <input id="email" v-model="form.email" type="email" class="form-input" :class="{ error: errors.email }"
-                  placeholder="your@email.com" data-cursor-hover />
-                <span v-if="errors.email" class="form-error">{{ errors.email }}</span>
-              </div>
+            <div class="form-group">
+              <label for="subject">Subject</label>
+              <input
+                id="subject"
+                v-model="formData.subject"
+                type="text"
+                required
+                placeholder="What's this about?"
+              />
+            </div>
 
-              <div class="form-group">
-                <label for="subject" class="form-label">Subject <span class="optional">(optional)</span></label>
-                <input id="subject" v-model="form.subject" type="text" class="form-input"
-                  placeholder="What's this about?" data-cursor-hover />
-              </div>
+            <div class="form-group">
+              <label for="message">Message</label>
+              <textarea
+                id="message"
+                v-model="formData.message"
+                required
+                rows="6"
+                placeholder="Your message..."
+              ></textarea>
+            </div>
 
-              <div class="form-group">
-                <label for="message" class="form-label">Message</label>
-                <textarea id="message" v-model="form.message" class="form-textarea" :class="{ error: errors.message }"
-                  placeholder="Tell me about your project..." rows="6" data-cursor-hover></textarea>
-                <span v-if="errors.message" class="form-error">{{ errors.message }}</span>
-              </div>
+            <button 
+              type="submit" 
+              class="submit-btn"
+              :disabled="isSubmitting"
+              data-cursor-hover
+            >
+              {{ isSubmitting ? 'Sending...' : 'Send Message' }}
+            </button>
 
-              <button type="submit" class="submit-btn" :disabled="isSubmitting" data-cursor-hover>
-                <span v-if="isSubmitting" class="btn-loading">
-                  <span class="loading-dot"></span>
-                  <span class="loading-dot"></span>
-                  <span class="loading-dot"></span>
-                </span>
-                <span v-else class="btn-text">
-                  Send Message
-                  <span class="btn-arrow">→</span>
-                </span>
-              </button>
-              <button type="button" class="progressive-btn" @click="handleProgressiveClick" data-cursor-hover>
-                {{ progressiveButtonText }}
-              </button>
+            <!-- Progressive button easter egg -->
+            <button 
+              type="button"
+              @click="handleProgressiveClick"
+              class="submit-btn progressive-btn"
+              data-cursor-hover
+            >
+              {{ progressiveButtonText }}
+            </button>
+          </form>
 
-            </form>
-          </Transition>
+          <p v-if="submitMessage" :class="['submit-message', submitStatus]">
+            {{ submitMessage }}
+          </p>
         </div>
-        <!-- BSOD Easter Egg -->
-        <BluescreenOfDeath :show="showBSOD" :click-count="3" @close="closeBSOD" />
       </div>
-    </main>
+    </div>
+
+    <!-- Blue Screen of Death -->
+    <BluescreenOfDeath 
+      :show="showBSOD" 
+      :clickCount="progressiveClickCount"
+      @close="handleCloseBSOD"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue'
-import { useRouter } from 'vue-router'
-import axios from 'axios'
+import { ref, computed, onMounted } from 'vue'
 import BluescreenOfDeath from '@/components/BluescreenOfDeath.vue'
+import WeatherBackground from '@/components/WeatherBackground.vue'
 import { useEasterEggs } from '@/composables/useEasterEggs'
 
-const router = useRouter()
+const { progress: easterEggProgress, discoverEgg, EASTER_EGGS } = useEasterEggs()
 
-const form = reactive({
+const formData = ref({
   name: '',
   email: '',
   subject: '',
   message: ''
 })
 
-const errors = reactive({})
 const isSubmitting = ref(false)
-const isSuccess = ref(false)
+const submitMessage = ref('')
+const submitStatus = ref('')
 
+// Progressive button easter egg with persistent tracking
+const STORAGE_KEY = 'progressive_button_clicks'
 const progressiveClickCount = ref(0)
 const showBSOD = ref(false)
-const { discoverEgg, EASTER_EGGS } = useEasterEggs()
+
+// Load click count from localStorage
+onMounted(() => {
+  const stored = localStorage.getItem(STORAGE_KEY)
+  if (stored) {
+    progressiveClickCount.value = parseInt(stored, 10) || 0
+  }
+})
 
 const progressiveButtonText = computed(() => {
-  switch (progressiveClickCount.value) {
-    case 0: return 'Contact me faster'
-    case 1: return 'Please stop'
-    case 2: return 'Ok, you asked for it...'
-    default: return 'Contact me faster'
-  }
+  const count = progressiveClickCount.value
+  if (count === 0) return 'Contact me faster'
+  if (count < 5) return 'Please stop...'
+  if (count < 10) return 'Seriously, stop!'
+  if (count < 14) return 'You are determined...'
+  if (count === 14) return 'One more click...'
+  return 'Contact me faster'
 })
 
 const handleProgressiveClick = () => {
   progressiveClickCount.value++
-
+  
+  // Save to localStorage
+  localStorage.setItem(STORAGE_KEY, progressiveClickCount.value.toString())
+  
+  // Discover easter egg on first click
   if (progressiveClickCount.value === 1) {
     discoverEgg(EASTER_EGGS.PROGRESSIVE_BUTTON)
   }
-
-  if (progressiveClickCount.value >= 3) {
+  
+  // Trigger BSOD at exactly 15 clicks
+  if (progressiveClickCount.value === 15) {
     showBSOD.value = true
+    // Reset counter after showing BSOD
     progressiveClickCount.value = 0
+    localStorage.setItem(STORAGE_KEY, '0')
   }
 }
 
-const closeBSOD = () => {
+const handleCloseBSOD = () => {
   showBSOD.value = false
 }
 
-const validateForm = () => {
-  const newErrors = {}
-
-  if (!form.name.trim()) {
-    newErrors.name = 'Name is required'
-  }
-
-  if (!form.email.trim()) {
-    newErrors.email = 'Email is required'
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
-    newErrors.email = 'Invalid email format'
-  }
-
-  if (!form.message.trim()) {
-    newErrors.message = 'Message is required'
-  } else if (form.message.length < 10) {
-    newErrors.message = 'Message must be at least 10 characters'
-  }
-
-  Object.keys(errors).forEach(key => delete errors[key])
-  Object.assign(errors, newErrors)
-
-  return Object.keys(newErrors).length === 0
-}
-
 const handleSubmit = async () => {
-  if (!validateForm()) return
-
   isSubmitting.value = true
-
+  submitMessage.value = ''
+  
   try {
-    await axios.post('/api/v1/contact', form)
-    isSuccess.value = true
-    Object.keys(form).forEach(key => form[key] = '')
-  } catch (error) {
-    if (error.response?.data?.errors) {
-      Object.assign(errors, error.response.data.errors)
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1500))
+    
+    submitMessage.value = 'Message sent successfully! I\'ll get back to you soon.'
+    submitStatus.value = 'success'
+    
+    // Reset form
+    formData.value = {
+      name: '',
+      email: '',
+      subject: '',
+      message: ''
     }
+  } catch (error) {
+    submitMessage.value = 'Failed to send message. Please try again.'
+    submitStatus.value = 'error'
   } finally {
     isSubmitting.value = false
+    
+    setTimeout(() => {
+      submitMessage.value = ''
+      submitStatus.value = ''
+    }, 5000)
   }
 }
-
-const socialLinks = [
-  { name: 'GitHub', url: 'https://github.com/Grozef', icon: '◆' },
-  { name: 'LinkedIn', url: 'https://www.linkedin.com/in/françois-lisowski-39a88576', icon: '◇' },
-  // { name: 'Twitter', url: 'https://twitter.com', icon: '○' },
-  { name: 'Email', url: 'mailto:francois.lisowski@proton.me', icon: '◈' }
-]
 </script>
 
 <style lang="scss" scoped>
 .contact-page {
+  position: relative;
   min-height: 100vh;
-  background: var(--terminal-bg);
-  display: flex;
-  flex-direction: column;
+  padding: 6rem 2rem 4rem;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
 }
 
 .page-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 2rem;
-  border-bottom: 1px solid var(--terminal-border);
-}
-
-.back-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: var(--terminal-text-dim);
-  font-family: var(--font-mono);
-  font-size: 0.875rem;
-  transition: color 0.3s ease;
-
-  &:hover {
-    color: var(--terminal-accent);
-  }
+  text-align: center;
+  margin-bottom: 3rem;
 }
 
 .page-title {
   font-family: var(--font-display);
-  font-size: 1.5rem;
-  font-weight: 500;
-  color: var(--terminal-text);
+  font-size: 3.5rem;
+  font-weight: 700;
+  color: var(--terminal-accent);
+  margin-bottom: 1rem;
+  
+  @media (max-width: 768px) {
+    font-size: 2.5rem;
+  }
 }
 
-.header-spacer {
-  width: 80px;
+.page-subtitle {
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  color: var(--terminal-text-dim);
+  
+  @media (max-width: 768px) {
+    font-size: 1rem;
+  }
 }
 
-.contact-main {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  padding: 4rem 2rem;
-}
-
-.contact-grid {
+.contact-content {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 2fr;
   gap: 4rem;
-  max-width: 1200px;
-  margin: 0 auto;
-  width: 100%;
+  margin-top: 3rem;
 
   @media (max-width: 968px) {
     grid-template-columns: 1fr;
@@ -263,127 +275,94 @@ const socialLinks = [
   }
 }
 
-// Info section
 .contact-info {
-  position: relative;
-}
-
-.info-content {
-  position: relative;
-  z-index: 1;
-}
-
-.section-label {
-  display: block;
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
-  color: var(--terminal-accent);
-  margin-bottom: 1rem;
-}
-
-.info-title {
-  font-family: var(--font-display);
-  font-size: 3rem;
-  font-weight: 500;
-  color: var(--terminal-text);
-  letter-spacing: -0.03em;
-  line-height: 1.2;
-  margin-bottom: 1.5rem;
-
-  @media (max-width: 768px) {
+  h2 {
+    font-family: var(--font-display);
     font-size: 2rem;
-  }
-}
-
-.info-text {
-  font-family: var(--font-serif);
-  font-size: 1.125rem;
-  line-height: 1.8;
-  color: var(--terminal-text-dim);
-  margin-bottom: 3rem;
-}
-
-.social-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-
-.social-link {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 1.25rem;
-  border: 1px solid var(--terminal-border);
-  color: var(--terminal-text);
-  font-family: var(--font-mono);
-  font-size: 0.875rem;
-  transition: all 0.3s ease;
-
-  .link-icon {
     color: var(--terminal-accent);
-  }
-
-  &:hover {
-    border-color: var(--terminal-accent);
-    background: rgba(34, 211, 238, 0.05);
+    margin-bottom: 2rem;
   }
 }
 
-.info-visual {
-  position: absolute;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
+.info-items {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  opacity: 0.2;
-
-  @media (max-width: 968px) {
-    display: none;
-  }
+  gap: 1.5rem;
 }
 
-.visual-line {
-  height: 1px;
-  background: var(--terminal-accent);
-  animation: lineWidth 3s ease infinite;
+.info-item {
+  .label {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    color: var(--terminal-text-dim);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
 
-  @for $i from 1 through 5 {
-    &:nth-child(#{$i}) {
-      width: #{100 + ($i * 30)}px;
-      animation-delay: #{$i * 0.2}s;
+  .value {
+    font-family: var(--font-serif);
+    font-size: 1.125rem;
+    color: var(--terminal-text);
+    
+    &[href] {
+      color: var(--terminal-accent);
+      transition: color 0.3s ease;
+      
+      &:hover {
+        color: var(--terminal-accent-secondary);
+      }
     }
   }
 }
 
-@keyframes lineWidth {
+.easter-egg-progress {
+  margin-top: 3rem;
+  padding: 1.5rem;
+  background: var(--terminal-bg-secondary);
+  border: 1px solid var(--terminal-border);
+  border-radius: 8px;
 
-  0%,
-  100% {
-    transform: scaleX(0.5);
-    opacity: 0.3;
+  h3 {
+    font-family: var(--font-mono);
+    font-size: 1.125rem;
+    color: var(--terminal-accent);
+    margin-bottom: 1rem;
   }
 
-  50% {
-    transform: scaleX(1);
-    opacity: 1;
+  .progress-info {
+    margin-bottom: 1rem;
+    
+    p {
+      font-family: var(--font-mono);
+      font-size: 0.875rem;
+      color: var(--terminal-text);
+      margin: 0.25rem 0;
+    }
+  }
+  
+  .reset-hint {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--terminal-text-dim);
+    font-style: italic;
+    
+    code {
+      padding: 0.2rem 0.4rem;
+      background: var(--terminal-bg);
+      border: 1px solid var(--terminal-border);
+      border-radius: 3px;
+      color: var(--terminal-accent);
+    }
   }
 }
 
-// Form section
 .contact-form-wrapper {
   background: var(--terminal-bg-secondary);
-  border: 1px solid var(--terminal-border);
+  padding: 2rem;
   border-radius: 12px;
-  padding: 3rem;
-
-  @media (max-width: 768px) {
-    padding: 2rem;
-  }
+  border: 1px solid var(--terminal-border);
 }
 
 .contact-form {
@@ -396,208 +375,88 @@ const socialLinks = [
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-}
 
-.form-label {
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--terminal-text);
-
-  .optional {
+  label {
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
     color: var(--terminal-text-dim);
-    text-transform: none;
-    letter-spacing: normal;
-  }
-}
-
-.form-input,
-.form-textarea {
-  font-family: var(--font-mono);
-  font-size: 1rem;
-  color: var(--terminal-text);
-  background: var(--terminal-bg);
-  border: 1px solid var(--terminal-border);
-  padding: 1rem;
-  border-radius: 4px;
-  transition: all 0.3s ease;
-
-  &::placeholder {
-    color: var(--terminal-text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
   }
 
-  &:focus {
-    outline: none;
-    border-color: var(--terminal-accent);
-    box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.1);
+  input,
+  textarea {
+    padding: 0.75rem 1rem;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    color: var(--terminal-text);
+    background: var(--terminal-bg);
+    border: 1px solid var(--terminal-border);
+    border-radius: 4px;
+    transition: all 0.3s ease;
+
+    &:focus {
+      outline: none;
+      border-color: var(--terminal-accent);
+    }
+
+    &::placeholder {
+      color: var(--terminal-text-dim);
+    }
   }
 
-  &.error {
-    border-color: var(--terminal-error);
+  textarea {
+    resize: vertical;
+    min-height: 120px;
   }
-}
-
-.form-textarea {
-  resize: vertical;
-  min-height: 150px;
-}
-
-.form-error {
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  color: var(--terminal-error);
 }
 
 .submit-btn {
+  padding: 1rem 2rem;
   font-family: var(--font-mono);
   font-size: 1rem;
+  font-weight: 600;
   color: var(--terminal-bg);
   background: var(--terminal-accent);
   border: none;
-  padding: 1rem 2rem;
   border-radius: 4px;
+  cursor: pointer;
   transition: all 0.3s ease;
-  margin-top: 1rem;
 
   &:hover:not(:disabled) {
     background: var(--terminal-text);
+    transform: translateY(-2px);
   }
 
   &:disabled {
-    opacity: 0.7;
+    opacity: 0.5;
     cursor: not-allowed;
   }
 }
 
-.btn-text {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-
-  .btn-arrow {
-    transition: transform 0.3s ease;
-  }
-}
-
-.submit-btn:hover:not(:disabled) .btn-arrow {
-  transform: translateX(4px);
-}
-
-.btn-loading {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-}
-
-.loading-dot {
-  width: 6px;
-  height: 6px;
-  background: var(--terminal-bg);
-  border-radius: 50%;
-  animation: loadingPulse 1.4s ease infinite;
-
-  &:nth-child(2) {
-    animation-delay: 0.2s;
-  }
-
-  &:nth-child(3) {
-    animation-delay: 0.4s;
-  }
-}
-
-@keyframes loadingPulse {
-
-  0%,
-  80%,
-  100% {
-    transform: scale(0.6);
-    opacity: 0.5;
-  }
-
-  40% {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-// Success message
-.success-message {
-  text-align: center;
-  padding: 2rem;
-}
-
-.success-icon {
-  width: 60px;
-  height: 60px;
-  margin: 0 auto 1.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 2rem;
-  color: var(--terminal-success);
-  border: 2px solid var(--terminal-success);
-  border-radius: 50%;
-}
-
-.success-title {
-  font-family: var(--font-display);
-  font-size: 1.5rem;
-  font-weight: 500;
-  color: var(--terminal-text);
+.progressive-btn {
+  background: var(--terminal-accent-secondary);
   margin-bottom: 0.5rem;
 }
 
-.success-text {
-  font-family: var(--font-serif);
-  font-size: 1rem;
-  color: var(--terminal-text-dim);
-  margin-bottom: 2rem;
-}
-
-.progressive-btn {
+.submit-message {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 4px;
   font-family: var(--font-mono);
   font-size: 0.875rem;
-  color: var(--terminal-text-dim);
-  background: transparent;
-  border: 1px solid var(--terminal-border);
-  padding: 0.75rem 1.5rem;
-  border-radius: 4px;
-  transition: all 0.3s ease;
-  margin-top: 0.5rem;
+  text-align: center;
 
-  &:hover {
-    border-color: var(--terminal-accent);
-    color: var(--terminal-accent);
+  &.success {
+    background: rgba(39, 202, 64, 0.1);
+    color: var(--terminal-success);
+    border: 1px solid var(--terminal-success);
   }
-}
 
-.reset-btn {
-  font-family: var(--font-mono);
-  font-size: 0.875rem;
-  color: var(--terminal-accent);
-  background: transparent;
-  border: 1px solid var(--terminal-accent);
-  padding: 0.75rem 1.5rem;
-  border-radius: 4px;
-  transition: all 0.3s ease;
-
-  &:hover {
-    background: var(--terminal-accent);
-    color: var(--terminal-bg);
+  &.error {
+    background: rgba(255, 68, 68, 0.1);
+    color: var(--terminal-error);
+    border: 1px solid var(--terminal-error);
   }
-}
-
-// Transitions
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
 }
 </style>

@@ -1,0 +1,112 @@
+/* Sword Cursor Easter Egg Styles */
+
+/* Hide default cursor when sword cursor is active */
+body.sword-cursor-active,
+body.sword-cursor-active * {
+  cursor: none !important;
+}
+
+/* Sword cursor container */
+.sword-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 40px;
+  height: 40px;
+  pointer-events: none;
+  z-index: 10001;
+  transform: translate(-50%, -50%) rotate(45deg);
+  transition: transform 0.1s ease;
+}
+
+/* Sword sprite using CSS (simple sword shape) */
+.sword-cursor::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 30px;
+  background: linear-gradient(to bottom, #c9a227 0%, #8b7520 50%, #4a3f15 100%);
+  border-radius: 2px;
+}
+
+/* Sword blade */
+.sword-cursor::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 3px solid transparent;
+  border-right: 3px solid transparent;
+  border-bottom: 10px solid #e8e6e3;
+  filter: drop-shadow(0 0 3px rgba(201, 162, 39, 0.5));
+}
+
+/* Sword handle */
+.sword-handle {
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 12px;
+  height: 8px;
+  background: #8b7520;
+  border-radius: 2px;
+}
+
+/* Sword pommel */
+.sword-pommel {
+  position: absolute;
+  bottom: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 6px;
+  background: #c9a227;
+  border-radius: 50%;
+}
+
+/* Sword glow effect on click */
+body.sword-cursor-active.clicking .sword-cursor {
+  transform: translate(-50%, -50%) rotate(45deg) scale(1.2);
+  filter: drop-shadow(0 0 10px rgba(201, 162, 39, 0.8));
+}
+
+/* Sword attack animation */
+@keyframes sword-slash {
+  0% {
+    transform: translate(-50%, -50%) rotate(45deg);
+  }
+  50% {
+    transform: translate(-50%, -50%) rotate(135deg);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(45deg);
+  }
+}
+
+body.sword-cursor-active.attacking .sword-cursor {
+  animation: sword-slash 0.3s ease;
+}
+
+/* Transition effects */
+.sword-cursor {
+  opacity: 0;
+  animation: swordFadeIn 0.3s ease forwards;
+}
+
+@keyframes swordFadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(45deg) scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(45deg) scale(1);
+  }
+}

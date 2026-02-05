@@ -84,6 +84,11 @@
       </blockquote>
     </section>
 
+    <div class="sword-trigger-section">
+  <p class="citation">"The sword chooses the warrior..."</p>
+  <SwordTrigger />
+</div>
+
     <!-- Modal -->
     <ProjectModal :project="selectedProject" :is-open="isModalOpen" @close="handleCloseModal" />
   </div>
@@ -94,6 +99,7 @@ import { ref, onMounted, computed, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useGitHubStore } from '@/stores/github'
 import ProjectModal from '@/components/ProjectModal.vue'
+import SwordTrigger from '@/components/SwordTrigger.vue'
 
 const router = useRouter()
 const githubStore = useGitHubStore()

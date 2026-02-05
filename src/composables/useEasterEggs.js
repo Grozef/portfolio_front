@@ -1,7 +1,8 @@
-// FIX: Complete Easter egg tracking with ALL eggs including Konami code
 import { ref, computed, watch } from 'vue'
+import api from '@/services/api'
 
-// FIX: Complete list with Konami code and Master egg
+// Complete list of all easter eggs (20 total: 19 regular + 1 master)
+// The count shown to users is 19 (excluding master egg from the hunt)
 const EASTER_EGGS = {
   VIM_QUIT: 'vim_quit',
   ASCII_ART: 'ascii_art',
@@ -12,11 +13,20 @@ const EASTER_EGGS = {
   HUMANS_TXT: 'humans_txt',
   FOUND_404: 'found_404',
   ENHANCED_WHOAMI: 'enhanced_whoami',
-  KONAMI_CODE: 'konami_code',           // FIX: Added Konami code
-  MASTER_EGG: 'master_egg'              // FIX: Added Master egg
+  KONAMI_CODE: 'konami_code',
+  SWORD_CURSOR: 'sword_cursor',
+  EYE_TRACKING: 'eye_tracking',
+  SOUND_EFFECTS: 'sound_effects',
+  MUSIC_PLAYER: 'music_player',
+  WEATHER_BACKGROUND: 'weather_background',
+  ADBLOCK_DETECTOR: 'adblock_detector',
+  EXIF_MESSAGE: 'exif_message',
+  FAKE_ADMIN: 'fake_admin',
+  CUSTOM_HEADER: 'custom_header',
+  MASTER_EGG: 'master_egg'
 }
 
-// FIX: Complete human-readable names
+// Human-readable names
 const EASTER_EGG_NAMES = {
   vim_quit: 'Vim Command',
   ascii_art: 'ASCII Art',
@@ -27,44 +37,114 @@ const EASTER_EGG_NAMES = {
   humans_txt: 'humans.txt',
   found_404: '404 Game',
   enhanced_whoami: 'whoami Command',
-  konami_code: 'Konami Code',           // FIX: Added
-  master_egg: 'Master Achievement'      // FIX: Added
+  konami_code: 'Konami Code',
+  sword_cursor: 'Sword Cursor',
+  eye_tracking: 'Eye Tracking',
+  sound_effects: '8-bit Sounds',
+  music_player: 'Hidden Player',
+  weather_background: 'Weather Magic',
+  adblock_detector: 'AdBlock Message',
+  exif_message: 'EXIF Secret',
+  fake_admin: 'Fake Terminal',
+  custom_header: 'HTTP Header',
+  master_egg: 'Master Achievement'
 }
 
 const STORAGE_KEY = 'portfolio_easter_eggs'
+const SESSION_KEY = 'portfolio_session_id'
 
-const loadDiscoveredEggs = () => {
+// Generate or retrieve session ID
+const getSessionId = () => {
+  let sessionId = localStorage.getItem(SESSION_KEY)
+  if (!sessionId) {
+    sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)
+    localStorage.setItem(SESSION_KEY, sessionId)
+  }
+  return sessionId
+}
+
+// Global state
+const discoveredEggs = ref([])
+const masterEggTriggered = ref(false)
+const isLoading = ref(false)
+const isSyncing = ref(false)
+
+// Load from backend
+const loadFromBackend = async () => {
   try {
-    const stored = localStorage.getItem(STORAGE_KEY)
-    return stored ? JSON.parse(stored) : []
+    isLoading.value = true
+    const sessionId = getSessionId()
+    
+    const response = await api.get('/easter-eggs/progress', {
+      headers: {
+        'X-Session-Id': sessionId
+      }
+    })
+    
+    if (response.data.success) {
+      discoveredEggs.value = response.data.data || []
+      
+      // Check if master egg is discovered
+      if (discoveredEggs.value.includes('master_egg')) {
+        masterEggTriggered.value = true
+      }
+      
+      // Also sync with localStorage for offline access
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(discoveredEggs.value))
+    }
   } catch (error) {
-    console.error('Error loading easter eggs:', error)
-    return []
+    console.error('Failed to load easter eggs from backend:', error)
+    
+    // Fallback to localStorage
+    const stored = localStorage.getItem(STORAGE_KEY)
+    if (stored) {
+      try {
+        discoveredEggs.value = JSON.parse(stored)
+      } catch (e) {
+        discoveredEggs.value = []
+      }
+    }
+  } finally {
+    isLoading.value = false
   }
 }
 
-// Global state for discovered easter eggs
-const discoveredEggs = ref(loadDiscoveredEggs())
-const masterEggTriggered = ref(localStorage.getItem('master_egg_triggered') === 'true')
+// Save to backend
+const saveToBackend = async (eggId, metadata = {}) => {
+  try {
+    const sessionId = getSessionId()
+    
+    const response = await api.post('/easter-eggs/discover', {
+      egg_id: eggId,
+      metadata: metadata
+    }, {
+      headers: {
+        'X-Session-Id': sessionId
+      }
+    })
+    
+    return response.data
+  } catch (error) {
+    console.error('Failed to save easter egg to backend:', error)
+    return null
+  }
+}
 
-// FIX: Dynamic console logger function
+// Console logger
 const logEasterEggProgress = () => {
-  // FIX: Total is now 11 (including Konami and Master)
   const totalEggs = Object.values(EASTER_EGGS).length
   const foundCount = discoveredEggs.value.length
   const remaining = totalEggs - foundCount
 
-  // Clear previous output and show updated progress
   console.clear()
   
   console.log('%c╔════════════════════════════════════════════╗', 'color: #c9a227; font-family: monospace;')
   console.log('%c║     EASTER EGGS PROGRESS                   ║', 'color: #c9a227; font-family: monospace; font-weight: bold;')
   console.log('%c╚════════════════════════════════════════════╝', 'color: #c9a227; font-family: monospace;')
   console.log('')
-  console.log(`%cDécouverts: ${foundCount}/${totalEggs}`, 'color: #4a9eff; font-weight: bold; font-size: 14px;')
+  console.log(`%cDiscovered: ${foundCount}/${totalEggs}`, 'color: #4a9eff; font-weight: bold; font-size: 14px;')
   console.log('')
 
-  // Show discovered eggs
   if (foundCount > 0) {
     console.log('%cEaster Eggs Found:', 'color: #27ca40; font-weight: bold;')
     discoveredEggs.value.forEach(eggId => {
@@ -74,7 +154,6 @@ const logEasterEggProgress = () => {
     console.log('')
   }
 
-  // FIX: French countdown for last 3 eggs
   if (remaining > 0) {
     let remainingMessage = ''
     
@@ -96,13 +175,13 @@ const logEasterEggProgress = () => {
   
   console.log('')
   console.log('%cHint: Check /humans.txt for clues!', 'color: #6b6b6b; font-style: italic;')
+  console.log('%cType resetEasterEggs() to start over', 'color: #6b6b6b; font-style: italic;')
 }
 
-// Watch for changes and save to localStorage
+// Watch for changes
 watch(discoveredEggs, (newEggs) => {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(newEggs))
-    // FIX: Update console on every change
     logEasterEggProgress()
   } catch (error) {
     console.error('Error saving easter eggs:', error)
@@ -110,15 +189,23 @@ watch(discoveredEggs, (newEggs) => {
 }, { deep: true })
 
 export function useEasterEggs() {
-  const discoverEgg = (eggId) => {
+  const discoverEgg = async (eggId, metadata = {}) => {
     if (!discoveredEggs.value.includes(eggId)) {
+      isSyncing.value = true
+      
+      // Add to local state immediately
       discoveredEggs.value.push(eggId)
+      
+      // Sync with backend
+      await saveToBackend(eggId, metadata)
       
       const eggName = EASTER_EGG_NAMES[eggId] || eggId
       console.log(`%c🥚 Easter Egg Discovered: ${eggName}`, 'color: #c9a227; font-weight: bold; font-size: 14px;')
       
-      // Check if all eggs are discovered (excluding master egg itself)
+      // Check if all eggs are discovered
       checkMasterEgg()
+      
+      isSyncing.value = false
     }
   }
 
@@ -127,7 +214,6 @@ export function useEasterEggs() {
   }
 
   const allEggsDiscovered = computed(() => {
-    // FIX: Check if all eggs EXCEPT master egg are discovered
     const regularEggs = Object.values(EASTER_EGGS).filter(egg => egg !== 'master_egg')
     const discoveredRegularEggs = discoveredEggs.value.filter(egg => egg !== 'master_egg')
     return discoveredRegularEggs.length >= regularEggs.length
@@ -145,27 +231,50 @@ export function useEasterEggs() {
   const checkMasterEgg = () => {
     if (allEggsDiscovered.value && !masterEggTriggered.value) {
       masterEggTriggered.value = true
-      localStorage.setItem('master_egg_triggered', 'true')
-      // FIX: Also add master egg to discovered list
+      
       if (!discoveredEggs.value.includes('master_egg')) {
         discoveredEggs.value.push('master_egg')
+        saveToBackend('master_egg', { completedAt: new Date().toISOString() })
       }
       return true
     }
     return false
   }
 
-  const resetEggs = () => {
-    discoveredEggs.value = []
-    masterEggTriggered.value = false
-    localStorage.removeItem(STORAGE_KEY)
-    localStorage.removeItem('master_egg_triggered')
-    logEasterEggProgress()
+  const resetEggs = async () => {
+    try {
+      const sessionId = getSessionId()
+      
+      // Reset backend
+      await api.delete('/easter-eggs/reset', {
+        headers: {
+          'X-Session-Id': sessionId
+        }
+      })
+      
+      // Reset local state
+      discoveredEggs.value = []
+      masterEggTriggered.value = false
+      localStorage.removeItem(STORAGE_KEY)
+      
+      logEasterEggProgress()
+      
+      console.log('%c✓ Easter egg progress reset!', 'color: #27ca40; font-weight: bold;')
+    } catch (error) {
+      console.error('Failed to reset easter eggs:', error)
+    }
   }
 
-  // FIX: Log progress on initialization
+  // Initialize on first use
+  if (discoveredEggs.value.length === 0 && !isLoading.value) {
+    loadFromBackend()
+  }
+
+  // Log progress after delay
   setTimeout(() => {
-    logEasterEggProgress()
+    if (!isLoading.value) {
+      logEasterEggProgress()
+    }
   }, 1000)
 
   return {
@@ -174,9 +283,25 @@ export function useEasterEggs() {
     masterEggTriggered: computed(() => masterEggTriggered.value),
     allEggsDiscovered,
     progress,
+    isLoading: computed(() => isLoading.value),
+    isSyncing: computed(() => isSyncing.value),
     discoverEgg,
     isDiscovered,
     resetEggs,
-    logEasterEggProgress // Export for manual refresh
+    logEasterEggProgress,
+    loadFromBackend
+  }
+}
+
+// Register global console command
+if (typeof window !== 'undefined') {
+  window.resetEasterEggs = async () => {
+    const { resetEggs } = useEasterEggs()
+    await resetEggs()
+  }
+  
+  window.showEasterEggs = () => {
+    const { logEasterEggProgress } = useEasterEggs()
+    logEasterEggProgress()
   }
 }
