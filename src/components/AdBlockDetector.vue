@@ -1,13 +1,13 @@
 <template>
   <Transition name="slide-down">
-    <div v-if="adBlockDetected" class="adblock-message">
+    <div v-if="showMessage" class="adblock-message">
       <div class="message-content">
-        <span class="icon">🛡️</span>
+        <span class="icon">🎉</span>
         <p class="message-text">
-          Merci de ne pas bloquer mes pubs... Ah attends, je n'en ai pas. Tu peux rester ! 😄
+          Merci de ne pas utiliser AdBlock ! Bon, je n'ai pas de pubs de toute façon... mais l'intention compte ! 😄
         </p>
         <button @click="dismissMessage" class="dismiss-btn" data-cursor-hover>
-          <span>×</span>
+          <span>Got it!</span>
         </button>
       </div>
     </div>
@@ -20,59 +20,57 @@ import { useEasterEggs } from '@/composables/useEasterEggs'
 
 const { discoverEgg, EASTER_EGGS, isDiscovered } = useEasterEggs()
 
-const adBlockDetected = ref(false)
-const discovered = ref(false)
+const showMessage = ref(false)
+const noAdBlockDetected = ref(false)
 
-// Detect AdBlock by attempting to load a fake ad element
-const detectAdBlock = async () => {
-  // Method 1: Try to fetch a known ad URL
-  try {
-    const adUrl = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js'
-    const response = await fetch(adUrl, {
-      method: 'HEAD',
-      mode: 'no-cors'
-    })
-    
-    // If we get here without error, no adblock (but no-cors makes this tricky)
-  } catch (error) {
-    // Fetch failed, likely adblock
-    adBlockDetected.value = true
+// Detect if AdBlock is NOT present
+const detectNoAdBlock = async () => {
+  // If already discovered, don't show again
+  if (isDiscovered(EASTER_EGGS.ADBLOCK_DETECTOR)) {
+    return
   }
 
-  // Method 2: Create a bait element
+  // Method 1: Create a bait element that AdBlock would block
   const bait = document.createElement('div')
-  bait.className = 'ad ads advertisement pub-banner'
-  bait.style.cssText = 'position: absolute; top: -999px; left: -999px; width: 1px; height: 1px;'
+  bait.className = 'ad ads advertisement pub-banner adsbox ad-placement'
+  bait.style.cssText = 'position: absolute !important; top: -999px !important; left: -999px !important; width: 1px !important; height: 1px !important;'
+  bait.innerHTML = '&nbsp;'
   document.body.appendChild(bait)
 
-  // Check if element is blocked
+  // Check if element is NOT blocked (meaning no adblock)
   setTimeout(() => {
-    const isBlocked = bait.offsetHeight === 0 || 
-                     bait.offsetWidth === 0 || 
-                     window.getComputedStyle(bait).display === 'none'
+    const isNotBlocked = bait.offsetHeight > 0 && 
+                        bait.offsetWidth > 0 && 
+                        window.getComputedStyle(bait).display !== 'none' &&
+                        window.getComputedStyle(bait).visibility !== 'hidden'
     
-    if (isBlocked) {
-      adBlockDetected.value = true
+    if (isNotBlocked) {
+      noAdBlockDetected.value = true
+      showMessage.value = true
     }
     
-    document.body.removeChild(bait)
-    
-    // Discover easter egg if adblock detected
-    if (adBlockDetected.value && !discovered.value && !isDiscovered(EASTER_EGGS.ADBLOCK_DETECTOR)) {
-      discovered.value = true
-      setTimeout(() => {
-        discoverEgg(EASTER_EGGS.ADBLOCK_DETECTOR)
-      }, 1000)
+    try {
+      document.body.removeChild(bait)
+    } catch (e) {
+      // Bait was already removed by adblock
     }
   }, 100)
 }
 
 const dismissMessage = () => {
-  adBlockDetected.value = false
+  showMessage.value = false
+  
+  // Discover easter egg when user dismisses the message
+  if (noAdBlockDetected.value && !isDiscovered(EASTER_EGGS.ADBLOCK_DETECTOR)) {
+    discoverEgg(EASTER_EGGS.ADBLOCK_DETECTOR)
+  }
 }
 
 onMounted(() => {
-  detectAdBlock()
+  // Delay detection to avoid false positives
+  setTimeout(() => {
+    detectNoAdBlock()
+  }, 2000)
 })
 </script>
 
@@ -93,7 +91,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 1rem;
-  padding: 1.25rem 3rem 1.25rem 1.25rem;
+  padding: 1.25rem 1.25rem;
   background: var(--terminal-bg-secondary);
   border: 2px solid var(--terminal-accent);
   border-radius: 8px;
@@ -111,30 +109,31 @@ onMounted(() => {
   color: var(--terminal-text);
   line-height: 1.6;
   margin: 0;
+  flex: 1;
 }
 
 .dismiss-btn {
-  position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
-  width: 2rem;
-  height: 2rem;
-  padding: 0;
-  background: transparent;
-  border: 1px solid var(--terminal-border);
+  padding: 0.5rem 1rem;
+  background: var(--terminal-accent);
+  border: none;
   border-radius: 4px;
-  color: var(--terminal-text-dim);
-  font-size: 1.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  color: var(--terminal-bg);
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
 
   &:hover {
-    border-color: var(--terminal-accent);
-    color: var(--terminal-accent);
-    transform: rotate(90deg);
+    background: var(--terminal-accent-secondary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(34, 211, 238, 0.4);
+  }
+
+  &:active {
+    transform: translateY(0);
   }
 }
 
@@ -153,10 +152,22 @@ onMounted(() => {
   transform: translateX(-50%) translateY(-20px);
 }
 
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
 @media (max-width: 768px) {
   .message-content {
-    padding: 1rem 2.5rem 1rem 1rem;
-    gap: 0.75rem;
+    flex-direction: column;
+    text-align: center;
+    padding: 1rem;
   }
 
   .icon {
@@ -165,6 +176,10 @@ onMounted(() => {
 
   .message-text {
     font-size: 0.85rem;
+  }
+
+  .dismiss-btn {
+    width: 100%;
   }
 }
 </style>

@@ -5,7 +5,7 @@
       class="play-button"
       :class="{ playing: isPlaying }"
       data-cursor-hover
-      title="Play hold music"
+      title="Hidden music player - only visible in dark mode"
     >
       {{ isPlaying ? '⏸' : '▶' }}
     </button>
@@ -23,7 +23,7 @@ import { useEasterEggs } from '@/composables/useEasterEggs'
 const props = defineProps({
   musicSrc: {
     type: String,
-    default: '/audio/hold-music.mp3' // Path to hold music file
+    default: '/audio/hold-music.mp3'
   }
 })
 
@@ -43,7 +43,6 @@ const togglePlay = () => {
     audioRef.value.play()
     isPlaying.value = true
     
-    // Discover easter egg on first play
     if (!discovered.value) {
       discovered.value = true
       discoverEgg(EASTER_EGGS.MUSIC_PLAYER)
@@ -55,47 +54,64 @@ const togglePlay = () => {
 <style lang="scss" scoped>
 .hidden-music-player {
   position: fixed;
-  bottom: 1rem;
-  left: 1rem;
+  bottom: 1.5rem;
+  left: 1.5rem;
   z-index: 100;
 }
 
 .play-button {
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   padding: 0;
   background: transparent;
-  border: 1px solid transparent;
-  border-radius: 3px;
-  color: var(--terminal-text-dim);
-  font-size: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+  color: rgba(255, 255, 255, 0.05);
+  font-size: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  opacity: 0.3;
+  opacity: 0.1;
   transition: all 0.3s ease;
+
+  // HIDDEN by default - almost invisible
+  // Only reveals in dark mode
+  @media (prefers-color-scheme: dark) {
+    background: rgba(201, 162, 39, 0.2);
+    border: 2px solid rgba(201, 162, 39, 0.8);
+    color: #c9a227;
+    opacity: 0.7;
+    box-shadow: 0 0 10px rgba(201, 162, 39, 0.3);
+  }
 
   &:hover {
     opacity: 1;
-    border-color: var(--terminal-accent);
-    color: var(--terminal-accent);
-    transform: scale(1.5);
+    border-color: #c9a227;
+    background: rgba(201, 162, 39, 0.3);
+    transform: scale(1.8);
+    box-shadow: 0 0 20px rgba(201, 162, 39, 0.6);
+    color: #c9a227;
   }
 
   &.playing {
-    opacity: 0.6;
-    color: var(--terminal-accent);
+    opacity: 0.9;
+    background: rgba(201, 162, 39, 0.3);
+    border-color: #c9a227;
+    color: #c9a227;
     animation: pulse 2s ease infinite;
   }
 }
 
 @keyframes pulse {
   0%, 100% {
-    opacity: 0.6;
+    opacity: 0.8;
+    box-shadow: 0 0 10px rgba(201, 162, 39, 0.3);
   }
   50% {
     opacity: 1;
+    box-shadow: 0 0 25px rgba(201, 162, 39, 0.7);
+    transform: scale(1.05);
   }
 }
 </style>

@@ -17,18 +17,19 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useRoute } from 'vue-router'
 import { useSwordCursor } from '@/composables/useSwordCursor'
 import { useEasterEggs } from '@/composables/useEasterEggs'
 
+const route = useRoute()
 const { swordCursorActive, toggleSwordCursor } = useSwordCursor()
 const { discoverEgg, EASTER_EGGS } = useEasterEggs()
 
 const showHint = ref(false)
 
 const handleTrigger = () => {
-  toggleSwordCursor()
+  toggleSwordCursor(route.path)
   
-  // Discover easter egg on first activation
   if (swordCursorActive.value) {
     discoverEgg(EASTER_EGGS.SWORD_CURSOR)
     showHint.value = true

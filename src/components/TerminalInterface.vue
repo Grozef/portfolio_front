@@ -450,12 +450,37 @@ const executeCommand = async (input) => {
       })
       break
 
+    case 'resetegg()':
+      await resetEasterEggsCommand()
+      break
+
     default:
       terminalStore.addToHistory({
         type: 'error',
         content: `Command not found: ${command}. Type 'help' for available commands.`
       })
   }
+}
+
+const resetEasterEggsCommand = async () => {
+  const { resetEggs } = useEasterEggs()
+  
+  terminalStore.addToHistory({
+    type: 'output',
+    content: 'Resetting all easter eggs...'
+  })
+  
+  await resetEggs()
+  
+  terminalStore.addToHistory({
+    type: 'success',
+    content: '✓ All easter egg progress has been reset!'
+  })
+  
+  terminalStore.addToHistory({
+    type: 'output',
+    content: 'Start exploring again to discover all 18 easter eggs!'
+  })
 }
 
 const outputEnhancedWhoami = async () => {

@@ -1,39 +1,68 @@
 /* TEAM */
+
 Developer: François Lisowski
 Site: https://github.com/Grozef
 Location: France
 
 /* THANKS */
+
+After a few years in another field of competence, a special thanks to everyone that made this adventure possible.
+
+All my teachers from the CCI lyon, special thanks to Mr Albert, (i know he doesn't want me to display his name or his age ;),
+Mr Thinkedou, he will recognize himself, and Mr Ouvrier the master of technological survey.
+
+Thanks to all my coworkers from the CCI at HighConnexion. They help me start. Julien too.
+
+I'm not gonna lie, The IT academy is kind of a bullshit school, don't go there. Some teachers are real experts though.
+Thanks to my co-students, a hell of a class. Special thanks to Sofiane.
+
+A very special thanks to my lead dev Alex. I don't know if he's ever gonna read this but i owe him one. A really big one.
+
+Thank you to ALL employees from LAB, i cannot think of anyone who hasn't been nice to me.
+
+And final thanks to my family and friends. I don't often say this out loud but i should.
+
+
+/* TREASURE HUNTERS - EASTER EGGS */
+
 Easter Egg Hunters: Thanks to all the curious explorers who discovered the hidden gems!
-Open Source Community: For amazing tools and inspiration
-Coffee: For making late-night coding sessions possible
+
+Open Source Community: For amazing tools and inspiration. 
+
+Claude helped me a lot too i ain't gonna lie.
 
 /* TECHNOLOGY */
-Frontend: Vue.js 3, Vite
+
+Frontend: JavaScript, Vue.js 3, Vite
 State Management: Pinia
 Styling: SCSS
 Routing: Vue Router
-Backend: Node.js, Express
-Database: PostgreSQL
+Backend: PHP, Laravel
+Database: MySQL
 
 /* EASTER EGGS */
+
 This portfolio contains 11 hidden easter eggs!
 Can you find them all?
 
-1. Vim Command (ESC + :q)
+1. try to escape Vim.
 2. ASCII Art Console Welcome
-3. Fleeing Button
-4. Progressive Contact Button
-5. Extreme Dark Mode (CTRL+Z)
-6. Sleeping Cursor
-7. This File (humans.txt)
-8. Interactive 404 Page
-9. Enhanced whoami
-10. Konami Code (↑ ↑ ↓ ↓ ← → ← → B A)
+3. There is a button that does'nt want to be touched.
+4. There's another one that does't want to be clicked too much.
+5. The dark mode is extreme.
+6. If you wait 30 seconds, you'll see.
+7. This File (humans.txt).
+8. the 404 page is interactive. Some of the links are not what they pretend.
+9. whoami is a classic command
+10. If you're old enough to know what Konami is, you'll understand.
+11. Pretend that you're the admin
+
+
 11. Master Easter Egg (Find all others first!)
 
 /* SITE */
-Last Update: 2024
+
+Last Update: 2026
 Standards: HTML5, CSS3, ES6+
 Components: Vue 3 Composition API
 IDE: VS Code

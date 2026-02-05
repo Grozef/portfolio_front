@@ -1,11 +1,11 @@
 import { ref, computed, watch } from 'vue'
 import api from '@/services/api'
 
-// Complete list of all easter eggs (20 total: 19 regular + 1 master)
-// The count shown to users is 19 (excluding master egg from the hunt)
+// Complete list of all easter eggs (18 total: 17 regular + 1 master)
+// The count shown to users is 17 (excluding master egg from the hunt)
 const EASTER_EGGS = {
   VIM_QUIT: 'vim_quit',
-  ASCII_ART: 'ascii_art',
+  // ASCII_ART: 'ascii_art',
   FLEEING_BUTTON: 'fleeing_button',
   PROGRESSIVE_BUTTON: 'progressive_button',
   EXTREME_DARK_MODE: 'extreme_dark_mode',
@@ -15,14 +15,12 @@ const EASTER_EGGS = {
   ENHANCED_WHOAMI: 'enhanced_whoami',
   KONAMI_CODE: 'konami_code',
   SWORD_CURSOR: 'sword_cursor',
-  EYE_TRACKING: 'eye_tracking',
   SOUND_EFFECTS: 'sound_effects',
   MUSIC_PLAYER: 'music_player',
   WEATHER_BACKGROUND: 'weather_background',
   ADBLOCK_DETECTOR: 'adblock_detector',
-  EXIF_MESSAGE: 'exif_message',
   FAKE_ADMIN: 'fake_admin',
-  CUSTOM_HEADER: 'custom_header',
+  // CUSTOM_HEADER: 'custom_header',
   MASTER_EGG: 'master_egg'
 }
 
@@ -39,12 +37,10 @@ const EASTER_EGG_NAMES = {
   enhanced_whoami: 'whoami Command',
   konami_code: 'Konami Code',
   sword_cursor: 'Sword Cursor',
-  eye_tracking: 'Eye Tracking',
   sound_effects: '8-bit Sounds',
   music_player: 'Hidden Player',
   weather_background: 'Weather Magic',
   adblock_detector: 'AdBlock Message',
-  exif_message: 'EXIF Secret',
   fake_admin: 'Fake Terminal',
   custom_header: 'HTTP Header',
   master_egg: 'Master Achievement'
@@ -130,14 +126,13 @@ const saveToBackend = async (eggId, metadata = {}) => {
   }
 }
 
-// Console logger
+// Console logger - displays progress WITHOUT clearing console data
 const logEasterEggProgress = () => {
   const totalEggs = Object.values(EASTER_EGGS).length
   const foundCount = discoveredEggs.value.length
   const remaining = totalEggs - foundCount
-
-  console.clear()
   
+  console.log('')
   console.log('%c╔════════════════════════════════════════════╗', 'color: #c9a227; font-family: monospace;')
   console.log('%c║     EASTER EGGS PROGRESS                   ║', 'color: #c9a227; font-family: monospace; font-weight: bold;')
   console.log('%c╚════════════════════════════════════════════╝', 'color: #c9a227; font-family: monospace;')
@@ -175,7 +170,8 @@ const logEasterEggProgress = () => {
   
   console.log('')
   console.log('%cHint: Check /humans.txt for clues!', 'color: #6b6b6b; font-style: italic;')
-  console.log('%cType resetEasterEggs() to start over', 'color: #6b6b6b; font-style: italic;')
+  console.log('%cType resetEasterEggs() in console or terminal to start over', 'color: #6b6b6b; font-style: italic;')
+  console.log('')
 }
 
 // Watch for changes

@@ -99,6 +99,8 @@ const initializeTerminal = async () => {
   addLine('╚════════════════════════════════════════╝', 'accent')
   addLine('')
   
+  addLine('Type "exit" or "quit" to leave this terminal', 'dim')
+  
   await new Promise(resolve => setTimeout(resolve, 800))
   
   showInput.value = true
@@ -112,6 +114,21 @@ const initializeTerminal = async () => {
 
 const handleEnter = async () => {
   const input = currentInput.value.trim()
+  
+  // Check for exit command at any stage
+  if (input.toLowerCase() === 'exit' || input.toLowerCase() === 'quit') {
+    addLine(input, '', currentPrompt.value)
+    currentInput.value = ''
+    showInput.value = false
+    
+    await new Promise(resolve => setTimeout(resolve, 500))
+    addLine('Exiting fake admin terminal...', 'success')
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    addLine('Goodbye!', 'success')
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    router.push('/')
+    return
+  }
   
   if (loginStep.value === 0) {
     // Username step
@@ -155,6 +172,7 @@ const handleEnter = async () => {
     } else {
       await new Promise(resolve => setTimeout(resolve, 1000))
       addLine('')
+      addLine('Hint: Type "exit" to leave this terminal', 'dim')
       loginStep.value = 0
       username.value = ''
       currentPrompt.value = 'login: '

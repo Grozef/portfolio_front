@@ -2,19 +2,15 @@
   <div id="app">
     <CustomCursor v-if="!isMobile" />
     <GrainOverlay />
-    <!-- Extreme Dark Mode Overlay -->
     <ExtremeDarkMode />
     
-    <!-- Dark Mode Toggle Button -->
     <DarkModeToggle />
     
-    <!-- Konami Code Animation -->
     <KonamiAnimationGradius 
       :show="showKonami" 
       @close="showKonami = false" 
     />
     
-    <!-- Master Easter Egg Modal -->
     <MasterEasterEgg 
       :show="showMasterEgg" 
       :discovered-eggs="discoveredEggs"
@@ -35,7 +31,6 @@
     
     <FooterComponent />
     
-    <!-- Cookie Banner -->
     <CookieBanner />
   </div>
 </template>
@@ -48,7 +43,6 @@ import GrainOverlay from '@/components/GrainOverlay.vue'
 import FooterComponent from '@/components/FooterComponent.vue'
 import CookieBanner from '@/components/CookieBanner.vue'
 import ExtremeDarkMode from '@/components/ExtremeDarkMode.vue'
-import WeatherBackground from '@/components/WeatherBackground.vue'
 import MasterEasterEgg from '@/components/MasterEasterEgg.vue'
 import DarkModeToggle from '@/components/DarkModeToggle.vue'
 import KonamiAnimationGradius from '@/components/KonamiAnimationGradius.vue'
@@ -56,6 +50,7 @@ import { useVimQuit } from '@/composables/useVimQuit'
 import { useKonamiCode } from '@/composables/useKonamiCode'
 import { useEasterEggs } from '@/composables/useEasterEggs'
 import { useAdBlockDetector } from '@/composables/useAdBlockDetector'
+import { useSwordCursor } from '@/composables/useSwordCursor'
 import SwordCursor from '@/components/SwordCursor.vue'
 import GrandCompletionAnimation from '@/components/GrandCompletionAnimation.vue'
 
@@ -67,16 +62,12 @@ const asciiArtTriggered = ref(false)
 const showGrandCompletion = ref(false)
 const discoveryStartTime = ref(Date.now())
 
-// Total eggs count (19 regular eggs, excluding master egg)
-const totalEggs = 19
+const totalEggs = 17
 
-// Initialize Easter Eggs composables
 const { allEggsDiscovered, discoveredEggs, masterEggTriggered, discoverEgg, EASTER_EGGS } = useEasterEggs()
 
-// Initialize Vim quit easter egg
 useVimQuit()
 
-// Initialize Konami code easter egg
 useKonamiCode(() => {
   showKonami.value = true
   discoverEgg(EASTER_EGGS.KONAMI_CODE)
@@ -84,10 +75,14 @@ useKonamiCode(() => {
   setTimeout(() => { showKonami.value = false }, 5000)
 })
 
-// Initialize AdBlock detector easter egg
 useAdBlockDetector()
 
-// ASCII Art Console Welcome - triggers on homepage visit
+// SWORD CURSOR SCOPE - deactivate when leaving projects page
+const { checkRouteAndDeactivate } = useSwordCursor()
+watch(() => route.path, (newPath) => {
+  checkRouteAndDeactivate(newPath)
+})
+
 const displayASCIIWelcome = () => {
   if (asciiArtTriggered.value) return
   
@@ -120,15 +115,11 @@ const displayASCIIWelcome = () => {
   console.log('%cPro tip: Check out /humans.txt for more info!', 'color: #4a9eff; font-size: 12px;')
   console.log('%cTry the Konami Code: ↑ ↑ ↓ ↓ ← → ← → B A', 'color: #ffa500; font-size: 12px;')
   
-  // Discover ASCII art easter egg
   discoverEgg(EASTER_EGGS.ASCII_ART)
   asciiArtTriggered.value = true
-  
-  // Save to session storage to prevent re-triggering
   sessionStorage.setItem('ascii_art_shown', 'true')
 }
 
-// Watch for route changes to trigger ASCII art on homepage
 watch(() => route.path, (newPath) => {
   if (newPath === '/' || newPath === '/home') {
     const alreadyShown = sessionStorage.getItem('ascii_art_shown')
@@ -138,7 +129,6 @@ watch(() => route.path, (newPath) => {
   }
 }, { immediate: true })
 
-// Watch for all eggs discovered - Single watch block (FIXED)
 watch(allEggsDiscovered, (allDiscovered) => {
   if (allDiscovered && !masterEggTriggered.value) {
     setTimeout(() => {
@@ -149,12 +139,10 @@ watch(allEggsDiscovered, (allDiscovered) => {
 })
 
 onMounted(() => {
-  // Check if mobile
   isMobile.value = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
     navigator.userAgent
   )
   
-  // Trigger ASCII art on initial homepage load
   if (route.path === '/' || route.path === '/home') {
     const alreadyShown = sessionStorage.getItem('ascii_art_shown')
     if (!alreadyShown) {
@@ -166,8 +154,6 @@ onMounted(() => {
 
 <style lang="scss">
 @use '@/assets/main.scss';
-
-/* Import global cursor fix */
 @use '@/assets/global-cursor-fix.css';
 
 #app {

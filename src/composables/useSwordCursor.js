@@ -1,30 +1,41 @@
 import { ref } from 'vue'
 
 const swordCursorActive = ref(false)
+const allowedRoute = ref(null)
 
 export function useSwordCursor() {
-  const activateSwordCursor = () => {
+  const activateSwordCursor = (routePath = null) => {
     swordCursorActive.value = true
+    allowedRoute.value = routePath
     document.body.classList.add('sword-cursor-active')
   }
 
   const deactivateSwordCursor = () => {
     swordCursorActive.value = false
+    allowedRoute.value = null
     document.body.classList.remove('sword-cursor-active')
   }
 
-  const toggleSwordCursor = () => {
+  const toggleSwordCursor = (routePath = null) => {
     if (swordCursorActive.value) {
       deactivateSwordCursor()
     } else {
-      activateSwordCursor()
+      activateSwordCursor(routePath)
+    }
+  }
+
+  const checkRouteAndDeactivate = (currentRoute) => {
+    if (swordCursorActive.value && allowedRoute.value && currentRoute !== allowedRoute.value) {
+      deactivateSwordCursor()
     }
   }
 
   return {
     swordCursorActive,
+    allowedRoute,
     activateSwordCursor,
     deactivateSwordCursor,
-    toggleSwordCursor
+    toggleSwordCursor,
+    checkRouteAndDeactivate
   }
 }

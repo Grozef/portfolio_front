@@ -46,8 +46,8 @@
         </div>
       </div>
 
-            <EyeTrackingPortrait />
-            
+            <!-- <EyeTrackingPortrait /> -->
+
       <div class="stats-bar" v-if="stats">
         <div class="stat-item"><span class="stat-value">{{ stats.read }}</span><span class="stat-label">Read</span>
         </div>
@@ -221,7 +221,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useCarouselStore } from '@/stores/carousel'
 import { BACKEND_URL } from '@/services/api'
 import FleeingButton from '@/components/FleeingButton.vue'
-import EyeTrackingPortrait from '@/components/EyeTrackingPortrait.vue'
+// import EyeTrackingPortrait from '@/components/EyeTrackingPortrait.vue'
 
 const router = useRouter()
 const booksStore = useBooksStore()
@@ -816,6 +816,7 @@ onUnmounted(() => {
     line-height: 1.3;
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
 

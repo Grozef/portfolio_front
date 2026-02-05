@@ -84,10 +84,10 @@
       </blockquote>
     </section>
 
-    <div class="sword-trigger-section">
-  <p class="citation">"The sword chooses the warrior..."</p>
-  <SwordTrigger />
-</div>
+    <div class="quote-section">
+      <p class="citation">"The sword chooses the warrior..."</p>
+      <SwordTrigger />
+    </div>
 
     <!-- Modal -->
     <ProjectModal :project="selectedProject" :is-open="isModalOpen" @close="handleCloseModal" />
@@ -360,6 +360,7 @@ onMounted(async () => {
   margin-bottom: 1.5rem;
   display: -webkit-box;
   -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }

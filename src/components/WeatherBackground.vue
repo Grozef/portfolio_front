@@ -1,5 +1,6 @@
 <template>
   <div class="weather-background">
+    <div class="weather-overlay" :class="`weather-${weatherCondition}`"></div>
     <canvas ref="canvasRef" class="weather-canvas"></canvas>
     <div v-if="weatherLoaded && weatherData" class="weather-info">
       <span class="weather-icon">{{ weatherIcon }}</span>
@@ -19,15 +20,21 @@ const canvasRef = ref(null)
 const weatherLoaded = ref(false)
 const weatherData = ref(null)
 const weatherIcon = ref('☀️')
+const weatherCondition = ref('clear')
 
 let animationFrameId = null
 let particles = []
 
-// Weather API configuration 
-const WEATHER_API_KEY = '9a971ce1dc8fe614aa09980420e4c0a6' 
+const WEATHER_API_KEY = '9a971ce1dc8fe614aa09980420e4c0a6'
 const WEATHER_API_URL = 'https://api.openweathermap.org/data/2.5/weather'
 
-// Particle class for weather effects
+// Fallback location: Paris, France
+const FALLBACK_LOCATION = {
+  lat: 48.8566,
+  lon: 2.3522,
+  city: 'Paris'
+}
+
 class Particle {
   constructor(canvas, type = 'rain') {
     this.canvas = canvas
@@ -80,7 +87,6 @@ class Particle {
   }
 }
 
-// Get user location
 const getUserLocation = () => {
   return new Promise((resolve, reject) => {
     if (!navigator.geolocation) {
@@ -97,120 +103,110 @@ const getUserLocation = () => {
       },
       (error) => {
         reject(error)
-      }
+      },
+      { timeout: 10000 }
     )
   })
 }
 
-// Fetch weather data
-const fetchWeather = async (lat, lon) => {
+const fetchWeather = async (lat, lon, city = null) => {
   try {
     const response = await fetch(
       `${WEATHER_API_URL}?lat=${lat}&lon=${lon}&appid=${WEATHER_API_KEY}&units=metric`
     )
     
-    if (!response.ok) {
-      throw new Error('Weather API request failed')
-    }
-
+    if (!response.ok) throw new Error('Weather fetch failed')
+    
     const data = await response.json()
+    
+    const condition = data.weather[0].main.toLowerCase()
+    let icon = '☀️'
+    
+    if (condition.includes('rain')) icon = '🌧️'
+    else if (condition.includes('snow')) icon = '❄️'
+    else if (condition.includes('cloud')) icon = '☁️'
+    else if (condition.includes('clear')) icon = '☀️'
+    else if (condition.includes('thunder')) icon = '⛈️'
+    
+    weatherIcon.value = icon
+    weatherCondition.value = condition.includes('rain') ? 'rain' : 
+                            condition.includes('snow') ? 'snow' : 'clear'
     
     return {
       temp: Math.round(data.main.temp),
-      city: data.name,
-      condition: data.weather[0].main.toLowerCase(),
-      description: data.weather[0].description
+      city: city || data.name,
+      condition: condition
     }
   } catch (error) {
-    console.error('Failed to fetch weather:', error)
+    console.error('Weather API error:', error)
     return null
   }
 }
 
-// Initialize weather effects
+const resizeCanvas = () => {
+  const canvas = canvasRef.value
+  if (canvas) {
+    canvas.width = window.innerWidth
+    canvas.height = window.innerHeight
+  }
+}
+
 const initWeatherEffects = (condition) => {
   const canvas = canvasRef.value
   if (!canvas) return
-
+  
+  const ctx = canvas.getContext('2d')
   particles = []
-  let particleCount = 0
+  
   let particleType = 'rain'
-
-  switch (condition) {
-    case 'rain':
-    case 'drizzle':
-    case 'thunderstorm':
-      particleCount = 200
-      particleType = 'rain'
-      weatherIcon.value = '🌧️'
-      break
-    case 'snow':
-      particleCount = 150
-      particleType = 'snow'
-      weatherIcon.value = '❄️'
-      break
-    case 'clouds':
-      particleCount = 0
-      weatherIcon.value = '☁️'
-      break
-    case 'clear':
-      particleCount = 0
-      weatherIcon.value = '☀️'
-      break
-    default:
-      particleCount = 0
-      weatherIcon.value = '🌤️'
+  let particleCount = 100
+  
+  if (condition.includes('rain')) {
+    particleType = 'rain'
+    particleCount = 150
+  } else if (condition.includes('snow')) {
+    particleType = 'snow'
+    particleCount = 100
+  } else {
+    return
   }
-
+  
   for (let i = 0; i < particleCount; i++) {
     particles.push(new Particle(canvas, particleType))
   }
-
+  
+  const animate = () => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+    
+    particles.forEach(particle => {
+      particle.update()
+      particle.draw(ctx)
+    })
+    
+    animationFrameId = requestAnimationFrame(animate)
+  }
+  
   animate()
 }
 
-// Animation loop
-const animate = () => {
-  const canvas = canvasRef.value
-  if (!canvas) return
-
-  const ctx = canvas.getContext('2d')
-  ctx.clearRect(0, 0, canvas.width, canvas.height)
-
-  particles.forEach(particle => {
-    particle.update()
-    particle.draw(ctx)
-  })
-
-  animationFrameId = requestAnimationFrame(animate)
-}
-
-// Resize canvas
-const resizeCanvas = () => {
-  const canvas = canvasRef.value
-  if (!canvas) return
-
-  canvas.width = window.innerWidth
-  canvas.height = window.innerHeight
-}
-
-// Initialize weather system
 const initWeather = async () => {
   try {
-    // Get user location
-    const location = await getUserLocation()
+    let location
+    try {
+      location = await getUserLocation()
+    } catch (geoError) {
+      console.warn('Geolocation denied or unavailable, using fallback location:', geoError.message)
+      location = FALLBACK_LOCATION
+    }
     
-    // Fetch weather data
-    const weather = await fetchWeather(location.lat, location.lon)
+    const weather = await fetchWeather(location.lat, location.lon, location.city)
     
     if (weather) {
       weatherData.value = weather
       weatherLoaded.value = true
       
-      // Initialize weather effects
       initWeatherEffects(weather.condition)
       
-      // Discover easter egg if not already discovered
       if (!isDiscovered(EASTER_EGGS.WEATHER_BACKGROUND)) {
         setTimeout(() => {
           discoverEgg(EASTER_EGGS.WEATHER_BACKGROUND, {
@@ -224,7 +220,6 @@ const initWeather = async () => {
   } catch (error) {
     console.error('Weather initialization failed:', error)
     
-    // Fallback: use default sunny weather
     weatherData.value = {
       temp: 20,
       city: 'Unknown',
@@ -232,13 +227,13 @@ const initWeather = async () => {
     }
     weatherLoaded.value = true
     weatherIcon.value = '☀️'
+    weatherCondition.value = 'clear'
   }
 }
 
 onMounted(() => {
   resizeCanvas()
   window.addEventListener('resize', resizeCanvas)
-  
   initWeather()
 })
 
@@ -252,13 +247,40 @@ onUnmounted(() => {
 
 <style lang="scss" scoped>
 .weather-background {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   pointer-events: none;
-  z-index: 0;
+  z-index: -1;
+}
+
+.weather-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transition: background 1s ease;
+  
+  &.weather-rain {
+    background: linear-gradient(180deg, 
+      rgba(70, 85, 110, 0.3) 0%, 
+      rgba(40, 50, 70, 0.4) 100%);
+  }
+  
+  &.weather-snow {
+    background: linear-gradient(180deg, 
+      rgba(200, 210, 220, 0.2) 0%, 
+      rgba(180, 190, 200, 0.3) 100%);
+  }
+  
+  &.weather-clear {
+    background: linear-gradient(180deg, 
+      rgba(30, 50, 90, 0.1) 0%, 
+      rgba(20, 30, 50, 0.15) 100%);
+  }
 }
 
 .weather-canvas {
@@ -267,7 +289,7 @@ onUnmounted(() => {
   left: 0;
   width: 100%;
   height: 100%;
-  opacity: 0.3;
+  opacity: 0.4;
 }
 
 .weather-info {
@@ -278,7 +300,7 @@ onUnmounted(() => {
   align-items: center;
   gap: 0.75rem;
   padding: 0.75rem 1.25rem;
-  background: rgba(17, 17, 19, 0.8);
+  background: rgba(17, 17, 19, 0.9);
   border: 1px solid var(--terminal-border);
   border-radius: 8px;
   backdrop-filter: blur(10px);
@@ -286,6 +308,7 @@ onUnmounted(() => {
   font-size: 0.875rem;
   color: var(--terminal-text);
   animation: fadeIn 0.5s ease;
+  pointer-events: auto;
   
   @media (max-width: 768px) {
     top: 5rem;
