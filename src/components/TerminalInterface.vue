@@ -306,6 +306,7 @@ const { discoverEgg, EASTER_EGGS } = useEasterEggs()
 const handleSocialLinkClick = (link, event) => {
   if (link.name === 'X') {
     event.preventDefault()
+    discoverEgg(EASTER_EGGS.RICKROLL)
     console.log('%c Rick Roll from Terminal! ', 'color: #c9a227; font-size: 16px; font-weight: bold;')
     window.open(link.url, '_blank')
   }

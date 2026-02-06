@@ -93,8 +93,8 @@ const initializeTerminal = async () => {
   
   addLine('')
   addLine('╔════════════════════════════════════════╗', 'accent')
-  addLine('║   PORTFOLIO ADMINISTRATION SYSTEM      ║', 'accent')
-  addLine('║        Unauthorized Access             ║', 'accent')
+  addLine('║    PORTFOLIO ADMINISTRATION SYSTEM     ║', 'accent')
+  addLine('║          Unauthorized Access           ║', 'accent')
   addLine('║           Will Be Monitored            ║', 'accent')
   addLine('╚════════════════════════════════════════╝', 'accent')
   addLine('')
@@ -185,7 +185,8 @@ const handleEnter = async () => {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
+  await nextTick()
   initializeTerminal()
 })
 </script>
@@ -266,6 +267,9 @@ onMounted(() => {
 }
 
 .terminal-body {
+  white-space: pre; 
+  font-family: 'Courier New', monospace;
+
   padding: 1.5rem;
   height: 500px;
   max-height: 70vh;
