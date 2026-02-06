@@ -1,7 +1,10 @@
 <template>
   <div class="contact-page">
     <!-- Weather background overlay -->
-    <WeatherBackground />
+    <!-- Fixed weather header -->
+    <header class="fixed-weather-header">
+      <WeatherBackground />
+    </header>
     
     <div class="container">
       <div class="page-header">
@@ -282,6 +285,14 @@ const handleSubmit = async () => {
   max-width: 1200px;
   margin: 0 auto;
   position: relative;
+.fixed-weather-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 999;
+  pointer-events: none;
+}
   z-index: 1;
 }
 

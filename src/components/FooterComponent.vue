@@ -94,7 +94,7 @@
             <div class="footer-bottom">
                 <p class="copyright">
                     © {{ currentYear }} - All rights reserved -
-                    <span class="eightbit-text" @mouseenter="playHoverSound" data-cursor-hover>Built with 8-bit</span>
+                    <span class="eightbit-text" @mouseenter="playHoverSound" @click="toggleMusic" data-cursor-hover>Built with 8-bit</span>
                 </p>
                 <p class="tagline">
                     Built with Vue.js & Laravel
@@ -117,7 +117,7 @@ const handleHumansTxtClick = () => {
 
 const currentYear = computed(() => new Date().getFullYear())
 
-const { playHoverSound } = use8BitSounds()
+const { playHoverSound, toggleMusic } = use8BitSounds()
 
 </script>
 

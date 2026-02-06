@@ -19,8 +19,9 @@
     
     const menuItems = [
       { path: '/Moi', icon: '◆', label: 'Dashboard', exact: true },
-      { path: '/books', icon: '◈', label: 'Books' },
-      { path: '/messages', icon: '◇', label: 'Messages' },
+      { path: '/Moi/books', icon: '◈', label: 'Books' },
+      { path: '/Moi/messages', icon: '◇', label: 'Messages' },
+      { path: '/Moi/carousel', icon: '○', label: 'Carousel' },
     ]
     
     const isActive = (item) => {

@@ -5,9 +5,11 @@ const allowedRoute = ref(null)
 
 export function useSwordCursor() {
   const activateSwordCursor = (routePath = null) => {
+    console.log('🗡️ Activating sword cursor')
     swordCursorActive.value = true
     allowedRoute.value = routePath
     document.body.classList.add('sword-cursor-active')
+    console.log('✓ Sword active:', swordCursorActive.value)
   }
 
   const deactivateSwordCursor = () => {

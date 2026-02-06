@@ -33,7 +33,7 @@
           <div class="achievement-badge">
             <div class="badge-glow"></div>
             <div class="badge-content">
-              <span class="badge-icon">🥚</span>
+              <span class="badge-icon"></span>
               <span class="badge-text">MASTER EGG HUNTER</span>
             </div>
           </div>

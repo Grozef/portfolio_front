@@ -70,7 +70,7 @@ useVimQuit()
 useKonamiCode(() => {
   showKonami.value = true
   discoverEgg(EASTER_EGGS.KONAMI_CODE)
-  console.log('%c🎮 KONAMI CODE ACTIVATED!', 'color: #c9a227; font-size: 20px; font-weight: bold;')
+  console.log('%c KONAMI CODE ACTIVATED!', 'color: #c9a227; font-size: 20px; font-weight: bold;')
   setTimeout(() => { showKonami.value = false }, 5000)
 })
 
@@ -140,12 +140,14 @@ watch(() => route.path, (newPath) => {
 // Watch for all eggs discovered - trigger globally
 watch(allEggsDiscovered, (allDiscovered) => {
   if (allDiscovered && !masterEggTriggered.value) {
+    console.log('%c ALL EASTER EGGS DISCOVERED! Triggering Master Egg...', 'color: #c9a227; font-weight: bold; font-size: 16px;')
+    masterEggTriggered.value = true
     setTimeout(() => {
       showGrandCompletion.value = true
       showMasterEgg.value = true
     }, 500)
   }
-})
+}, { immediate: true })
 
 onMounted(() => {
   isMobile.value = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(

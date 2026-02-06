@@ -2,7 +2,7 @@
   <div class="weather-background">
     <div class="weather-overlay" :class="`weather-${weatherCondition}`"></div>
     <canvas ref="canvasRef" class="weather-canvas"></canvas>
-    <div v-if="weatherLoaded && weatherData" class="weather-info">
+    <div v-if="weatherLoaded && weatherData" class="weather-info" :class="`weather-info-${weatherCondition}`">
       <span class="weather-icon">{{ weatherIcon }}</span>
       <span class="weather-temp">{{ weatherData.temp }}°C</span>
       <span class="weather-city">{{ weatherData.city }}</span>
@@ -335,6 +335,41 @@ onUnmounted(() => {
   color: var(--terminal-text-dim);
 }
 
+
+/* Weather-specific widget backgrounds */
+.weather-info.weather-info-rain {
+  background: linear-gradient(135deg, rgba(70, 85, 110, 0.95), rgba(40, 50, 70, 0.95));
+  border-color: rgba(74, 158, 255, 0.5);
+  box-shadow: 0 4px 20px rgba(74, 158, 255, 0.2);
+}
+
+.weather-info.weather-info-snow {
+  background: linear-gradient(135deg, rgba(200, 210, 220, 0.95), rgba(180, 190, 200, 0.95));
+  border-color: rgba(255, 255, 255, 0.5);
+  color: #1a1a1a;
+  box-shadow: 0 4px 20px rgba(255, 255, 255, 0.2);
+}
+
+.weather-info.weather-info-snow .weather-temp {
+  color: #4a9eff;
+}
+
+.weather-info.weather-info-snow .weather-city {
+  color: #666;
+}
+
+.weather-info.weather-info-clear {
+  background: linear-gradient(135deg, rgba(74, 158, 255, 0.9), rgba(30, 50, 90, 0.9));
+  border-color: rgba(201, 162, 39, 0.5);
+  box-shadow: 0 4px 20px rgba(201, 162, 39, 0.2);
+}
+
+.weather-info.weather-info-clouds,
+.weather-info.weather-info-cloudy {
+  background: linear-gradient(135deg, rgba(100, 110, 120, 0.95), rgba(70, 80, 90, 0.95));
+  border-color: rgba(150, 150, 150, 0.5);
+  box-shadow: 0 4px 20px rgba(100, 100, 100, 0.2);
+}
 @keyframes fadeIn {
   from {
     opacity: 0;

@@ -84,11 +84,17 @@ if (discoveredEggs.value.includes('master_egg')) {
 }
 
 // Console logger - displays progress WITHOUT clearing console data
-const logEasterEggProgress = () => {
+// Session flag to prevent console spam
+const progressLogged = ref(false)
+
+const logEasterEggProgress = (force = false) => {
+  // Only log once per session unless forced
+  if (progressLogged.value && !force) return
+  progressLogged.value = true
+  
   const totalEggs = Object.values(EASTER_EGGS).length
   const foundCount = discoveredEggs.value.length
   const remaining = totalEggs - foundCount
-  
   console.log('')
   console.log('%c╔════════════════════════════════════════════╗', 'color: #c9a227; font-family: monospace;')
   console.log('%c║     EASTER EGGS PROGRESS                   ║', 'color: #c9a227; font-family: monospace; font-weight: bold;')
@@ -122,7 +128,7 @@ const logEasterEggProgress = () => {
     console.log(`%c${remainingMessage}`, 'color: #ffa500; font-weight: bold; font-size: 14px;')
     console.log('%cKeep exploring!', 'color: #ffa500;')
   } else {
-    console.log('%c🎉 ALL EASTER EGGS FOUND! 🎉', 'color: #27ca40; font-weight: bold; font-size: 16px;')
+    console.log('%c ALL EASTER EGGS FOUND! ', 'color: #27ca40; font-weight: bold; font-size: 16px;')
   }
   
   console.log('')
@@ -135,7 +141,6 @@ const logEasterEggProgress = () => {
 watch(discoveredEggs, (newEggs) => {
   try {
     saveToCookies(newEggs)
-    logEasterEggProgress()
   } catch (error) {
     console.error('Error saving easter eggs:', error)
   }
@@ -147,8 +152,11 @@ export function useEasterEggs() {
       discoveredEggs.value.push(eggId)
       
       const eggName = EASTER_EGG_NAMES[eggId] || eggId
-      console.log(`%c🥚 Easter Egg Discovered: ${eggName}`, 'color: #c9a227; font-weight: bold; font-size: 14px;')
+      console.log(`%c Easter Egg Discovered: ${eggName}`, 'color: #c9a227; font-weight: bold; font-size: 14px;')
       
+      
+      // Show progress after discovery
+      logEasterEggProgress(true)
       // Check if all eggs are discovered
       checkMasterEgg()
     }

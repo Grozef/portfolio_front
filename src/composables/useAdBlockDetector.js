@@ -39,7 +39,7 @@ export function useAdBlockDetector() {
         discoverEgg(EASTER_EGGS.ADBLOCK_DETECTOR)
         
         console.log('%c🚫 AdBlock Detected!', 'color: #ff4444; font-size: 16px; font-weight: bold;')
-        console.log('%c🥚 Easter Egg Discovered: AdBlock Detector', 'color: #c9a227; font-size: 14px; font-weight: bold;')
+        console.log('%c Easter Egg Discovered: AdBlock Detector', 'color: #c9a227; font-size: 14px; font-weight: bold;')
         console.log('%cYou\'re using an ad blocker! Smart move 👍', 'color: #4a9eff; font-size: 12px;')
       }
     } catch (error) {

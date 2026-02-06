@@ -13,7 +13,7 @@
             </p>
             <div class="egg-list">
               <div class="egg-item" v-for="egg in discoveredEggs" :key="egg">
-                <span class="egg-icon">🥚</span>
+                <span class="egg-icon"></span>
                 <span class="egg-name">{{ formatEggName(egg) }}</span>
               </div>
             </div>
