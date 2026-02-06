@@ -111,15 +111,23 @@
         </template>
 
         <!-- Social output -->
-        <template v-else-if="entry.format === 'social'">
-          <div class="social-output">
-            <a v-for="link in entry.content" :key="link.name" :href="link.url" target="_blank" rel="noopener"
-              class="social-link" data-cursor-hover>
-              <span class="social-icon">{{ link.icon }}</span>
-              {{ link.name }}
-            </a>
-          </div>
-        </template>
+<template v-else-if="entry.format === 'social'">
+  <div class="social-output">
+    <a 
+      v-for="link in entry.content" 
+      :key="link.name" 
+      :href="link.url" 
+      target="_blank" 
+      rel="noopener"
+      class="social-link" 
+      data-cursor-hover
+      @click="handleSocialLinkClick(link, $event)"
+    >
+      <span class="social-icon">{{ link.icon }}</span>
+      {{ link.name }}
+    </a>
+  </div>
+</template>
 
         <template v-else-if="entry.format === 'whoami'">
           <div class="whoami-output">
@@ -292,6 +300,16 @@ import { useRouter } from 'vue-router'
 import { useKonamiCode } from '@/composables/useKonamiCode'
 import KonamiAnimation from './KonamiAnimationGradius.vue'
 import { useEasterEggs } from '@/composables/useEasterEggs'
+
+const { discoverEgg, EASTER_EGGS } = useEasterEggs() 
+
+const handleSocialLinkClick = (link, event) => {
+  if (link.name === 'X') {
+    event.preventDefault()
+    console.log('%c Rick Roll from Terminal! ', 'color: #c9a227; font-size: 16px; font-weight: bold;')
+    window.open(link.url, '_blank')
+  }
+}
 
 const emit = defineEmits(['openProject'])
 

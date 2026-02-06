@@ -1,9 +1,18 @@
 <template>
-  <!-- Sword Cursor Overlay -->
-  <div v-if="swordCursorActive" class="sword-cursor" ref="swordRef">
-    <div class="sword-handle"></div>
-    <div class="sword-pommel"></div>
-  </div>
+  <Teleport to="body">
+    <div 
+      v-if="swordCursorActive" 
+      class="sword-cursor-container" 
+      ref="swordRef"
+    >
+      <div class="sword-assembly">
+        <div class="sword-blade"></div>
+        <div class="sword-crossguard"></div>
+        <div class="sword-handle"></div>
+        <div class="sword-pommel"></div>
+      </div>
+    </div>
+  </Teleport>
 </template>
 
 <script setup>
@@ -15,223 +24,144 @@ const swordRef = ref(null)
 
 let cursorX = 0
 let cursorY = 0
+let rafId = null
 
 const updateCursorPosition = (e) => {
   cursorX = e.clientX
   cursorY = e.clientY
   
+  if (rafId) cancelAnimationFrame(rafId)
+  
+  rafId = requestAnimationFrame(() => {
+    if (swordRef.value) {
+      // On centre l'épée et on lui donne son inclinaison de base
+      swordRef.value.style.transform = `translate(${cursorX}px, ${cursorY}px) rotate(45deg)`
+    }
+  })
+}
+
+const handleAction = (className, duration) => {
   if (swordRef.value) {
-    swordRef.value.style.left = cursorX + 'px'
-    swordRef.value.style.top = cursorY + 'px'
+    swordRef.value.classList.add(className)
+    setTimeout(() => {
+      swordRef.value?.classList.remove(className)
+    }, duration)
   }
 }
 
-const handleMouseDown = () => {
-  document.body.classList.add('clicking')
-  setTimeout(() => {
-    document.body.classList.remove('clicking')
-  }, 100)
+const handleMouseDown = () => handleAction('clicking', 100)
+const handleClick = () => handleAction('attacking', 400)
+
+const setupListeners = () => {
+  document.body.classList.add('sword-cursor-active')
+  document.addEventListener('mousemove', updateCursorPosition)
+  document.addEventListener('mousedown', handleMouseDown)
+  document.addEventListener('click', handleClick)
 }
 
-const handleClick = () => {
-  document.body.classList.add('attacking')
-  setTimeout(() => {
-    document.body.classList.remove('attacking')
-  }, 300)
-}
-
-watch(swordCursorActive, (isActive) => {
-  if (isActive) {
-    document.addEventListener('mousemove', updateCursorPosition)
-    document.addEventListener('mousedown', handleMouseDown)
-    document.addEventListener('click', handleClick)
-  } else {
-    document.removeEventListener('mousemove', updateCursorPosition)
-    document.removeEventListener('mousedown', handleMouseDown)
-    document.removeEventListener('click', handleClick)
-  }
-})
-
-onMounted(() => {
-  if (swordCursorActive.value) {
-    document.addEventListener('mousemove', updateCursorPosition)
-    document.addEventListener('mousedown', handleMouseDown)
-    document.addEventListener('click', handleClick)
-  }
-})
-
-onUnmounted(() => {
+const removeListeners = () => {
+  document.body.classList.remove('sword-cursor-active')
   document.removeEventListener('mousemove', updateCursorPosition)
   document.removeEventListener('mousedown', handleMouseDown)
   document.removeEventListener('click', handleClick)
-  document.body.classList.remove('sword-cursor-active', 'clicking', 'attacking')
+}
+
+watch(swordCursorActive, (isActive) => {
+  isActive ? setupListeners() : removeListeners()
+})
+
+onMounted(() => {
+  if (swordCursorActive.value) setupListeners()
+})
+
+onUnmounted(() => {
+  if (rafId) cancelAnimationFrame(rafId)
+  removeListeners()
 })
 </script>
 
-<style lang="scss">
-/* Sword Cursor Easter Egg Styles - REDESIGNED */
-
+<style>
+/* Cacher le vrai curseur */
 body.sword-cursor-active,
 body.sword-cursor-active * {
   cursor: none !important;
 }
 
-.sword-cursor {
+.sword-cursor-container {
   position: fixed;
   top: 0;
   left: 0;
-  width: 50px;
-  height: 50px;
-  pointer-events: none;
-  z-index: 10001;
-  transform: translate(-50%, -50%) rotate(45deg);
-  transition: transform 0.1s ease;
-}
-
-/* Blade - elongated and tapered */
-.sword-cursor::before {
-  content: '';
-  position: absolute;
-  top: -15px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 0;
+  width: 0; /* On part d'un point 0,0 */
   height: 0;
-  border-left: 6px solid transparent;
-  border-right: 6px solid transparent;
-  border-bottom: 35px solid #e8e8f0;
-  filter: drop-shadow(0 0 4px rgba(232, 232, 240, 0.6)) 
-          drop-shadow(0 2px 2px rgba(0, 0, 0, 0.3));
+  pointer-events: none;
+  z-index: 999999;
+  will-change: transform;
+  transition: filter 0.2s ease;
 }
 
-/* Blade shine effect */
-.sword-cursor::after {
-  content: '';
+/* Conteneur interne pour l'alignement et l'animation */
+.sword-assembly {
   position: absolute;
-  top: -10px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 2px;
-  height: 30px;
-  background: linear-gradient(to bottom, 
-    rgba(255, 255, 255, 0.9) 0%,
-    rgba(255, 255, 255, 0.5) 50%,
-    transparent 100%
-  );
-  border-radius: 1px;
+  top: -0px; /* Ajuste la pointe sur le curseur */
+  left: -2px; 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: swordFadeIn 0.3s ease-out forwards;
 }
 
-/* Cross-guard (hilt) */
-.sword-handle::before {
-  content: '';
-  position: absolute;
-  bottom: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 20px;
-  height: 4px;
-  background: linear-gradient(90deg, #4a3f15 0%, #8b7520 50%, #4a3f15 100%);
-  border-radius: 2px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-/* Handle/Grip */
-.sword-handle {
-  position: absolute;
-  bottom: -5px;
-  left: 50%;
-  transform: translateX(-50%);
+/* La Lame */
+.sword-blade {
   width: 6px;
-  height: 12px;
-  background: linear-gradient(to bottom, #8b7520 0%, #6b5a18 50%, #4a3f15 100%);
+  height: 35px;
+  background: linear-gradient(90deg, #e0e0e0, #ffffff, #b0b0b0);
+  clip-path: polygon(50% 0%, 100% 15%, 100% 100%, 0% 100%, 0% 15%);
+  filter: drop-shadow(0 0 2px rgba(255,255,255,0.5));
+}
+
+/* La Garde (le truc qui manquait pour la solidité) */
+.sword-crossguard {
+  width: 18px;
+  height: 4px;
+  background: #8b7520;
   border-radius: 2px;
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4);
+  margin-top: -1px;
 }
 
-/* Pommel (end knob) */
-.sword-pommel {
-  position: absolute;
-  bottom: -18px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 10px;
+/* La Poignée */
+.sword-handle {
+  width: 4px;
   height: 10px;
-  background: radial-gradient(circle at 30% 30%, #ffd700, #c9a227, #8b7520);
+  background: #b91313;
+}
+
+/* Le Pommeau */
+.sword-pommel {
+  width: 8px;
+  height: 8px;
+  background: radial-gradient(circle at 30% 30%, #ffd700, #8b7520);
   border-radius: 50%;
-  border: 1px solid #6b5a18;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4),
-              inset 0 1px 2px rgba(255, 255, 255, 0.3);
+  margin-top: -2px;
 }
 
-/* Glow effect on click */
-body.sword-cursor-active.clicking .sword-cursor {
-  transform: translate(-50%, -50%) rotate(45deg) scale(1.2);
-  filter: drop-shadow(0 0 15px rgba(201, 162, 39, 0.9)) 
-          drop-shadow(0 0 30px rgba(255, 215, 0, 0.5));
+/* États et Animations */
+.sword-cursor-container.clicking {
+  filter: brightness(1.5) drop-shadow(0 0 5px gold);
 }
 
-body.sword-cursor-active.clicking .sword-cursor::before {
-  border-bottom-color: #fff;
-  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 1));
-}
-
-/* Sword attack animation - slash motion */
-@keyframes sword-slash {
-  0% {
-    transform: translate(-50%, -50%) rotate(45deg);
-  }
-  25% {
-    transform: translate(-50%, -50%) rotate(90deg) scale(1.1);
-  }
-  50% {
-    transform: translate(-50%, -50%) rotate(135deg) scale(1.15);
-  }
-  75% {
-    transform: translate(-50%, -50%) rotate(90deg) scale(1.1);
-  }
-  100% {
-    transform: translate(-50%, -50%) rotate(45deg);
-  }
-}
-
-body.sword-cursor-active.attacking .sword-cursor {
+.sword-cursor-container.attacking .sword-assembly {
   animation: sword-slash 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-body.sword-cursor-active.attacking .sword-cursor::before {
-  border-bottom-color: #fffacd;
-}
-
-/* Entrance animation */
-.sword-cursor {
-  opacity: 0;
-  animation: swordFadeIn 0.4s ease forwards;
+@keyframes sword-slash {
+  0% { transform: rotate(0deg); }
+  30% { transform: rotate(-20deg) scale(1.2); }
+  60% { transform: rotate(70deg) scale(1.1); }
+  100% { transform: rotate(0deg); }
 }
 
 @keyframes swordFadeIn {
-  from {
-    opacity: 0;
-    transform: translate(-50%, -50%) rotate(45deg) scale(0.3);
-    filter: blur(4px);
-  }
-  to {
-    opacity: 1;
-    transform: translate(-50%, -50%) rotate(45deg) scale(1);
-    filter: blur(0);
-  }
-}
-
-/* Subtle idle animation */
-@keyframes swordIdle {
-  0%, 100% {
-    transform: translate(-50%, -50%) rotate(45deg) translateY(0);
-  }
-  50% {
-    transform: translate(-50%, -50%) rotate(45deg) translateY(-2px);
-  }
-}
-
-body.sword-cursor-active .sword-cursor:not(.attacking):not(.clicking) {
-  animation: swordIdle 2s ease-in-out infinite;
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 </style>

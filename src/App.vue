@@ -70,23 +70,20 @@ useVimQuit()
 useKonamiCode(() => {
   showKonami.value = true
   discoverEgg(EASTER_EGGS.KONAMI_CODE)
-  console.log('%c KONAMI CODE ACTIVATED!', 'color: #c9a227; font-size: 20px; font-weight: bold;')
+  console.log('%cKONAMI CODE ACTIVATED!', 'color: #c9a227; font-size: 20px; font-weight: bold;')
   setTimeout(() => { showKonami.value = false }, 5000)
 })
 
 useAdBlockDetector()
 
-// SWORD CURSOR SCOPE - deactivate when leaving projects page
 const { checkRouteAndDeactivate } = useSwordCursor()
 watch(() => route.path, (newPath) => {
   checkRouteAndDeactivate(newPath)
 })
 
-// ASCII Art display function - DISPLAYS ONLY ONCE PER SESSION
 const asciiArtShown = ref(false)
 
 const displayASCIIWelcome = () => {
-  // Only display once per session to avoid console spam
   if (asciiArtShown.value) return
   
   const asciiArt = `
@@ -114,21 +111,17 @@ const displayASCIIWelcome = () => {
   `
 
   console.log('%c' + asciiArt, 'color: #c9a227; font-family: monospace; font-size: 12px; line-height: 1.2;')
-  console.log('%c Easter Egg Discovered: ASCII Art Console Welcome', 'color: #27ca40; font-weight: bold; font-size: 14px;')
+  console.log('%cEaster Egg Discovered: ASCII Art Console Welcome', 'color: #27ca40; font-weight: bold; font-size: 14px;')
   console.log('%cPro tip: Check out /humans.txt for more info!', 'color: #4a9eff; font-size: 12px;')
-  console.log('%cDo you know what the Konami Komando is ?', 'color: #ffa500; font-size: 12px;')
+  console.log('%cDo you know what the Konami Komando is?', 'color: #ffa500; font-size: 12px;')
   
-  // Discover the easter egg
   discoverEgg(EASTER_EGGS.ASCII_ART)
   
-  // Mark as shown for this session
   asciiArtShown.value = true
 }
 
-// Watch route changes and display ASCII art on home page ONCE
 watch(() => route.path, (newPath) => {
   if (newPath === '/' || newPath === '/home') {
-    // Use nextTick to ensure DOM is ready
     nextTick(() => {
       setTimeout(() => {
         displayASCIIWelcome()
@@ -137,14 +130,14 @@ watch(() => route.path, (newPath) => {
   }
 }, { immediate: true })
 
-// Watch for all eggs discovered - trigger globally
 watch(allEggsDiscovered, (allDiscovered) => {
   if (allDiscovered && !masterEggTriggered.value) {
-    console.log('%c ALL EASTER EGGS DISCOVERED! Triggering Master Egg...', 'color: #c9a227; font-weight: bold; font-size: 16px;')
-    masterEggTriggered.value = true
+    console.log('%cALL EASTER EGGS DISCOVERED!', 'color: #c9a227; font-weight: bold; font-size: 18px;')
+    console.log('%cTriggering Master Egg...', 'color: #4a9eff; font-size: 14px;')
     setTimeout(() => {
       showGrandCompletion.value = true
       showMasterEgg.value = true
+      discoverEgg(EASTER_EGGS.MASTER_EGG)
     }, 500)
   }
 }, { immediate: true })
@@ -154,7 +147,6 @@ onMounted(() => {
     navigator.userAgent
   )
   
-  // Display ASCII art on mount if on home page (only once)
   if (route.path === '/' || route.path === '/home') {
     nextTick(() => {
       setTimeout(() => {

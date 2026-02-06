@@ -1,7 +1,6 @@
 import { ref, computed, watch } from 'vue'
 import { setCookie, getCookie, deleteCookie } from '@/utils/cookies'
 
-// Complete list of all easter eggs (18 total: 17 regular + 1 master)
 const EASTER_EGGS = {
   VIM_QUIT: 'vim_quit',
   ASCII_ART: 'ascii_art',
@@ -20,12 +19,10 @@ const EASTER_EGGS = {
   WEATHER_BACKGROUND: 'weather_background',
   ADBLOCK_DETECTOR: 'adblock_detector',
   FAKE_ADMIN: 'fake_admin',
-  // CUSTOM_HEADER: 'custom_header',
-  // RICKROLL: 'rickroll',
+  RICKROLL: 'rickroll',
   MASTER_EGG: 'master_egg'
 }
 
-// Human-readable names
 const EASTER_EGG_NAMES = {
   vim_quit: 'Vim Command',
   ascii_art: 'ASCII Art',
@@ -44,14 +41,12 @@ const EASTER_EGG_NAMES = {
   weather_background: 'Weather Magic',
   adblock_detector: 'AdBlock Message',
   fake_admin: 'Fake Terminal',
-  custom_header: 'HTTP Header',
   rickroll: 'Rick Roll',
   master_egg: 'Master Achievement'
 }
 
 const STORAGE_KEY = 'portfolio_easter_eggs'
 
-// Load from cookies
 const loadFromCookies = () => {
   const stored = getCookie(STORAGE_KEY)
   if (stored) {
@@ -64,7 +59,6 @@ const loadFromCookies = () => {
   return []
 }
 
-// Save to cookies (1 year expiry)
 const saveToCookies = (eggs) => {
   const cookieConsent = getCookie('cookie_consent')
   if (cookieConsent === 'accepted') {
@@ -72,29 +66,27 @@ const saveToCookies = (eggs) => {
   }
 }
 
-// Global state
 const discoveredEggs = ref(loadFromCookies())
 const masterEggTriggered = ref(false)
 const isLoading = ref(false)
 const isSyncing = ref(false)
 
-// Check if master egg is in discovered list
 if (discoveredEggs.value.includes('master_egg')) {
   masterEggTriggered.value = true
 }
 
-// Console logger - displays progress WITHOUT clearing console data
-// Session flag to prevent console spam
 const progressLogged = ref(false)
 
 const logEasterEggProgress = (force = false) => {
-  // Only log once per session unless forced
   if (progressLogged.value && !force) return
   progressLogged.value = true
   
-  const totalEggs = Object.values(EASTER_EGGS).length
-  const foundCount = discoveredEggs.value.length
+  const regularEggs = Object.values(EASTER_EGGS).filter(egg => egg !== 'master_egg')
+  const totalEggs = regularEggs.length
+  const discoveredRegular = discoveredEggs.value.filter(egg => egg !== 'master_egg')
+  const foundCount = discoveredRegular.length
   const remaining = totalEggs - foundCount
+  
   console.log('')
   console.log('%c╔════════════════════════════════════════════╗', 'color: #c9a227; font-family: monospace;')
   console.log('%c║     EASTER EGGS PROGRESS                   ║', 'color: #c9a227; font-family: monospace; font-weight: bold;')
@@ -105,9 +97,9 @@ const logEasterEggProgress = (force = false) => {
 
   if (foundCount > 0) {
     console.log('%cEaster Eggs Found:', 'color: #27ca40; font-weight: bold;')
-    discoveredEggs.value.forEach(eggId => {
+    discoveredRegular.forEach(eggId => {
       const name = EASTER_EGG_NAMES[eggId] || eggId
-      console.log(`%c✓ ${name}`, 'color: #27ca40;')
+      console.log(`%c[X] ${name}`, 'color: #27ca40;')
     })
     console.log('')
   }
@@ -128,7 +120,7 @@ const logEasterEggProgress = (force = false) => {
     console.log(`%c${remainingMessage}`, 'color: #ffa500; font-weight: bold; font-size: 14px;')
     console.log('%cKeep exploring!', 'color: #ffa500;')
   } else {
-    console.log('%c ALL EASTER EGGS FOUND! ', 'color: #27ca40; font-weight: bold; font-size: 16px;')
+    console.log('%cALL EASTER EGGS FOUND!', 'color: #27ca40; font-weight: bold; font-size: 16px;')
   }
   
   console.log('')
@@ -137,7 +129,6 @@ const logEasterEggProgress = (force = false) => {
   console.log('')
 }
 
-// Watch for changes
 watch(discoveredEggs, (newEggs) => {
   try {
     saveToCookies(newEggs)
@@ -152,13 +143,9 @@ export function useEasterEggs() {
       discoveredEggs.value.push(eggId)
       
       const eggName = EASTER_EGG_NAMES[eggId] || eggId
-      console.log(`%c Easter Egg Discovered: ${eggName}`, 'color: #c9a227; font-weight: bold; font-size: 14px;')
+      console.log(`%c[+] Easter Egg Discovered: ${eggName}`, 'color: #c9a227; font-weight: bold; font-size: 14px;')
       
-      
-      // Show progress after discovery
       logEasterEggProgress(true)
-      // Check if all eggs are discovered
-      checkMasterEgg()
     }
   }
 
@@ -169,41 +156,36 @@ export function useEasterEggs() {
   const allEggsDiscovered = computed(() => {
     const regularEggs = Object.values(EASTER_EGGS).filter(egg => egg !== 'master_egg')
     const discoveredRegularEggs = discoveredEggs.value.filter(egg => egg !== 'master_egg')
-    return discoveredRegularEggs.length >= regularEggs.length
+    const allFound = discoveredRegularEggs.length >= regularEggs.length
+    
+    if (allFound) {
+      console.log('%cALL REGULAR EGGS DISCOVERED!', 'color: #c9a227; font-weight: bold; font-size: 16px;')
+      console.log(`%cRegular eggs: ${discoveredRegularEggs.length}/${regularEggs.length}`, 'color: #27ca40; font-size: 14px;')
+    }
+    
+    return allFound
   })
 
   const progress = computed(() => {
-    const totalEggs = Object.values(EASTER_EGGS).length
+    const regularEggs = Object.values(EASTER_EGGS).filter(egg => egg !== 'master_egg')
+    const discoveredRegular = discoveredEggs.value.filter(egg => egg !== 'master_egg')
     return {
-      discovered: discoveredEggs.value.length,
-      total: totalEggs,
-      percentage: Math.round((discoveredEggs.value.length / totalEggs) * 100)
+      discovered: discoveredRegular.length,
+      total: regularEggs.length,
+      percentage: Math.round((discoveredRegular.length / regularEggs.length) * 100)
     }
   })
-
-  const checkMasterEgg = () => {
-    if (allEggsDiscovered.value && !masterEggTriggered.value) {
-      masterEggTriggered.value = true
-      
-      if (!discoveredEggs.value.includes('master_egg')) {
-        discoveredEggs.value.push('master_egg')
-      }
-      return true
-    }
-    return false
-  }
 
   const resetEggs = () => {
     discoveredEggs.value = []
     masterEggTriggered.value = false
     deleteCookie(STORAGE_KEY)
     
-    logEasterEggProgress()
+    logEasterEggProgress(true)
     
-    console.log('%c✓ Easter egg progress reset!', 'color: #27ca40; font-weight: bold;')
+    console.log('%c[OK] Easter egg progress reset!', 'color: #27ca40; font-weight: bold;')
   }
 
-  // Log progress after delay on first use
   setTimeout(() => {
     if (!isLoading.value) {
       logEasterEggProgress()
@@ -225,7 +207,6 @@ export function useEasterEggs() {
   }
 }
 
-// Register global console command
 if (typeof window !== 'undefined') {
   window.resetEasterEggs = () => {
     const { resetEggs } = useEasterEggs()
@@ -234,6 +215,6 @@ if (typeof window !== 'undefined') {
   
   window.showEasterEggs = () => {
     const { logEasterEggProgress } = useEasterEggs()
-    logEasterEggProgress()
+    logEasterEggProgress(true)
   }
 }

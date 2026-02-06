@@ -5,7 +5,7 @@
         <canvas ref="confettiCanvas" class="confetti-canvas"></canvas>
         <div class="master-egg-content" @click.stop>
           <div class="achievement-badge">
-            <div class="badge-icon">🏆</div>
+            <div class="badge-icon">TROPHY</div>
             <h2 class="achievement-title">ACHIEVEMENT UNLOCKED!</h2>
             <h3 class="achievement-name">Master Easter Egg Hunter</h3>
             <p class="achievement-desc">
@@ -13,16 +13,16 @@
             </p>
             <div class="egg-list">
               <div class="egg-item" v-for="egg in discoveredEggs" :key="egg">
-                <span class="egg-icon"></span>
+                <span class="egg-icon">*</span>
                 <span class="egg-name">{{ formatEggName(egg) }}</span>
               </div>
             </div>
             <div class="secret-content">
-              <h4 class="secret-title">🎁 Your Reward</h4>
+              <h4 class="secret-title">REWARD</h4>
               <p class="secret-text">
                 Congratulations! You've proven yourself to be a true explorer. 
                 As a reward, you've unlocked the secret developer mode. 
-                Check the console for special access codes! 🚀
+                Check the console for special access codes!
               </p>
             </div>
             <button class="close-btn" @click="close" data-cursor-hover>
@@ -49,7 +49,7 @@ const props = defineProps({
   },
   totalEggs: {
     type: Number,
-    default: 9
+    default: 18
   }
 })
 
@@ -74,11 +74,11 @@ class ConfettiPiece {
 
   randomColor() {
     const colors = [
-      '#c9a227', // terminal-accent
-      '#4a9eff', // terminal-accent-secondary
-      '#27ca40', // success
-      '#ff6b6b', // error
-      '#a78bfa'  // purple
+      '#c9a227',
+      '#4a9eff',
+      '#27ca40',
+      '#ff6b6b',
+      '#a78bfa'
     ]
     return colors[Math.floor(Math.random() * colors.length)]
   }
@@ -154,8 +154,7 @@ const handleResize = () => {
 watch(() => props.show, (newVal) => {
   if (newVal) {
     setTimeout(initConfetti, 100)
-    // Log secret code to console
-    console.log('%c🎉 MASTER EASTER EGG UNLOCKED! 🎉', 'font-size: 20px; color: #c9a227; font-weight: bold;')
+    console.log('%cMASTER EASTER EGG UNLOCKED!', 'font-size: 20px; color: #c9a227; font-weight: bold;')
     console.log('%cSecret Developer Code: DEV_MODE_2024', 'font-size: 14px; color: #4a9eff;')
     console.log('%cYou have proven yourself worthy, master explorer!', 'font-size: 12px; color: #27ca40;')
   } else {
@@ -181,11 +180,6 @@ onUnmounted(() => {
 </script>
 
 <style lang="scss" scoped>
-
-* {
-  cursor: default !important;
-}
-
 .master-egg-overlay {
   position: fixed;
   top: 0;
@@ -197,7 +191,6 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
 }
 
 .confetti-canvas {
@@ -212,7 +205,6 @@ onUnmounted(() => {
 .master-egg-content {
   position: relative;
   z-index: 10001;
-  cursor: default;
   max-width: 600px;
   width: 90%;
   max-height: 90vh;
@@ -230,9 +222,12 @@ onUnmounted(() => {
 }
 
 .badge-icon {
-  font-size: 5rem;
+  font-size: 3rem;
   margin-bottom: 1rem;
   animation: iconBounce 1s ease infinite;
+  color: var(--terminal-accent);
+  font-weight: bold;
+  font-family: var(--font-display);
 }
 
 .achievement-title {
@@ -290,6 +285,7 @@ onUnmounted(() => {
 
 .egg-icon {
   font-size: 1.2rem;
+  color: var(--terminal-accent);
 }
 
 .egg-name {
@@ -372,7 +368,7 @@ onUnmounted(() => {
   }
 
   .badge-icon {
-    font-size: 3rem;
+    font-size: 2rem;
   }
 
   .achievement-name {
