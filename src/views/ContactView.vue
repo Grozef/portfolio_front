@@ -125,11 +125,13 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import BluescreenOfDeath from '@/components/BluescreenOfDeath.vue'
 import WeatherBackground from '@/components/WeatherBackground.vue'
 import { useEasterEggs } from '@/composables/useEasterEggs'
 
+const router = useRouter()
 const { progress: easterEggProgress, discoverEgg, EASTER_EGGS } = useEasterEggs()
 
 const formData = ref({
@@ -145,18 +147,42 @@ const submitStatus = ref('')
 
 // Progressive button easter egg with persistent tracking
 const STORAGE_KEY = 'progressive_button_clicks'
+const POST_BSOD_KEY = 'post_bsod_clicks'
+const BSOD_OCCURRED_KEY = 'bsod_occurred'
+
 const progressiveClickCount = ref(0)
+const postBsodClicks = ref(0)
+const bsodOccurred = ref(false)
 const showBSOD = ref(false)
 
-// Load click count from localStorage
+// Load state from localStorage
 onMounted(() => {
   const stored = localStorage.getItem(STORAGE_KEY)
   if (stored) {
     progressiveClickCount.value = parseInt(stored, 10) || 0
   }
+  
+  const bsodOccurredStored = localStorage.getItem(BSOD_OCCURRED_KEY)
+  if (bsodOccurredStored === 'true') {
+    bsodOccurred.value = true
+  }
+  
+  const postBsodStored = localStorage.getItem(POST_BSOD_KEY)
+  if (postBsodStored) {
+    postBsodClicks.value = parseInt(postBsodStored, 10) || 0
+  }
 })
 
 const progressiveButtonText = computed(() => {
+  // Post-BSOD state: different messages
+  if (bsodOccurred.value) {
+    if (postBsodClicks.value === 0) return 'Try Again?'
+    if (postBsodClicks.value === 1) return 'Still clicking?'
+    if (postBsodClicks.value === 2) return 'Last chance...'
+    return 'Contact me faster'
+  }
+  
+  // Pre-BSOD state: original messages
   const count = progressiveClickCount.value
   if (count === 0) return 'Contact me faster'
   if (count < 5) return 'Please stop...'
@@ -167,9 +193,26 @@ const progressiveButtonText = computed(() => {
 })
 
 const handleProgressiveClick = () => {
-  progressiveClickCount.value++
+  // Post-BSOD logic: count to 3 clicks then redirect to dino game
+  if (bsodOccurred.value) {
+    postBsodClicks.value++
+    localStorage.setItem(POST_BSOD_KEY, postBsodClicks.value.toString())
+    
+    if (postBsodClicks.value >= 3) {
+      // Reset states
+      bsodOccurred.value = false
+      postBsodClicks.value = 0
+      localStorage.removeItem(BSOD_OCCURRED_KEY)
+      localStorage.removeItem(POST_BSOD_KEY)
+      
+      // Redirect to dino game
+      router.push('/easter-egg/dino')
+    }
+    return
+  }
   
-  // Save to localStorage
+  // Pre-BSOD logic: count to 15 clicks
+  progressiveClickCount.value++
   localStorage.setItem(STORAGE_KEY, progressiveClickCount.value.toString())
   
   // Discover easter egg on first click
@@ -180,14 +223,20 @@ const handleProgressiveClick = () => {
   // Trigger BSOD at exactly 15 clicks
   if (progressiveClickCount.value === 15) {
     showBSOD.value = true
-    // Reset counter after showing BSOD
-    progressiveClickCount.value = 0
-    localStorage.setItem(STORAGE_KEY, '0')
   }
 }
 
 const handleCloseBSOD = () => {
   showBSOD.value = false
+  
+  // Set BSOD occurred flag and reset pre-BSOD counter
+  bsodOccurred.value = true
+  progressiveClickCount.value = 0
+  postBsodClicks.value = 0
+  
+  localStorage.setItem(BSOD_OCCURRED_KEY, 'true')
+  localStorage.setItem(STORAGE_KEY, '0')
+  localStorage.setItem(POST_BSOD_KEY, '0')
 }
 
 const handleSubmit = async () => {

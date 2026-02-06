@@ -191,6 +191,11 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
+
+* {
+  cursor: default !important;
+}
+
 .fake-admin-terminal {
   position: fixed;
   top: 0;

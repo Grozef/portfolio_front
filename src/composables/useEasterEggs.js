@@ -1,11 +1,10 @@
 import { ref, computed, watch } from 'vue'
-import api from '@/services/api'
+import { setCookie, getCookie, deleteCookie } from '@/utils/cookies'
 
 // Complete list of all easter eggs (18 total: 17 regular + 1 master)
-// The count shown to users is 17 (excluding master egg from the hunt)
 const EASTER_EGGS = {
   VIM_QUIT: 'vim_quit',
-  // ASCII_ART: 'ascii_art',
+  ASCII_ART: 'ascii_art',
   FLEEING_BUTTON: 'fleeing_button',
   PROGRESSIVE_BUTTON: 'progressive_button',
   EXTREME_DARK_MODE: 'extreme_dark_mode',
@@ -21,6 +20,7 @@ const EASTER_EGGS = {
   ADBLOCK_DETECTOR: 'adblock_detector',
   FAKE_ADMIN: 'fake_admin',
   // CUSTOM_HEADER: 'custom_header',
+  // RICKROLL: 'rickroll',
   MASTER_EGG: 'master_egg'
 }
 
@@ -43,87 +43,42 @@ const EASTER_EGG_NAMES = {
   adblock_detector: 'AdBlock Message',
   fake_admin: 'Fake Terminal',
   custom_header: 'HTTP Header',
+  rickroll: 'Rick Roll',
   master_egg: 'Master Achievement'
 }
 
 const STORAGE_KEY = 'portfolio_easter_eggs'
-const SESSION_KEY = 'portfolio_session_id'
 
-// Generate or retrieve session ID
-const getSessionId = () => {
-  let sessionId = localStorage.getItem(SESSION_KEY)
-  if (!sessionId) {
-    sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)
-    localStorage.setItem(SESSION_KEY, sessionId)
+// Load from cookies
+const loadFromCookies = () => {
+  const stored = getCookie(STORAGE_KEY)
+  if (stored) {
+    try {
+      return JSON.parse(stored)
+    } catch (e) {
+      return []
+    }
   }
-  return sessionId
+  return []
+}
+
+// Save to cookies (1 year expiry)
+const saveToCookies = (eggs) => {
+  const cookieConsent = getCookie('cookie_consent')
+  if (cookieConsent === 'accepted') {
+    setCookie(STORAGE_KEY, JSON.stringify(eggs), 365)
+  }
 }
 
 // Global state
-const discoveredEggs = ref([])
+const discoveredEggs = ref(loadFromCookies())
 const masterEggTriggered = ref(false)
 const isLoading = ref(false)
 const isSyncing = ref(false)
 
-// Load from backend
-const loadFromBackend = async () => {
-  try {
-    isLoading.value = true
-    const sessionId = getSessionId()
-    
-    const response = await api.get('/easter-eggs/progress', {
-      headers: {
-        'X-Session-Id': sessionId
-      }
-    })
-    
-    if (response.data.success) {
-      discoveredEggs.value = response.data.data || []
-      
-      // Check if master egg is discovered
-      if (discoveredEggs.value.includes('master_egg')) {
-        masterEggTriggered.value = true
-      }
-      
-      // Also sync with localStorage for offline access
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(discoveredEggs.value))
-    }
-  } catch (error) {
-    console.error('Failed to load easter eggs from backend:', error)
-    
-    // Fallback to localStorage
-    const stored = localStorage.getItem(STORAGE_KEY)
-    if (stored) {
-      try {
-        discoveredEggs.value = JSON.parse(stored)
-      } catch (e) {
-        discoveredEggs.value = []
-      }
-    }
-  } finally {
-    isLoading.value = false
-  }
-}
-
-// Save to backend
-const saveToBackend = async (eggId, metadata = {}) => {
-  try {
-    const sessionId = getSessionId()
-    
-    const response = await api.post('/easter-eggs/discover', {
-      egg_id: eggId,
-      metadata: metadata
-    }, {
-      headers: {
-        'X-Session-Id': sessionId
-      }
-    })
-    
-    return response.data
-  } catch (error) {
-    console.error('Failed to save easter egg to backend:', error)
-    return null
-  }
+// Check if master egg is in discovered list
+if (discoveredEggs.value.includes('master_egg')) {
+  masterEggTriggered.value = true
 }
 
 // Console logger - displays progress WITHOUT clearing console data
@@ -177,7 +132,7 @@ const logEasterEggProgress = () => {
 // Watch for changes
 watch(discoveredEggs, (newEggs) => {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(newEggs))
+    saveToCookies(newEggs)
     logEasterEggProgress()
   } catch (error) {
     console.error('Error saving easter eggs:', error)
@@ -185,23 +140,15 @@ watch(discoveredEggs, (newEggs) => {
 }, { deep: true })
 
 export function useEasterEggs() {
-  const discoverEgg = async (eggId, metadata = {}) => {
+  const discoverEgg = (eggId, metadata = {}) => {
     if (!discoveredEggs.value.includes(eggId)) {
-      isSyncing.value = true
-      
-      // Add to local state immediately
       discoveredEggs.value.push(eggId)
-      
-      // Sync with backend
-      await saveToBackend(eggId, metadata)
       
       const eggName = EASTER_EGG_NAMES[eggId] || eggId
       console.log(`%c🥚 Easter Egg Discovered: ${eggName}`, 'color: #c9a227; font-weight: bold; font-size: 14px;')
       
       // Check if all eggs are discovered
       checkMasterEgg()
-      
-      isSyncing.value = false
     }
   }
 
@@ -230,43 +177,23 @@ export function useEasterEggs() {
       
       if (!discoveredEggs.value.includes('master_egg')) {
         discoveredEggs.value.push('master_egg')
-        saveToBackend('master_egg', { completedAt: new Date().toISOString() })
       }
       return true
     }
     return false
   }
 
-  const resetEggs = async () => {
-    try {
-      const sessionId = getSessionId()
-      
-      // Reset backend
-      await api.delete('/easter-eggs/reset', {
-        headers: {
-          'X-Session-Id': sessionId
-        }
-      })
-      
-      // Reset local state
-      discoveredEggs.value = []
-      masterEggTriggered.value = false
-      localStorage.removeItem(STORAGE_KEY)
-      
-      logEasterEggProgress()
-      
-      console.log('%c✓ Easter egg progress reset!', 'color: #27ca40; font-weight: bold;')
-    } catch (error) {
-      console.error('Failed to reset easter eggs:', error)
-    }
+  const resetEggs = () => {
+    discoveredEggs.value = []
+    masterEggTriggered.value = false
+    deleteCookie(STORAGE_KEY)
+    
+    logEasterEggProgress()
+    
+    console.log('%c✓ Easter egg progress reset!', 'color: #27ca40; font-weight: bold;')
   }
 
-  // Initialize on first use
-  if (discoveredEggs.value.length === 0 && !isLoading.value) {
-    loadFromBackend()
-  }
-
-  // Log progress after delay
+  // Log progress after delay on first use
   setTimeout(() => {
     if (!isLoading.value) {
       logEasterEggProgress()
@@ -284,16 +211,15 @@ export function useEasterEggs() {
     discoverEgg,
     isDiscovered,
     resetEggs,
-    logEasterEggProgress,
-    loadFromBackend
+    logEasterEggProgress
   }
 }
 
 // Register global console command
 if (typeof window !== 'undefined') {
-  window.resetEasterEggs = async () => {
+  window.resetEasterEggs = () => {
     const { resetEggs } = useEasterEggs()
-    await resetEggs()
+    resetEggs()
   }
   
   window.showEasterEggs = () => {

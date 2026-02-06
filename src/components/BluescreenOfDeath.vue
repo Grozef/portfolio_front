@@ -1,7 +1,7 @@
 <template>
   <Teleport to="body">
     <Transition name="bsod">
-      <div v-if="show" class="bsod-overlay" @click="close">
+      <div v-if="show" class="bsod-overlay" :class="{ 'can-close': canClose }" @click="handleClick">
         <div class="bsod-screen">
           <div class="bsod-content">
             <div class="bsod-header">
@@ -25,7 +25,7 @@
                 </div>
                 <div class="info-line">
                   <span class="info-label">Solution:</span>
-                  <span class="info-value">Click anywhere to continue (and maybe slow down next time)</span>
+                  <span class="info-value">Wait for the loading bar to complete</span>
                 </div>
               </div>
 
@@ -43,7 +43,8 @@
             </div>
 
             <div class="bsod-footer">
-              <p>Click anywhere to dismiss this easter egg</p>
+              <p v-if="!canClose">Please wait for the loading bar to complete...</p>
+              <p v-else>Click anywhere to dismiss this easter egg</p>
             </div>
           </div>
         </div>
@@ -53,7 +54,7 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted, onUnmounted } from 'vue'
+import { ref, watch, onMounted, onUnmounted, computed } from 'vue'
 
 const props = defineProps({
   show: {
@@ -71,13 +72,17 @@ const emit = defineEmits(['close'])
 const progress = ref(0)
 let progressInterval = null
 
-const close = () => {
-  emit('close')
+const canClose = computed(() => progress.value >= 100)
+
+const handleClick = () => {
+  if (canClose.value) {
+    emit('close')
+  }
 }
 
 const handleEscape = (event) => {
-  if (event.key === 'Escape' && props.show) {
-    close()
+  if (event.key === 'Escape' && props.show && canClose.value) {
+    emit('close')
   }
 }
 
@@ -123,8 +128,12 @@ onUnmounted(() => {
   height: 100%;
   background: #0078d7;
   z-index: 10000;
-  cursor: pointer;
   overflow: auto;
+  cursor: not-allowed;
+  
+  &.can-close {
+    cursor: pointer;
+  }
 }
 
 .bsod-screen {
@@ -133,6 +142,11 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   padding: 2rem;
+  pointer-events: none;
+  
+  .can-close & {
+    pointer-events: all;
+  }
 }
 
 .bsod-content {

@@ -1,9 +1,13 @@
 /**
  * Vue Router Configuration
  * 
- * Fixed: Admin-layout child route naming
- * Added: Fake admin terminal at /admin
- * Added: Real admin moved to /Moi
+ * Routes:
+ * - Public pages (home, projects, books, about, contact)
+ * - Fake admin terminal at /admin (Easter Egg)
+ * - Real admin at /Moi (secure)
+ * - Dinosaur game at /easter-egg/dino (Easter Egg)
+ * - Legal pages
+ * - 404 page
  * 
  * @module router
  */
@@ -46,14 +50,19 @@ const router = createRouter({
       meta: { guest: true }
     },
 
-    // Fake admin terminal (Easter Egg #18)
+    // Easter Egg routes
     {
       path: '/admin',
       name: 'fake-admin',
       component: () => import('@/components/FakeAdminTerminal.vue')
     },
+    {
+      path: '/easter-egg/dino',
+      name: 'dino-game',
+      component: () => import('@/views/DinoGameView.vue')
+    },
 
-    // Real admin routes - moved to /Moi for security
+    // Real admin routes - at /Moi for security
     {
       path: '/Moi',
       component: () => import('@/views/AdminLayout.vue'),

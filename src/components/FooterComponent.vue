@@ -2,7 +2,6 @@
     <footer class="site-footer">
         <div class="footer-container">
             <div class="footer-content">
-                <!-- Links Section -->
                 <div class="footer-section">
                     <h3>Navigation</h3>
                     <ul class="footer-links">
@@ -14,7 +13,6 @@
                     </ul>
                 </div>
 
-                <!-- Legal Section -->
                 <div class="footer-section">
                     <h3>Legal Information</h3>
                     <ul class="footer-links">
@@ -23,18 +21,27 @@
                         <li><router-link to="/cookies">Cookies</router-link></li>
                         <li><router-link to="/terms">Terms of Use</router-link></li>
                         <li><router-link to="/404" class="footer-link footer-link--game" data-cursor-hover>
-                            Legal Actions
-                        </router-link> </li>
+                                Legal Actions
+                            </router-link></li>
                     </ul>
                 </div>
 
-                <!-- Contact Section -->
                 <div class="footer-section">
                     <h3>Contact</h3>
                     <ul class="footer-links">
-                        <li>
+                        <!-- <li>
                             <a href="mailto:francois.lisowski@proton.me">
                                 <span class="icon">✉</span>
+                                francois.lisowski@proton.me
+                            </a>
+                        </li> -->
+                        <li>
+                            <a href="mailto:francois.lisowski@proton.me">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
+                                    fill="currentColor">
+                                    <path
+                                        d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+                                </svg>
                                 francois.lisowski@proton.me
                             </a>
                         </li>
@@ -60,6 +67,17 @@
                             </a>
                         </li>
                         <li>
+                            <a href='https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?autoplay=1&mute=0' ,
+                                target="_blank" rel="noopener">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
+                                    fill="currentColor">
+                                    <path
+                                        d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                                </svg>
+                                X
+                            </a>
+                        </li>
+                        <li>
                             <a href="/humans.txt" target="_blank" class="footer-link" @click="handleHumansTxtClick"
                                 data-cursor-hover>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
@@ -73,20 +91,14 @@
                     </ul>
                 </div>
             </div>
-            <!-- Bottom Bar -->
             <div class="footer-bottom">
                 <p class="copyright">
-                    © {{ currentYear }} - All rights reserved
+                    © {{ currentYear }} - All rights reserved -
+                    <span class="eightbit-text" @mouseenter="playHoverSound" data-cursor-hover>Built with 8-bit</span>
                 </p>
                 <p class="tagline">
                     Built with Vue.js & Laravel
                 </p>
-                  <button 
-    @mouseenter="playHoverSound"
-    data-cursor-hover
-  >
-    Menu Item
-  </button>
             </div>
         </div>
     </footer>
@@ -100,7 +112,6 @@ import { use8BitSounds } from '@/composables/use8BitSounds'
 const { discoverEgg, EASTER_EGGS } = useEasterEggs()
 
 const handleHumansTxtClick = () => {
-    // Discover easter egg when link is clicked
     discoverEgg(EASTER_EGGS.HUMANS_TXT)
 }
 
@@ -195,6 +206,23 @@ const { playHoverSound } = use8BitSounds()
 
     .copyright {
         font-weight: 500;
+
+        .eightbit-text {
+            font-family: 'Courier New', 'Press Start 2P', monospace;
+            font-size: 0.85rem;
+            color: #00ffff;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-block;
+
+            &:hover {
+                color: #eaff00;
+                text-shadow: 0 0 15px rgba(201, 204, 11, 0.7);
+                transform: scale(1.05);
+            }
+        }
     }
 
     .tagline {
@@ -202,15 +230,9 @@ const { playHoverSound } = use8BitSounds()
         align-items: center;
         justify-content: center;
         gap: 0.5rem;
-
-        //        .heart {
-        //            color: #ff0066;
-        //            animation: heartbeat 1.5s ease-in-out infinite;
-        //        }
     }
 }
 
-// Dark mode adjustments
 @media (prefers-color-scheme: dark) {
     .site-footer {
         background: linear-gradient(180deg, rgba(10, 10, 15, 0.9) 0%, rgba(5, 5, 10, 1) 100%);

@@ -306,7 +306,7 @@ const showKonamiAnimation = ref(false)
 
 // Konami Code activation
 const handleKonamiActivation = () => {
-  
+
   const { discoverEgg, EASTER_EGGS } = useEasterEggs()
   discoverEgg(EASTER_EGGS.KONAMI_CODE)
 
@@ -464,19 +464,19 @@ const executeCommand = async (input) => {
 
 const resetEasterEggsCommand = async () => {
   const { resetEggs } = useEasterEggs()
-  
+
   terminalStore.addToHistory({
     type: 'output',
     content: 'Resetting all easter eggs...'
   })
-  
+
   await resetEggs()
-  
+
   terminalStore.addToHistory({
     type: 'success',
     content: '✓ All easter egg progress has been reset!'
   })
-  
+
   terminalStore.addToHistory({
     type: 'output',
     content: 'Start exploring again to discover all 18 easter eggs!'
@@ -731,7 +731,11 @@ const outputSocial = () => {
     content: [
       { name: 'GitHub', url: 'https://github.com/Grozef', icon: '◆' },
       { name: 'LinkedIn', url: 'https://linkedin.com/in/françois-lisowski-39a88576', icon: '◆' },
-      { name: 'X', url: 'https://fr.wikipedia.org/wiki/Elon_Musk', icon: '◆' },
+      {
+        name: 'X',
+        url: 'https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?autoplay=1&mute=0',
+        icon: '◆'
+      },
       // { name: 'Blog', url: 'https://blog.example.com', icon: '◆' }
     ]
   })
@@ -1106,7 +1110,7 @@ onMounted(() => {
 
 .whoami-section {
   margin-bottom: 1.5rem;
-  
+
   &:last-of-type {
     margin-bottom: 0;
   }
@@ -1136,11 +1140,11 @@ onMounted(() => {
   border-radius: 4px;
   border-left: 2px solid transparent;
   transition: border-color 0.2s ease;
-  
+
   &:hover {
     border-left-color: var(--terminal-accent);
   }
-  
+
   &.wide {
     grid-column: 1 / -1;
   }
@@ -1161,7 +1165,7 @@ onMounted(() => {
   flex: 1;
   font-size: 0.85rem;
   font-family: var(--font-mono);
-  
+
   &.small {
     font-size: 0.7rem;
     word-break: break-all;
@@ -1173,7 +1177,7 @@ onMounted(() => {
   padding-top: 0.75rem;
   border-top: 1px solid var(--terminal-border);
   text-align: center;
-  
+
   small {
     color: var(--terminal-text-dim);
     font-size: 0.75rem;
@@ -1186,16 +1190,16 @@ onMounted(() => {
   .whoami-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .whoami-item {
     flex-direction: column;
     gap: 0.25rem;
   }
-  
+
   .whoami-label {
     min-width: auto;
   }
-  
+
   .whoami-value {
     text-align: left;
   }

@@ -27,6 +27,9 @@ And final thanks to my family and friends. I don't often say this out loud but i
 
 Easter Egg Hunters: Thanks to all the curious explorers who discovered the hidden gems!
 
+Thanks to DJARTMUSIC : check his pixabay profile here: https://pixabay.com/users/djartmusic-46653586/
+Thanks to MindMist : check his pixabay profile here: https://pixabay.com/fr/users/mindmist-48855701/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=313367
+
 Open Source Community: For amazing tools and inspiration. 
 
 Claude helped me a lot too i ain't gonna lie.
@@ -56,9 +59,13 @@ Can you find them all?
 9. whoami is a classic command
 10. If you're old enough to know what Konami is, you'll understand.
 11. Pretend that you're the admin
-
-
-11. Master Easter Egg (Find all others first!)
+12. the sword cusrsor 
+13. an 8-bit sound_effect
+14. There's an hidden music Player
+15. do you know how to inspect a HTTP header ?
+16. I'm not on X
+17. if you keep clickin' you'll find the dino game.
+18. Master Easter Egg (Find all others first!)
 
 /* SITE */
 

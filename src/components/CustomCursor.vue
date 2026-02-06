@@ -13,24 +13,22 @@ const isClicking = ref(false)
 const isVisible = ref(false)
 const isMobile = ref(true)
 const isSleeping = ref(false)
+const wasSleeping = ref(false)
 
-// Store last known cursor position for sleeping state
 const lastCursorX = ref(0)
 const lastCursorY = ref(0)
 
 let rafId = null
 let inactivityTimeout = null
-const INACTIVITY_DELAY = 30000 // 30 seconds
+const INACTIVITY_DELAY = 30000
 
 const updateCursor = (e) => {
   cursorX.value = e.clientX
   cursorY.value = e.clientY
   
-  // Always update last known position while active
   lastCursorX.value = e.clientX
   lastCursorY.value = e.clientY
   
-  // Reset inactivity timer on mouse move
   resetInactivityTimer()
   wakeCursor()
 }
@@ -64,15 +62,18 @@ const checkHoverable = (e) => {
   isHovering.value = !!isHoverable
 }
 
-// Sleeping cursor feature
 const startSleeping = () => {
   if (!isSleeping.value) {
     isSleeping.value = true
-    discoverEgg(EASTER_EGGS.SLEEPING_CURSOR)
+    wasSleeping.value = true
   }
 }
 
 const wakeCursor = () => {
+  if (isSleeping.value && wasSleeping.value) {
+    discoverEgg(EASTER_EGGS.SLEEPING_CURSOR)
+    wasSleeping.value = false
+  }
   isSleeping.value = false
 }
 
@@ -99,7 +100,6 @@ onMounted(() => {
     document.addEventListener('mousedown', handleMouseDown)
     document.addEventListener('mouseup', handleMouseUp)
     
-    // Start inactivity timer
     resetInactivityTimer()
     
     animateDot()
@@ -123,7 +123,6 @@ onUnmounted(() => {
 
 <template>
   <div v-if="!isMobile" class="custom-cursor" :class="{ visible: isVisible }">
-    <!-- Normal cursor -->
     <div v-if="!isSleeping"
       class="cursor-ring"
       :class="{ hovering: isHovering, clicking: isClicking }"
@@ -135,7 +134,6 @@ onUnmounted(() => {
       :style="{ transform: `translate(${cursorX}px, ${cursorY}px)` }"
     ></div>
     
-    <!-- Sleeping cursor positioned at actual mouse location -->
     <div v-if="isSleeping"
       class="sleeping-cursor"
       :style="{ 
@@ -219,7 +217,6 @@ onUnmounted(() => {
   }
 }
 
-// Sleeping cursor positioned at actual mouse location
 .sleeping-cursor {
   position: absolute;
   transform: translate(-20px, -20px);

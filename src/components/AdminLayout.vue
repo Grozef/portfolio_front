@@ -18,7 +18,7 @@
     const user = computed(() => authStore.user)
     
     const menuItems = [
-      { path: '/admin', icon: '◆', label: 'Dashboard', exact: true },
+      { path: '/Moi', icon: '◆', label: 'Dashboard', exact: true },
       { path: '/admin/books', icon: '◈', label: 'Books' },
       { path: '/admin/messages', icon: '◇', label: 'Messages' },
     ]

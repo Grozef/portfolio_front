@@ -36,7 +36,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, nextTick } from 'vue'
 import { RouterView, useRoute } from 'vue-router'
 import CustomCursor from '@/components/CustomCursor.vue'
 import GrainOverlay from '@/components/GrainOverlay.vue'
@@ -58,11 +58,10 @@ const route = useRoute()
 const isMobile = ref(false)
 const showMasterEgg = ref(false)
 const showKonami = ref(false)
-const asciiArtTriggered = ref(false)
 const showGrandCompletion = ref(false)
 const discoveryStartTime = ref(Date.now())
 
-const totalEggs = 17
+const totalEggs = 18
 
 const { allEggsDiscovered, discoveredEggs, masterEggTriggered, discoverEgg, EASTER_EGGS } = useEasterEggs()
 
@@ -83,52 +82,54 @@ watch(() => route.path, (newPath) => {
   checkRouteAndDeactivate(newPath)
 })
 
+// ASCII Art display function - DISPLAYS ON EVERY HOME PAGE VISIT
 const displayASCIIWelcome = () => {
-  if (asciiArtTriggered.value) return
-  
   const asciiArt = `
-   ╔════════════════════════════════════════════════════════╗
-   ║                                                        ║
-   ║              Welcome to François's Portfolio           ║
-   ║                                                        ║
-   ║                    ___________________                 ║
-   ║                   |  _____________  |                  ║
-   ║                   | |             | |                  ║
-   ║                   | |   > _       | |                  ║
-   ║                   | |             | |                  ║
-   ║                   | |_____________| |                  ║
-   ║                   |_________________|                  ║
-   ║                        |  |_| |  |                     ║
-   ║                     ___|________|___                   ║
-   ║                    |________________|                  ║
-   ║                                                        ║
-   ║              Type 'help' to get started                ║
-   ║                                                        ║
-   ║           Hint: ${totalEggs} easter eggs are hidden    ║
-   ║                  Can you find them all?                ║
-   ║                                                        ║
-   ╚════════════════════════════════════════════════════════╝
+ ╔════════════════════════════════════════════════════════╗
+ ║                                                        ║
+ ║              Welcome to François's Portfolio           ║
+ ║                                                        ║
+ ║                    ___________________                 ║
+ ║                   |  _____________  |                  ║
+ ║                   | |             | |                  ║
+ ║                   | |   > _       | |                  ║
+ ║                   | |             | |                  ║
+ ║                   | |_____________| |                  ║
+ ║                   |_________________|                  ║
+ ║                        |  |_| |  |                     ║
+ ║                     ___|________|___                   ║
+ ║                    |________________|                  ║
+ ║                                                        ║
+ ║              Type 'help' to get started                ║
+ ║                                                        ║
+ ║           Hint: ${totalEggs} easter eggs are hidden    ║
+ ║                  Can you find them all?                ║
+ ║                                                        ║
+ ╚════════════════════════════════════════════════════════╝
   `
 
   console.log('%c' + asciiArt, 'color: #c9a227; font-family: monospace; font-size: 12px; line-height: 1.2;')
-  console.log('%cEaster Egg Discovered: ASCII Art Console Welcome', 'color: #27ca40; font-weight: bold; font-size: 14px;')
+  console.log('%c Easter Egg Discovered: ASCII Art Console Welcome', 'color: #27ca40; font-weight: bold; font-size: 14px;')
   console.log('%cPro tip: Check out /humans.txt for more info!', 'color: #4a9eff; font-size: 12px;')
-  console.log('%cTry the Konami Code: ↑ ↑ ↓ ↓ ← → ← → B A', 'color: #ffa500; font-size: 12px;')
+  console.log('%cDo you know what the Konami Komando is ?', 'color: #ffa500; font-size: 12px;')
   
+  // Discover the easter egg
   discoverEgg(EASTER_EGGS.ASCII_ART)
-  asciiArtTriggered.value = true
-  sessionStorage.setItem('ascii_art_shown', 'true')
 }
 
+// Watch route changes and display ASCII art on home page
 watch(() => route.path, (newPath) => {
   if (newPath === '/' || newPath === '/home') {
-    const alreadyShown = sessionStorage.getItem('ascii_art_shown')
-    if (!alreadyShown) {
-      setTimeout(displayASCIIWelcome, 500)
-    }
+    // Use nextTick to ensure DOM is ready
+    nextTick(() => {
+      setTimeout(() => {
+        displayASCIIWelcome()
+      }, 300)
+    })
   }
 }, { immediate: true })
 
+// Watch for all eggs discovered
 watch(allEggsDiscovered, (allDiscovered) => {
   if (allDiscovered && !masterEggTriggered.value) {
     setTimeout(() => {
@@ -143,11 +144,13 @@ onMounted(() => {
     navigator.userAgent
   )
   
+  // Display ASCII art on mount if on home page
   if (route.path === '/' || route.path === '/home') {
-    const alreadyShown = sessionStorage.getItem('ascii_art_shown')
-    if (!alreadyShown) {
-      setTimeout(displayASCIIWelcome, 500)
-    }
+    nextTick(() => {
+      setTimeout(() => {
+        displayASCIIWelcome()
+      }, 300)
+    })
   }
 })
 </script>

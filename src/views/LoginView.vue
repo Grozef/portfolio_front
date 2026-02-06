@@ -1,12 +1,3 @@
-<!--
-  LoginView.vue - Page de connexion admin
-  
-  Fonctionnalites:
-  - Formulaire de connexion email/password
-  - Affichage du temps restant si compte bloque (brute force)
-  - Compte a rebours automatique
-  - Redirection vers /admin apres connexion
--->
 <template>
   <div class="login-page">
     <header class="page-header">
@@ -105,7 +96,7 @@ const handleSubmit = async () => {
   const success = await authStore.login(email.value, password.value)
 
   if (success) {
-    router.push('/admin')
+    router.push('/books')
   } else if (authStore.retryAfter > 0) {
     startCountdown(authStore.retryAfter)
   }

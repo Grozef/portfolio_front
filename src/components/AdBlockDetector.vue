@@ -2,9 +2,9 @@
   <Transition name="slide-down">
     <div v-if="showMessage" class="adblock-message">
       <div class="message-content">
-        <span class="icon">🎉</span>
+        <!-- <span class="icon"></span> -->
         <p class="message-text">
-          Merci de ne pas utiliser AdBlock ! Bon, je n'ai pas de pubs de toute façon... mais l'intention compte ! 😄
+          Merci de ne pas utiliser AdBlock ! Bon, je n'ai pas de pubs de toute façon...  
         </p>
         <button @click="dismissMessage" class="dismiss-btn" data-cursor-hover>
           <span>Got it!</span>

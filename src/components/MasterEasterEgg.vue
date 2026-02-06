@@ -181,6 +181,11 @@ onUnmounted(() => {
 </script>
 
 <style lang="scss" scoped>
+
+* {
+  cursor: default !important;
+}
+
 .master-egg-overlay {
   position: fixed;
   top: 0;
