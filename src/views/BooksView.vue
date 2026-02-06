@@ -387,7 +387,7 @@ const getStatusLabel = (status) => ({
 
 const goToTerminal = () => router.push('/')
 const goToLogin = () => router.push('/login')
-const goToAdminCarousel = () => router.push('/admin/carousel')
+const goToAdminCarousel = () => router.push('/Moi/carousel')
 const handleLogout = async () => { await authStore.logout() }
 
 onMounted(async () => {

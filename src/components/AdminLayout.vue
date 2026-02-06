@@ -1,40 +1,14 @@
 <!--
-  AdminLayout.vue - VIEWS (pas components!)
-  Layout admin avec sidebar et router-view
+  AdminLayout.vue - Layout admin avec sidebar
+  
+  Fonctionnalites:
+  - Sidebar navigation
+  - Header avec user info
+  - Slot pour le contenu
 -->
-<script setup>
-import { computed } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
-
-const router = useRouter()
-const route = useRoute()
-const authStore = useAuthStore()
-
-const user = computed(() => authStore.user)
-
-const menuItems = [
-  { path: '/Moi/messages', icon: '◇', label: 'Messages' },
-  { path: '/Moi/books', icon: '◈', label: 'Books' },
-  { path: '/Moi/carousel', icon: '○', label: 'Carousel' },
-]
-
-const isActive = (item) => {
-  return route.path.startsWith(item.path)
-}
-
-const handleLogout = async () => {
-  await authStore.logout()
-  router.push('/')
-}
-
-const goToSite = () => {
-  router.push('/')
-}
-</script>
-
 <template>
   <div class="admin-layout">
+    <!-- Sidebar -->
     <aside class="sidebar">
       <div class="sidebar-header">
         <span class="logo-symbol">◆</span>
@@ -42,14 +16,8 @@ const goToSite = () => {
       </div>
 
       <nav class="sidebar-nav">
-        <router-link
-          v-for="item in menuItems"
-          :key="item.path"
-          :to="item.path"
-          class="nav-item"
-          :class="{ active: isActive(item) }"
-          data-cursor-hover
-        >
+        <router-link v-for="item in menuItems" :key="item.path" :to="item.path" class="nav-item"
+          :class="{ active: isActive(item) }" data-cursor-hover>
           <span class="nav-icon">{{ item.icon }}</span>
           <span class="nav-label">{{ item.label }}</span>
         </router-link>
@@ -63,10 +31,14 @@ const goToSite = () => {
       </div>
     </aside>
 
+    <!-- Main Content -->
     <div class="main-wrapper">
-      <header class="admin-header">
-        <div class="header-title">Dashboard</div>
-        
+      <!-- Header -->
+      <!-- <header class="admin-header">
+        <div class="header-title">
+          <slot name="header-title">Dashboard</slot>
+        </div>
+
         <div class="header-actions">
           <div class="user-info" v-if="user">
             <span class="user-name">{{ user.name }}</span>
@@ -76,14 +48,50 @@ const goToSite = () => {
             Logout
           </button>
         </div>
-      </header>
+      </header> -->
 
+      <!-- Content -->
       <main class="admin-content">
-        <router-view />
+        <slot></slot>
       </main>
     </div>
   </div>
 </template>
+
+<script setup>
+import { computed } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+
+const router = useRouter()
+const route = useRoute()
+const authStore = useAuthStore()
+
+const user = computed(() => authStore.user)
+
+const menuItems = [
+  { path: '/Moi', icon: '◆', label: 'Dashboard', exact: true },
+  { path: '/books', icon: '◈', label: 'Books' },
+  { path: '/messages', icon: '◇', label: 'Messages' },
+  { path: '/carousel', icon: '◆', label: 'Carousel' },
+]
+
+const isActive = (item) => {
+  if (item.exact) {
+    return route.path === item.path
+  }
+  return route.path.startsWith(item.path)
+}
+
+const handleLogout = async () => {
+  await authStore.logout()
+  router.push('/')
+}
+
+const goToSite = () => {
+  router.push('/')
+}
+</script>
 
 <style lang="scss" scoped>
 .admin-layout {
