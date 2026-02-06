@@ -82,8 +82,13 @@ watch(() => route.path, (newPath) => {
   checkRouteAndDeactivate(newPath)
 })
 
-// ASCII Art display function - DISPLAYS ON EVERY HOME PAGE VISIT
+// ASCII Art display function - DISPLAYS ONLY ONCE PER SESSION
+const asciiArtShown = ref(false)
+
 const displayASCIIWelcome = () => {
+  // Only display once per session to avoid console spam
+  if (asciiArtShown.value) return
+  
   const asciiArt = `
  ╔════════════════════════════════════════════════════════╗
  ║                                                        ║
@@ -115,9 +120,12 @@ const displayASCIIWelcome = () => {
   
   // Discover the easter egg
   discoverEgg(EASTER_EGGS.ASCII_ART)
+  
+  // Mark as shown for this session
+  asciiArtShown.value = true
 }
 
-// Watch route changes and display ASCII art on home page
+// Watch route changes and display ASCII art on home page ONCE
 watch(() => route.path, (newPath) => {
   if (newPath === '/' || newPath === '/home') {
     // Use nextTick to ensure DOM is ready
@@ -129,7 +137,7 @@ watch(() => route.path, (newPath) => {
   }
 }, { immediate: true })
 
-// Watch for all eggs discovered
+// Watch for all eggs discovered - trigger globally
 watch(allEggsDiscovered, (allDiscovered) => {
   if (allDiscovered && !masterEggTriggered.value) {
     setTimeout(() => {
@@ -144,7 +152,7 @@ onMounted(() => {
     navigator.userAgent
   )
   
-  // Display ASCII art on mount if on home page
+  // Display ASCII art on mount if on home page (only once)
   if (route.path === '/' || route.path === '/home') {
     nextTick(() => {
       setTimeout(() => {

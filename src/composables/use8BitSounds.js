@@ -4,6 +4,17 @@ import { useEasterEggs } from './useEasterEggs'
 const soundsInitialized = ref(false)
 const audioContext = ref(null)
 
+// HTML5 Audio for 8-bit music
+const music8Bit = ref(null)
+const isMusicPlaying = ref(false)
+
+// Initialize music element
+if (typeof window !== 'undefined') {
+  music8Bit.value = new Audio('/sound/djartmusic-the-return-of-the-8-bit-era-301292.mp3')
+  music8Bit.value.loop = true
+  music8Bit.value.volume = 1
+}
+
 // Create 8-bit style sound using Web Audio API
 const create8BitSound = (frequency = 440, duration = 0.1, type = 'square') => {
   if (!audioContext.value) {
@@ -42,6 +53,7 @@ const soundEffects = {
 export function use8BitSounds() {
   const { discoverEgg, EASTER_EGGS, isDiscovered } = useEasterEggs()
   
+  // Play beep sound effect (for hover)
   const playSound = (soundType = 'hover') => {
     try {
       if (soundEffects[soundType]) {
@@ -58,16 +70,75 @@ export function use8BitSounds() {
     }
   }
 
+  // Toggle 8-bit music (for click)
+  const toggleMusic = () => {
+    if (!music8Bit.value) return
+
+    try {
+      if (isMusicPlaying.value) {
+        music8Bit.value.pause()
+        isMusicPlaying.value = false
+      } else {
+        music8Bit.value.play()
+        isMusicPlaying.value = true
+        
+        // Discover easter egg on first music play
+        if (!soundsInitialized.value && !isDiscovered(EASTER_EGGS.SOUND_EFFECTS)) {
+          soundsInitialized.value = true
+          discoverEgg(EASTER_EGGS.SOUND_EFFECTS)
+        }
+      }
+    } catch (error) {
+      console.error('Failed to toggle music:', error)
+    }
+  }
+
+  // Play 8-bit music
+  const playMusic = () => {
+    if (!music8Bit.value || isMusicPlaying.value) return
+    
+    try {
+      music8Bit.value.play()
+      isMusicPlaying.value = true
+      
+      if (!soundsInitialized.value && !isDiscovered(EASTER_EGGS.SOUND_EFFECTS)) {
+        soundsInitialized.value = true
+        discoverEgg(EASTER_EGGS.SOUND_EFFECTS)
+      }
+    } catch (error) {
+      console.error('Failed to play music:', error)
+    }
+  }
+
+  // Pause 8-bit music
+  const pauseMusic = () => {
+    if (!music8Bit.value || !isMusicPlaying.value) return
+    
+    try {
+      music8Bit.value.pause()
+      isMusicPlaying.value = false
+    } catch (error) {
+      console.error('Failed to pause music:', error)
+    }
+  }
+
   const playHoverSound = () => playSound('hover')
   const playClickSound = () => playSound('click')
   const playSuccessSound = () => playSound('success')
   const playBlipSound = () => playSound('blip')
 
   return {
+    // Sound effects
     playSound,
     playHoverSound,
     playClickSound,
     playSuccessSound,
-    playBlipSound
+    playBlipSound,
+    
+    // Music controls
+    toggleMusic,
+    playMusic,
+    pauseMusic,
+    isMusicPlaying
   }
 }

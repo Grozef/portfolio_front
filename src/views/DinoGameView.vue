@@ -57,7 +57,7 @@ import { useRouter } from 'vue-router'
 import { useEasterEggs } from '@/composables/useEasterEggs'
 
 const router = useRouter()
-const { discoverEgg, EASTER_EGGS } = useEasterEggs()
+const { discoverEgg, isDiscovered, EASTER_EGGS } = useEasterEggs()
 
 const gameCanvas = ref(null)
 const canvasWidth = 800
@@ -198,6 +198,11 @@ const updateGame = () => {
 
   // Update score
   score.value++
+  
+  // Unlock DINO_GAME easter egg at 1000 points
+  if (score.value === 1000 && !isDiscovered(EASTER_EGGS.DINO_GAME)) {
+    discoverEgg(EASTER_EGGS.DINO_GAME)
+  }
   
   // Increase difficulty
   if (score.value % 500 === 0) {

@@ -13,7 +13,7 @@
 
     <main class="about-main">
       <!-- Hero section -->
-           <HiddenMusicPlayer musicSrc="/audio/hold-music.mp3" />
+           <HiddenMusicPlayer musicSrc="/sound/mindmist-sounds-of-waves-313367.mp3" />
            
       <section class="hero-section">
         <div class="hero-content">
