@@ -9,24 +9,17 @@
           <span class="btn close" @click="$router.push('/')"></span>
         </div>
       </div>
-      
+
       <div class="terminal-body" ref="terminalBody">
         <div v-for="(line, index) in terminalLines" :key="index" class="terminal-line">
           <span v-if="line.prompt" class="prompt">{{ line.prompt }}</span>
           <span :class="line.class">{{ line.text }}</span>
         </div>
-        
+
         <div v-if="showInput" class="terminal-input-line">
           <span class="prompt">{{ currentPrompt }}</span>
-          <input
-            ref="inputRef"
-            v-model="currentInput"
-            @keydown.enter="handleEnter"
-            type="text"
-            class="terminal-input"
-            :type="inputType"
-            autofocus
-          />
+          <input ref="inputRef" v-model="currentInput" @keydown.enter="handleEnter" type="text" class="terminal-input"
+            :type="inputType" autofocus />
           <span class="cursor">_</span>
         </div>
       </div>
@@ -42,6 +35,12 @@ import { useEasterEggs } from '@/composables/useEasterEggs'
 const router = useRouter()
 const { discoverEgg, EASTER_EGGS } = useEasterEggs()
 
+// --- 1. DYNAMIC RECIPE IMPORT ---
+// Vite's glob import to scan the directory for JSON files
+// 'eager: true' loads them immediately instead of lazy-loading
+const recipeFiles = import.meta.glob('@/data/recipes/**/*.json', { eager: true });
+
+// --- 2. TERMINAL STATE ---
 const terminalBody = ref(null)
 const inputRef = ref(null)
 const terminalLines = ref([])
@@ -49,20 +48,46 @@ const currentInput = ref('')
 const currentPrompt = ref('login: ')
 const showInput = ref(false)
 const inputType = ref('text')
-const loginStep = ref(0) // 0 = username, 1 = password
+
+// --- 3. SHELL & LOGIN STATE ---
+const isMaster = ref(false)
+const currentDir = ref('/') // Options: '/', 'desserts', 'plats', 'entrees'
+const loginStep = ref(0)    // 0 = username, 1 = password
 const username = ref('')
 const attemptCount = ref(0)
 
-const messages = {
-  failed_login: [
-    "Nice try, mais on n'est plus en 2004. 🔒",
-    "Accès refusé. Peut-être dans une autre vie ? 🚫",
-    "admin/admin ? Vraiment ? C'est ton meilleur coup ? 😏",
-    "Erreur 403: Trop prévisible. 🎭",
-    "Permission denied. Essaye encore ! (ou pas) 🛡️"
-  ]
+// Virtual filesystem for the cookbook
+const cookbook = ref({
+  desserts: {},
+  plats: {},
+  entrees: {}
+})
+
+// --- 4. DATA LOADING ---
+const loadRecipes = () => {
+  try {
+    for (const path in recipeFiles) {
+      // Parse path (e.g., /src/data/recipes/desserts/cookies.json)
+      const parts = path.split('/')
+      const category = parts[parts.length - 2] // Extract folder name
+      const fileName = parts[parts.length - 1].replace('.json', '.txt') // Virtual .txt extension
+      
+      // Get the JSON content (default export)
+      const content = recipeFiles[path].default || recipeFiles[path]
+      
+      if (cookbook.value[category]) {
+        cookbook.value[category][fileName] = {
+          text: content.display || "Content missing (key: 'display')",
+          data: content.downloadData || {}
+        }
+      }
+    }
+  } catch (err) {
+    console.error("Failed to load cookbook archives:", err)
+  }
 }
 
+// --- 5. UTILITY FUNCTIONS ---
 const addLine = (text, className = '', prompt = '') => {
   terminalLines.value.push({ text, class: className, prompt })
   nextTick(() => {
@@ -72,127 +97,166 @@ const addLine = (text, className = '', prompt = '') => {
   })
 }
 
-const typeWriter = async (text, delay = 30) => {
-  for (let i = 0; i < text.length; i++) {
-    await new Promise(resolve => setTimeout(resolve, delay))
-    if (terminalLines.value.length > 0) {
-      const lastLine = terminalLines.value[terminalLines.value.length - 1]
-      lastLine.text = text.substring(0, i + 1)
-    }
-  }
+const downloadJSON = (fileName, data) => {
+  const jsonString = JSON.stringify(data, null, 2)
+  const blob = new Blob([jsonString], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = fileName.replace('.txt', '.json')
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  URL.revokeObjectURL(url)
+  addLine(`[SYSTEM] File ${fileName.replace('.txt', '.json')} downloaded successfully.`, 'success')
 }
 
-const initializeTerminal = async () => {
-  await new Promise(resolve => setTimeout(resolve, 500))
-  
-  addLine('Initializing secure connection...')
-  await new Promise(resolve => setTimeout(resolve, 1000))
-  
-  addLine('SSH-2.0-OpenSSH_8.4p1 Debian-5+deb11u1', 'success')
-  await new Promise(resolve => setTimeout(resolve, 500))
-  
-  addLine('')
-  addLine('╔════════════════════════════════════════╗', 'accent')
-  addLine('║    PORTFOLIO ADMINISTRATION SYSTEM     ║', 'accent')
-  addLine('║          Unauthorized Access           ║', 'accent')
-  addLine('║           Will Be Monitored            ║', 'accent')
-  addLine('╚════════════════════════════════════════╝', 'accent')
-  addLine('')
-  
-  addLine('Type "exit" or "quit" to leave this terminal', 'dim')
-  
-  await new Promise(resolve => setTimeout(resolve, 800))
-  
-  showInput.value = true
-  nextTick(() => {
-    inputRef.value?.focus()
-  })
-  
-  // Discover easter egg
-  discoverEgg(EASTER_EGGS.FAKE_ADMIN)
-}
-
+// --- 6. COMMAND HANDLER ---
 const handleEnter = async () => {
   const input = currentInput.value.trim()
+  const args = input.split(' ')
+  const command = args[0].toLowerCase()
   
-  // Check for exit command at any stage
-  if (input.toLowerCase() === 'exit' || input.toLowerCase() === 'quit') {
+  // A. Universal Exit Command
+  if (command === 'exit' || command === 'quit') {
     addLine(input, '', currentPrompt.value)
-    currentInput.value = ''
-    showInput.value = false
-    
-    await new Promise(resolve => setTimeout(resolve, 500))
-    addLine('Exiting fake admin terminal...', 'success')
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    addLine('Goodbye!', 'success')
-    await new Promise(resolve => setTimeout(resolve, 1000))
     router.push('/')
     return
   }
-  
-  if (loginStep.value === 0) {
-    // Username step
-    addLine(input, '', 'login: ')
-    username.value = input
-    currentInput.value = ''
-    currentPrompt.value = 'password: '
-    inputType.value = 'password'
-    loginStep.value = 1
-  } else {
-    // Password step
-    addLine('•'.repeat(input.length), '', 'password: ')
-    currentInput.value = ''
+
+  // B. MASTER CODE DETECTION
+  if (input === 'EGG-MLC4O1EB-MASTER' && !isMaster.value) {
+    addLine('********', '', currentPrompt.value)
+    isMaster.value = true
     showInput.value = false
-    
-    await new Promise(resolve => setTimeout(resolve, 800))
-    addLine('Authenticating...', 'dim')
-    await new Promise(resolve => setTimeout(resolve, 1500))
-    
-    attemptCount.value++
-    
-    // Check credentials
-    if (username.value.toLowerCase() === 'admin' && input.toLowerCase() === 'admin') {
-      const message = messages.failed_login[0]
-      addLine(message, 'error')
-    } else {
-      const randomMessage = messages.failed_login[Math.floor(Math.random() * messages.failed_login.length)]
-      addLine(randomMessage, 'error')
+    currentInput.value = ''
+    await new Promise(r => setTimeout(r, 600))
+    addLine('(!) WARNING: KERNEL OVERRIDE DETECTED', 'warning')
+    await new Promise(r => setTimeout(r, 800))
+    addLine('MASTER ACCESS GRANTED. Welcome back, Chef !', 'success')
+    addLine('Type "help" to see cookbook commands.', 'dim')
+    currentPrompt.value = 'root@portfolio:~# '
+    showInput.value = true
+    return
+  }
+
+  // C. MASTER SHELL MODE (Recipes & Navigation)
+  if (isMaster.value) {
+    addLine(input, '', currentPrompt.value)
+    currentInput.value = ''
+
+    switch (command) {
+      case 'ls':
+        if (currentDir.value === '/') {
+          addLine(' plats/  desserts/', 'accent')
+        } else {
+          const folder = currentDir.value.replace('/', '')
+          const files = Object.keys(cookbook.value[folder] || {}).join('  ')
+          addLine(files || '(Empty directory)', 'dim')
+        }
+        break
+
+      case 'cd':
+        const target = args[1]
+        if (!target || target === '..' || target === '/' || target === '~') {
+          currentDir.value = '/'
+          currentPrompt.value = 'root@portfolio:~# '
+        } else {
+          const folder = target.replace('/', '')
+          if (cookbook.value[folder]) {
+            currentDir.value = `/${folder}`
+            currentPrompt.value = `root@portfolio:~/${folder}# `
+          } else {
+            addLine(`cd: no such directory: ${target}`, 'error')
+          }
+        }
+        break
+
+      case 'cat':
+        const file = args[1]
+        const folder = currentDir.value.replace('/', '')
+        if (folder && cookbook.value[folder][file]) {
+          addLine(cookbook.value[folder][file].text)
+        } else {
+          addLine(`cat: ${file || 'null'}: No such file`, 'error')
+        }
+        break
+
+      case 'download':
+        const fDown = args[1]
+        const dDown = currentDir.value.replace('/', '')
+        if (dDown && cookbook.value[dDown][fDown]) {
+          downloadJSON(fDown, cookbook.value[dDown][fDown].data)
+        } else {
+          addLine("Usage: download [filename.txt]", "warning")
+        }
+        break
+
+      case 'help':
+        addLine('Available commands: ls, cd, cat, download, clear, exit')
+        break
+
+      case 'clear':
+        terminalLines.value = []
+        break
+
+      default:
+        if (input) addLine(`bash: ${command}: command not found`, 'error')
     }
-    
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    addLine('')
-    addLine(`Login attempt #${attemptCount.value} failed.`, 'warning')
-    
-    if (attemptCount.value >= 3) {
-      await new Promise(resolve => setTimeout(resolve, 800))
-      addLine('')
-      addLine('Trop de tentatives échouées. Retour à l\'accueil...', 'warning')
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      router.push('/')
+  } 
+  
+  // D. STANDARD LOGIN MODE
+  else {
+    if (loginStep.value === 0) {
+      addLine(input, '', 'login: ')
+      username.value = input
+      currentInput.value = ''
+      currentPrompt.value = 'password: '
+      inputType.value = 'password'
+      loginStep.value = 1
     } else {
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      addLine('')
-      addLine('Hint: Type "exit" to leave this terminal', 'dim')
-      loginStep.value = 0
-      username.value = ''
-      currentPrompt.value = 'login: '
-      inputType.value = 'text'
-      showInput.value = true
-      nextTick(() => {
-        inputRef.value?.focus()
-      })
+      addLine('•'.repeat(input.length), '', 'password: ')
+      currentInput.value = ''
+      showInput.value = false
+      
+      await new Promise(r => setTimeout(r, 800))
+      addLine('Authenticating...', 'dim')
+      await new Promise(r => setTimeout(r, 1000))
+      
+      addLine('Permission denied (publickey).', 'error')
+      attemptCount.value++
+      
+      if (attemptCount.value >= 3) {
+        addLine('Too many failed attempts. Disconnecting...', 'warning')
+        await new Promise(r => setTimeout(r, 1500))
+        router.push('/')
+      } else {
+        loginStep.value = 0
+        currentPrompt.value = 'login: '
+        inputType.value = 'text'
+        showInput.value = true
+        nextTick(() => inputRef.value?.focus())
+      }
     }
   }
 }
 
-onMounted(async () => {
-  await nextTick()
-  initializeTerminal()
+// --- 7. INITIALIZATION ---
+onMounted(() => {
+  loadRecipes() // Load data from JSON files first
+  
+  setTimeout(() => {
+    addLine('SSH-2.0-OpenSSH_8.4p1 Debian-5+deb11u1', 'success')
+    addLine('Authorized access only. All activities are logged.', 'dim')
+    showInput.value = true
+    nextTick(() => inputRef.value?.focus())
+  }, 500)
+  
+  discoverEgg(EASTER_EGGS.FAKE_ADMIN)
 })
 </script>
 
 <style lang="scss" scoped>
-
 * {
   cursor: default !important;
 }
@@ -248,18 +312,18 @@ onMounted(async () => {
   height: 12px;
   border-radius: 50%;
   cursor: pointer;
-  
+
   &.minimize {
     background: #ffbd2e;
   }
-  
+
   &.maximize {
     background: #28c940;
   }
-  
+
   &.close {
     background: #ff5f57;
-    
+
     &:hover {
       filter: brightness(1.2);
     }
@@ -267,7 +331,7 @@ onMounted(async () => {
 }
 
 .terminal-body {
-  white-space: pre; 
+  white-space: pre;
   font-family: 'Courier New', monospace;
 
   padding: 1.5rem;
@@ -278,15 +342,15 @@ onMounted(async () => {
   font-size: 0.95rem;
   line-height: 1.6;
   color: #33ff33;
-  
+
   &::-webkit-scrollbar {
     width: 8px;
   }
-  
+
   &::-webkit-scrollbar-track {
     background: #0a0a0a;
   }
-  
+
   &::-webkit-scrollbar-thumb {
     background: #33ff33;
     border-radius: 4px;
@@ -295,29 +359,29 @@ onMounted(async () => {
 
 .terminal-line {
   margin-bottom: 0.25rem;
-  
+
   .prompt {
     color: #00ff00;
     font-weight: bold;
     margin-right: 0.5rem;
   }
-  
+
   &.success {
     color: #00ff00;
   }
-  
+
   &.error {
     color: #ff4444;
   }
-  
+
   &.warning {
     color: #ffaa00;
   }
-  
+
   &.accent {
     color: #00ffff;
   }
-  
+
   &.dim {
     color: #66ff66;
     opacity: 0.7;
@@ -328,7 +392,7 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   margin-top: 0.5rem;
-  
+
   .prompt {
     color: #00ff00;
     font-weight: bold;
@@ -344,7 +408,7 @@ onMounted(async () => {
   color: #33ff33;
   font-family: 'Courier New', monospace;
   font-size: 0.95rem;
-  
+
   &[type="password"] {
     letter-spacing: 0.2em;
   }
@@ -356,10 +420,14 @@ onMounted(async () => {
 }
 
 @keyframes blink {
-  0%, 50% {
+
+  0%,
+  50% {
     opacity: 1;
   }
-  51%, 100% {
+
+  51%,
+  100% {
     opacity: 0;
   }
 }
@@ -368,7 +436,7 @@ onMounted(async () => {
   .fake-admin-terminal {
     padding: 1rem;
   }
-  
+
   .terminal-body {
     font-size: 0.85rem;
     height: 400px;

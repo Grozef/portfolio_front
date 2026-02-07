@@ -9,7 +9,7 @@ Location: France
 After a few years in another field of competence, a special thanks to everyone that made this adventure possible.
 
 All my teachers from the CCI lyon, special thanks to Mr Albert, (i know he doesn't want me to display his name or his age ;),
-Mr Thinkedou, he will recognize himself, and Mr Ouvrier the master of technological survey.
+Mr Thinkedou, the JS Master, The crowned spanish leader of PHP and Mr Ouvrier, the boss of technological survey, they will recognize themselves.
 
 Thanks to all my coworkers from the CCI at HighConnexion. They help me start. Julien too.
 
@@ -32,7 +32,7 @@ Thanks to MindMist : check his pixabay profile here: https://pixabay.com/fr/user
 
 Open Source Community: For amazing tools and inspiration. 
 
-Claude helped me a lot too i ain't gonna lie.
+Claude, Gemini and Mistral helped me a lot too i ain't gonna lie.
 
 /* TECHNOLOGY */
 
@@ -45,27 +45,34 @@ Database: MySQL
 
 /* EASTER EGGS */
 
-This portfolio contains 11 hidden easter eggs!
+This portfolio contains 21 hidden easter eggs!
 Can you find them all?
 
-1. try to escape Vim.
-2. ASCII Art Console Welcome
-3. There is a button that does'nt want to be touched.
-4. There's another one that does't want to be clicked too much.
-5. The dark mode is extreme.
-6. If you wait 30 seconds, you'll see.
-7. This File (humans.txt).
-8. the 404 page is interactive. Some of the links are not what they pretend.
-9. whoami is a classic command
+1.  try to escape Vim.
+2.  ASCII Art Console Welcome
+3.  There is a button that does'nt want to be touched.
+4.  There's another one that does't want to be clicked too much.
+5.  The dark mode is extreme.
+6.  If you wait 30 seconds, you'll see.
+7.  This File (humans.txt).
+8.  the 404 page is interactive. Some of the links are not what they pretend.
+9.  whoami is a classic command
 10. If you're old enough to know what Konami is, you'll understand.
 11. Pretend that you're the admin
-12. the sword cusrsor 
-13. an 8-bit sound_effect
+12. The sword cusrsor 
+13. An 8-bit sound_effect
 14. There's an hidden music Player
-15. do you know how to inspect a HTTP header ?
+15. Do you know how to inspect a HTTP header ?
 16. I'm not on X
-17. if you keep clickin' you'll find the dino game.
-18. Master Easter Egg (Find all others first!)
+17. If you keep clickin' you'll find the dino game.
+18. You're not a teapot. Don't try to brew coffee.
+20. The weather may change. Be carefull.
+21. I don't have commercials but somewhere i look for adBlock.
+
+22. Master Easter Egg (Find all others first!)
+
+Once you get the code, the trick is to put this code in the login field. 
+I hope you like to cook !
 
 /* SITE */
 

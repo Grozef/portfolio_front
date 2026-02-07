@@ -12,7 +12,7 @@
     >
       <span class="weather-icon">{{ weatherIcon }}</span>
       <span class="weather-temp">{{ weatherCondition === 'eruption' ? '900' : weatherData.temp }}°C</span>
-      <span class="weather-city">{{ weatherCondition === 'eruption' ? 'POMPEII' : weatherData.city }}</span>
+      <span class="weather-city">{{ weatherCondition === 'eruption' ? 'Eyjafjallajökull' : weatherData.city }}</span>
     </div>
   </div>
 </template>

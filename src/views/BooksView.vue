@@ -49,13 +49,13 @@
             <!-- <EyeTrackingPortrait /> -->
 
       <div class="stats-bar" v-if="stats">
+                <div class="stat-item"><span class="stat-value">{{ stats.to_read }}</span><span class="stat-label">To
+            Read</span>
+        </div>
         <div class="stat-item"><span class="stat-value">{{ stats.read }}</span><span class="stat-label">Read</span>
         </div>
         <div class="stat-item"><span class="stat-value">{{ stats.reading }}</span><span
             class="stat-label">Reading</span>
-        </div>
-        <div class="stat-item"><span class="stat-value">{{ stats.to_read }}</span><span class="stat-label">To
-            Read</span>
         </div>
       </div>
 
@@ -290,7 +290,7 @@ const prevCarouselImage = () => {
 const startCarouselAutoplay = () => {
   carouselInterval = setInterval(() => {
     nextCarouselImage()
-  }, 3600000) // 1 heure
+  }, 20000) 
 }
 
 const stopCarouselAutoplay = () => {
@@ -392,6 +392,9 @@ const handleLogout = async () => { await authStore.logout() }
 
 onMounted(async () => {
   await authStore.checkAuth()
+
+  booksStore.setFilter('to-read')
+  
   await Promise.all([
     booksStore.fetchBooks(),
     booksStore.fetchStats(),

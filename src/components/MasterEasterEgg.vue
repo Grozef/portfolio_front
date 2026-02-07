@@ -9,7 +9,7 @@
             <h2 class="achievement-title">ACHIEVEMENT UNLOCKED!</h2>
             <h3 class="achievement-name">Master Easter Egg Hunter</h3>
             <p class="achievement-desc">
-              You've discovered all {{ totalEggs }} easter eggs hidden throughout this portfolio!
+              You've discovered all {{ discoveredEggs.length }} easter eggs hidden throughout this portfolio!
             </p>
             <div class="egg-list">
               <div class="egg-item" v-for="egg in discoveredEggs" :key="egg">
@@ -20,8 +20,8 @@
             <div class="secret-content">
               <h4 class="secret-title">REWARD</h4>
               <p class="secret-text">
-                Congratulations! You've proven yourself to be a true explorer. 
-                As a reward, you've unlocked the secret developer mode. 
+                Congratulations! You've proven yourself to be a true explorer.
+                As a reward, you've unlocked the secret developer mode.
                 Check the console for special access codes!
               </p>
             </div>
@@ -135,7 +135,7 @@ const animateConfetti = () => {
 }
 
 const formatEggName = (eggId) => {
-  return eggId.split('_').map(word => 
+  return eggId.split('_').map(word =>
     word.charAt(0).toUpperCase() + word.slice(1)
   ).join(' ')
 }
@@ -151,8 +151,38 @@ const handleResize = () => {
   }
 }
 
+const playSuccessSound = () => {
+  const context = new (window.AudioContext || window.webkitAudioContext)()
+
+  const playNote = (freq, startTime, duration) => {
+    const osc = context.createOscillator()
+    const gain = context.createGain()
+
+    osc.type = 'sine'
+    osc.frequency.setValueAtTime(freq, startTime)
+
+    gain.gain.setValueAtTime(0, startTime)
+    gain.gain.linearRampToValueAtTime(0.2, startTime + 0.05)
+    gain.gain.exponentialRampToValueAtTime(0.01, startTime + duration)
+
+    osc.connect(gain)
+    gain.connect(context.destination)
+
+    osc.start(startTime)
+    osc.stop(startTime + duration)
+  }
+
+  // success sound
+  const now = context.currentTime
+  playNote(523.25, now, 0.5)        // C5
+  playNote(659.25, now + 0.1, 0.5)  // E5
+  playNote(783.99, now + 0.2, 0.5)  // G5
+  playNote(1046.50, now + 0.4, 0.8) // C6
+}
+
 watch(() => props.show, (newVal) => {
   if (newVal) {
+    playSuccessSound()
     setTimeout(initConfetti, 100)
     console.log('%cMASTER EASTER EGG UNLOCKED!', 'font-size: 20px; color: #c9a227; font-weight: bold;')
     console.log('%cSecret Developer Code: DEV_MODE_2024', 'font-size: 14px; color: #4a9eff;')
@@ -181,6 +211,9 @@ onUnmounted(() => {
 
 <style lang="scss" scoped>
 .master-egg-overlay {
+  // test cursor
+  cursor: auto !important;
+
   position: fixed;
   top: 0;
   left: 0;
@@ -212,6 +245,9 @@ onUnmounted(() => {
 }
 
 .achievement-badge {
+  // test cursor
+  cursor: pointer !important;
+
   background: var(--terminal-bg-secondary);
   border: 2px solid var(--terminal-accent);
   border-radius: 12px;
@@ -222,6 +258,8 @@ onUnmounted(() => {
 }
 
 .badge-icon {
+  // test cursor
+  cursor: pointer !important;
   font-size: 3rem;
   margin-bottom: 1rem;
   animation: iconBounce 1s ease infinite;
@@ -231,6 +269,9 @@ onUnmounted(() => {
 }
 
 .achievement-title {
+  // test cursor
+  cursor: pointer !important;
+
   font-family: var(--font-mono);
   font-size: 1rem;
   letter-spacing: 0.2em;
@@ -240,6 +281,9 @@ onUnmounted(() => {
 }
 
 .achievement-name {
+  // test cursor
+  cursor: pointer !important;
+
   font-family: var(--font-display);
   font-size: 2rem;
   color: var(--terminal-text);
@@ -247,6 +291,9 @@ onUnmounted(() => {
 }
 
 .achievement-desc {
+  // test cursor
+  cursor: pointer !important;
+
   font-family: var(--font-serif);
   font-size: 1.125rem;
   color: var(--terminal-text-dim);
@@ -255,6 +302,9 @@ onUnmounted(() => {
 }
 
 .egg-list {
+  // test cursor
+  cursor: pointer !important;
+
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 0.75rem;
@@ -262,9 +312,36 @@ onUnmounted(() => {
   padding: 1.5rem;
   background: var(--terminal-bg);
   border-radius: 8px;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+
+  /* ---  SCROLL --- */
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid rgba(201, 162, 39, 0.2);
+
+  /* Webkit - Chrome, Safari, Edge */
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: var(--terminal-bg);
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--terminal-accent);
+    border-radius: 10px;
+  }
+
+  /* Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: var(--terminal-accent) var(--terminal-bg);
 }
 
 .egg-item {
+  // test cursor
+  cursor: pointer !important;
+
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -293,6 +370,9 @@ onUnmounted(() => {
 }
 
 .secret-content {
+  // test cursor
+  cursor: pointer !important;
+
   background: rgba(201, 162, 39, 0.1);
   border: 1px solid var(--terminal-accent);
   border-radius: 8px;
@@ -301,6 +381,9 @@ onUnmounted(() => {
 }
 
 .secret-title {
+  // test cursor
+  cursor: pointer !important;
+
   font-family: var(--font-mono);
   font-size: 1rem;
   color: var(--terminal-accent);
@@ -308,6 +391,9 @@ onUnmounted(() => {
 }
 
 .secret-text {
+  // test cursor
+  cursor: pointer !important;
+
   font-family: var(--font-serif);
   font-size: 0.875rem;
   color: var(--terminal-text);
@@ -316,6 +402,9 @@ onUnmounted(() => {
 }
 
 .close-btn {
+  // test cursor
+  cursor: pointer !important;
+
   font-family: var(--font-mono);
   font-size: 1rem;
   padding: 1rem 2rem;
@@ -337,6 +426,7 @@ onUnmounted(() => {
     transform: scale(0.5) rotate(-10deg);
     opacity: 0;
   }
+
   100% {
     transform: scale(1) rotate(0deg);
     opacity: 1;
@@ -344,9 +434,12 @@ onUnmounted(() => {
 }
 
 @keyframes iconBounce {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0);
   }
+
   50% {
     transform: translateY(-10px);
   }

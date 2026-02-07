@@ -473,12 +473,36 @@ const executeCommand = async (input) => {
       await resetEasterEggsCommand()
       break
 
+    case 'x_project_dj_fresh_2005':
+      await developerHeaderMessage()
+      break  
+
     default:
       terminalStore.addToHistory({
         type: 'error',
         content: `Command not found: ${command}. Type 'help' for available commands.`
       })
   }
+}
+
+const developerHeaderMessage = async () => {
+  const { discoverEgg, EASTER_EGGS } = useEasterEggs()
+  discoverEgg(EASTER_EGGS.X_CODE)
+
+  terminalStore.addToHistory({
+    type: 'output',
+    format: 'ascii',
+    content: `
+  ╔═══════════════════════════════════════════════════════════╗
+  ║                                                           ║
+  ║          You've found the secret X code!                  ║
+  ║                                                           ║
+  ║          This was a hidden message from the developer.    ║
+  ║          Thanks for exploring the terminal!               ║
+  ║                                                           ║
+  ╚═══════════════════════════════════════════════════════════╝
+      `
+  })
 }
 
 const resetEasterEggsCommand = async () => {

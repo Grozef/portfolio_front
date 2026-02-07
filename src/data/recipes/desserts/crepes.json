@@ -1,0 +1,16 @@
+{
+  "display": "============================================================\n       CREPES \n============================================================\nTemp: 180°C | Temps: 10 min | Difficulté: Inexistante Facile\n------------------------------------------------------------\n\nINGRÉDIENTS :\n• 500 g de farine\n• 6 œufs\n• 1/2 litre de lait\n• 1/2 litre de bière\n• cuiere dans une poele legerement huilée.\n Manger.\n\n------------------------------------------------------------\n> Note : Trop bien\n============================================================",
+  "downloadData": {
+    "nomRecette": "Crêpes",
+    "categorie": "Dessert / Plats",
+    "temperatureFour": "180°C",
+    "tempsCuisson": "10 min",
+    "ingredients": [
+      "500 g de farine",
+      "6 oeufs",
+      "500 ml lait",
+      "500 ml de bière"
+    ],
+    "instructions": "Mélanger les oeufs et la farine d'abord, puis ajouter le lait et la bière progressivement afin de ne pas faire de grumeaux. cuire dans une poele legerement huilée. Si la pate repose une heure ou deux avant la cuisson, c'est encore meilleur. Ajoutez de la canelle en fin de saladier pour une version dessert."
+  }
+}

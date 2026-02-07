@@ -3,18 +3,18 @@
     <Transition name="completion">
       <div v-if="show" class="completion-overlay" @click="handleClose">
         <canvas ref="confettiCanvas" class="confetti-canvas"></canvas>
-        
+
         <div class="completion-content">
           <div class="trophy-icon">🏆</div>
-          
+
           <h1 class="completion-title">
             FÉLICITATIONS !
           </h1>
-          
+
           <p class="completion-subtitle">
             Tu as trouvé tous les {{ totalEggs }} easter eggs !
           </p>
-          
+
           <div class="stats-grid">
             <div class="stat-item">
               <span class="stat-label">Temps écoulé</span>
@@ -29,7 +29,7 @@
               <span class="stat-value">100%</span>
             </div>
           </div>
-          
+
           <div class="achievement-badge">
             <div class="badge-glow"></div>
             <div class="badge-content">
@@ -37,17 +37,17 @@
               <span class="badge-text">MASTER EGG HUNTER</span>
             </div>
           </div>
-          
+
           <div class="secret-message">
             <p>Tu as débloqué un secret spécial :</p>
             <code class="secret-code">{{ secretCode }}</code>
             <p class="secret-hint">Garde ce code précieusement...</p>
           </div>
-          
+
           <button @click="handleClose" class="close-button" data-cursor-hover>
             Continuer l'aventure
           </button>
-          
+
           <p class="click-hint">Clique n'importe où pour fermer</p>
         </div>
       </div>
@@ -82,18 +82,18 @@ const confettiParticles = []
 // Generate secret code
 const secretCode = computed(() => {
   const timestamp = Date.now()
-  return `EGG-${timestamp.toString(36).toUpperCase()}-MASTER`
+  return `EGG-MLC4O1EB-MASTER`
 })
 
 // Calculate time taken
 const timeTaken = computed(() => {
   if (!props.discoveryStartTime) return 'Unknown'
-  
+
   const elapsed = Date.now() - props.discoveryStartTime
   const hours = Math.floor(elapsed / 3600000)
   const minutes = Math.floor((elapsed % 3600000) / 60000)
   const seconds = Math.floor((elapsed % 60000) / 1000)
-  
+
   if (hours > 0) {
     return `${hours}h ${minutes}m`
   } else if (minutes > 0) {
@@ -190,7 +190,7 @@ const animateConfetti = () => {
 // Play celebration sound
 const playCelebrationSound = () => {
   const audioContext = new (window.AudioContext || window.webkitAudioContext)()
-  
+
   const notes = [523, 659, 784, 1047] // C, E, G, C
   notes.forEach((frequency, index) => {
     setTimeout(() => {
@@ -253,6 +253,9 @@ onUnmounted(() => {
 
 <style lang="scss" scoped>
 .completion-overlay {
+  // test cursor
+  cursor: pointer !important;
+
   position: fixed;
   top: 0;
   left: 0;
@@ -278,6 +281,9 @@ onUnmounted(() => {
 }
 
 .completion-content {
+  // test cursor
+  cursor: pointer !important;
+
   position: relative;
   max-width: 700px;
   width: 100%;
@@ -287,16 +293,22 @@ onUnmounted(() => {
 }
 
 .trophy-icon {
+  // test cursor
+  cursor: pointer !important;
+
   font-size: 6rem;
   margin-bottom: 1rem;
   animation: trophyFloat 3s ease-in-out infinite;
-  
+
   @media (max-width: 768px) {
     font-size: 4rem;
   }
 }
 
 .completion-title {
+  // test cursor
+  cursor: pointer !important;
+
   font-family: var(--font-display);
   font-size: 4rem;
   font-weight: 700;
@@ -304,29 +316,35 @@ onUnmounted(() => {
   margin-bottom: 1rem;
   text-shadow: 0 0 20px rgba(201, 162, 39, 0.5);
   animation: titlePulse 2s ease-in-out infinite;
-  
+
   @media (max-width: 768px) {
     font-size: 2.5rem;
   }
 }
 
 .completion-subtitle {
+  // test cursor
+  cursor: pointer !important;
+
   font-family: var(--font-mono);
   font-size: 1.5rem;
   color: var(--terminal-text);
   margin-bottom: 3rem;
-  
+
   @media (max-width: 768px) {
     font-size: 1.125rem;
   }
 }
 
 .stats-grid {
+  // test cursor
+  cursor: pointer !important;
+
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 2rem;
   margin-bottom: 3rem;
-  
+
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
     gap: 1.5rem;
@@ -334,12 +352,15 @@ onUnmounted(() => {
 }
 
 .stat-item {
+  // test cursor
+  cursor: pointer !important;
+
   padding: 1.5rem;
   background: var(--terminal-bg-secondary);
   border: 2px solid var(--terminal-border);
   border-radius: 8px;
   transition: all 0.3s ease;
-  
+
   &:hover {
     border-color: var(--terminal-accent);
     transform: translateY(-5px);
@@ -347,6 +368,9 @@ onUnmounted(() => {
 }
 
 .stat-label {
+  // test cursor
+  cursor: pointer !important;
+
   display: block;
   font-family: var(--font-mono);
   font-size: 0.875rem;
@@ -357,18 +381,24 @@ onUnmounted(() => {
 }
 
 .stat-value {
+  // test cursor
+  cursor: pointer !important;
+
   display: block;
   font-family: var(--font-display);
   font-size: 2rem;
   font-weight: 700;
   color: var(--terminal-accent);
-  
+
   @media (max-width: 768px) {
     font-size: 1.5rem;
   }
 }
 
 .achievement-badge {
+  // test cursor
+  cursor: pointer !important;
+
   position: relative;
   margin: 3rem auto;
   width: fit-content;
@@ -386,6 +416,9 @@ onUnmounted(() => {
 }
 
 .badge-content {
+  // test cursor
+  cursor: pointer !important;
+
   position: relative;
   display: flex;
   align-items: center;
@@ -397,10 +430,16 @@ onUnmounted(() => {
 }
 
 .badge-icon {
+  // test cursor
+  cursor: pointer !important;
+
   font-size: 2rem;
 }
 
 .badge-text {
+  // test cursor
+  cursor: pointer !important;
+
   font-family: var(--font-mono);
   font-size: 1.125rem;
   font-weight: 700;
@@ -409,12 +448,15 @@ onUnmounted(() => {
 }
 
 .secret-message {
+  // test cursor
+  cursor: pointer !important;
+
   margin: 3rem 0;
   padding: 2rem;
   background: var(--terminal-bg-secondary);
   border: 2px solid var(--terminal-accent);
   border-radius: 12px;
-  
+
   p {
     font-family: var(--font-mono);
     font-size: 0.95rem;
@@ -424,6 +466,9 @@ onUnmounted(() => {
 }
 
 .secret-code {
+  // test cursor
+  cursor: pointer !important;
+
   display: block;
   padding: 1rem 2rem;
   background: var(--terminal-bg);
@@ -438,12 +483,18 @@ onUnmounted(() => {
 }
 
 .secret-hint {
+  // test cursor
+  cursor: pointer !important;
+
   font-size: 0.875rem !important;
   color: var(--terminal-text-dim) !important;
   font-style: italic;
 }
 
 .close-button {
+  // test cursor
+  cursor: pointer !important;
+
   padding: 1rem 3rem;
   font-family: var(--font-mono);
   font-size: 1.125rem;
@@ -455,7 +506,7 @@ onUnmounted(() => {
   cursor: pointer;
   transition: all 0.3s ease;
   margin-bottom: 1rem;
-  
+
   &:hover {
     transform: translateY(-3px) scale(1.05);
     box-shadow: 0 10px 30px rgba(201, 162, 39, 0.5);
@@ -475,6 +526,7 @@ onUnmounted(() => {
     opacity: 0;
     transform: scale(0.9);
   }
+
   to {
     opacity: 1;
     transform: scale(1);
@@ -482,36 +534,48 @@ onUnmounted(() => {
 }
 
 @keyframes trophyFloat {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0) rotate(0deg);
   }
+
   50% {
     transform: translateY(-20px) rotate(10deg);
   }
 }
 
 @keyframes titlePulse {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: scale(1);
   }
+
   50% {
     transform: scale(1.05);
   }
 }
 
 @keyframes glowPulse {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 0.5;
   }
+
   50% {
     opacity: 1;
   }
 }
 
 @keyframes fadeInOut {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 0.5;
   }
+
   50% {
     opacity: 1;
   }
@@ -529,6 +593,7 @@ onUnmounted(() => {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -538,6 +603,7 @@ onUnmounted(() => {
   from {
     opacity: 1;
   }
+
   to {
     opacity: 0;
   }

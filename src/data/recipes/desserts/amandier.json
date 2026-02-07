@@ -1,0 +1,8 @@
+{
+  "display": "============================================================\n       🍰 L'AMANDIER (Le gâteau 100% amandes)\n============================================================\nSans Gluten | Très Moelleux | Préparation : 15 min\n------------------------------------------------------------\n\nINGRÉDIENTS :\n• 200g de poudre d'amandes\n• 150g de sucre\n• 100g de beurre fondu\n• 4 œufs\n• 1 bouchon de rhum (optionnel)\n\nINSTRUCTIONS :\n1. Préchauffer le four à 180°C.\n2. Fouetter les œufs avec le sucre jusqu'à blanchiment.\n3. Ajouter le beurre fondu puis la poudre d'amandes.\n4. Bien mélanger pour obtenir une pâte homogène.\n5. Verser dans un moule de 20cm.\n6. Enfourner 25 à 30 minutes. Le gâteau doit rester humide.\n\n------------------------------------------------------------\n> Note : Se conserve encore mieux le lendemain !\n============================================================",
+  "downloadData": {
+    "nom": "L'Amandier",
+    "categorie": "Dessert",
+    "stats": { "poudre_amande": "200g", "oeufs": 4 }
+  }
+}

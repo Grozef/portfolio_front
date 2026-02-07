@@ -61,6 +61,11 @@ const router = createRouter({
       name: 'dino-game',
       component: () => import('@/views/DinoGameView.vue')
     },
+    {
+      path: '/brew-coffee',
+      name: 'Teapot',
+      component: () => import('@/views/BrewCoffeeView.vue')
+    },
 
     // Real admin routes - at /Moi for security
     {

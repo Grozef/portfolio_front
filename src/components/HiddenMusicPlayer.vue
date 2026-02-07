@@ -1,7 +1,7 @@
 <template>
   <div class="hidden-music-player">
     <button 
-      @click="togglePlay"
+      @click="handleToggle" 
       class="play-button"
       :class="{ playing: isPlaying }"
       data-cursor-hover
@@ -10,14 +10,12 @@
       {{ isPlaying ? '⏸' : '▶' }}
     </button>
     
-    <audio ref="audioRef" loop>
-      <source :src="musicSrc" type="audio/mpeg">
-    </audio>
-  </div>
+    </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
+import { useMusic } from '@/composables/useMusic' // NEW: Import the global state
 import { useEasterEggs } from '@/composables/useEasterEggs'
 
 const props = defineProps({
@@ -27,31 +25,43 @@ const props = defineProps({
   }
 })
 
+// --- NEW LOGIC ---
+const { isPlaying, togglePlay } = useMusic()
 const { discoverEgg, EASTER_EGGS } = useEasterEggs()
-
-const audioRef = ref(null)
-const isPlaying = ref(false)
 const discovered = ref(false)
 
-const togglePlay = () => {
-  if (!audioRef.value) return
-
-  if (isPlaying.value) {
-    audioRef.value.pause()
-    isPlaying.value = false
-  } else {
-    audioRef.value.play()
-    isPlaying.value = true
-    
-    if (!discovered.value) {
-      discovered.value = true
-      discoverEgg(EASTER_EGGS.MUSIC_PLAYER)
-    }
+const handleToggle = () => {
+  togglePlay() // Uses the global engine
+  
+  // Keep your Easter Egg logic here (local to this button)
+  if (isPlaying.value && !discovered.value) {
+    discovered.value = true
+    discoverEgg(EASTER_EGGS.MUSIC_PLAYER)
   }
 }
+
+// --- OLD LOCAL LOGIC (For Analysis) ---
+/*
+const audioRef = ref(null)
+const isPlayingLocal = ref(false) // This was destroyed on page change
+
+const oldTogglePlay = () => {
+  if (!audioRef.value) return
+
+  if (isPlayingLocal.value) {
+    audioRef.value.pause()
+    isPlayingLocal.value = false
+  } else {
+    audioRef.value.play()
+    isPlayingLocal.value = true
+    // ... egg logic
+  }
+}
+*/
 </script>
 
 <style lang="scss" scoped>
+/* Styles remain exactly the same as your original code */
 .hidden-music-player {
   position: fixed;
   bottom: 1.5rem;
@@ -75,8 +85,6 @@ const togglePlay = () => {
   opacity: 0.1;
   transition: all 0.3s ease;
 
-  // HIDDEN by default - almost invisible
-  // Only reveals in dark mode
   @media (prefers-color-scheme: dark) {
     background: rgba(201, 162, 39, 0.2);
     border: 2px solid rgba(201, 162, 39, 0.8);

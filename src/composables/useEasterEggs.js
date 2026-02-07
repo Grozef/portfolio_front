@@ -20,6 +20,8 @@ const EASTER_EGGS = {
   ADBLOCK_DETECTOR: 'adblock_detector',
   FAKE_ADMIN: 'fake_admin',
   RICKROLL: 'rickroll',
+  TEA_POT: 'tea_pot',
+  X_CODE: 'x_code',
   MASTER_EGG: 'master_egg'
 }
 
@@ -42,6 +44,8 @@ const EASTER_EGG_NAMES = {
   adblock_detector: 'AdBlock Message',
   fake_admin: 'Fake Terminal',
   rickroll: 'Rick Roll',
+  tea_pot: 'It’s a Teapot',
+  x_code: 'X Dev Message',
   master_egg: 'Master Achievement'
 }
 
