@@ -23,6 +23,9 @@ let inactivityTimeout = null
 const INACTIVITY_DELAY = 30000
 
 const updateCursor = (e) => {
+  // Firefox fallback: make visible on first movement
+  if (!isVisible.value) isVisible.value = true
+  
   cursorX.value = e.clientX
   cursorY.value = e.clientY
   
@@ -39,25 +42,14 @@ const animateDot = () => {
   rafId = requestAnimationFrame(animateDot)
 }
 
-const handleMouseEnter = () => {
-  isVisible.value = true
-}
-
-const handleMouseLeave = () => {
-  isVisible.value = false
-}
-
-const handleMouseDown = () => {
-  isClicking.value = true
-  wakeCursor()
-}
-
-const handleMouseUp = () => {
-  isClicking.value = false
-}
+const handleMouseEnter = () => { isVisible.value = true }
+const handleMouseLeave = () => { isVisible.value = false }
+const handleMouseDown = () => { isClicking.value = true; wakeCursor() }
+const handleMouseUp = () => { isClicking.value = false }
 
 const checkHoverable = (e) => {
   const target = e.target
+  if (!target) return
   const isHoverable = target.closest('a, button, [data-cursor-hover], input, textarea, select')
   isHovering.value = !!isHoverable
 }
@@ -78,42 +70,39 @@ const wakeCursor = () => {
 }
 
 const resetInactivityTimer = () => {
-  if (inactivityTimeout) {
-    clearTimeout(inactivityTimeout)
-  }
-  
-  inactivityTimeout = setTimeout(() => {
-    startSleeping()
-  }, INACTIVITY_DELAY)
+  if (inactivityTimeout) clearTimeout(inactivityTimeout)
+  inactivityTimeout = setTimeout(startSleeping, INACTIVITY_DELAY)
 }
 
 onMounted(() => {
+  // Detect mobile/touch
   isMobile.value = window.matchMedia('(max-width: 768px)').matches ||
     'ontouchstart' in window ||
     navigator.maxTouchPoints > 0
 
   if (!isMobile.value) {
-    document.addEventListener('mousemove', updateCursor)
-    document.addEventListener('mousemove', checkHoverable)
-    document.addEventListener('mouseenter', handleMouseEnter)
-    document.addEventListener('mouseleave', handleMouseLeave)
-    document.addEventListener('mousedown', handleMouseDown)
-    document.addEventListener('mouseup', handleMouseUp)
+    window.addEventListener('mousemove', updateCursor)
+    window.addEventListener('mousemove', checkHoverable)
+    window.addEventListener('mouseover', checkHoverable) // Extra check for Firefox
+    window.addEventListener('mouseenter', handleMouseEnter)
+    window.addEventListener('mouseleave', handleMouseLeave)
+    window.addEventListener('mousedown', handleMouseDown)
+    window.addEventListener('mouseup', handleMouseUp)
     
     resetInactivityTimer()
-    
     animateDot()
   }
 })
 
 onUnmounted(() => {
   if (!isMobile.value) {
-    document.removeEventListener('mousemove', updateCursor)
-    document.removeEventListener('mousemove', checkHoverable)
-    document.removeEventListener('mouseenter', handleMouseEnter)
-    document.removeEventListener('mouseleave', handleMouseLeave)
-    document.removeEventListener('mousedown', handleMouseDown)
-    document.removeEventListener('mouseup', handleMouseUp)
+    window.removeEventListener('mousemove', updateCursor)
+    window.removeEventListener('mousemove', checkHoverable)
+    window.removeEventListener('mouseover', checkHoverable)
+    window.removeEventListener('mouseenter', handleMouseEnter)
+    window.removeEventListener('mouseleave', handleMouseLeave)
+    window.removeEventListener('mousedown', handleMouseDown)
+    window.removeEventListener('mouseup', handleMouseUp)
     
     if (rafId) cancelAnimationFrame(rafId)
     if (inactivityTimeout) clearTimeout(inactivityTimeout)

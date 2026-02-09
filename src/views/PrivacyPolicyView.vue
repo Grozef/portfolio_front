@@ -20,9 +20,9 @@
         <section>
           <h2>2. {{ t.controller }}</h2>
           <div class="info-box">
-            <p><strong>{{ t.name }}:</strong> [{{ t.yourName }}]</p>
-            <p><strong>{{ t.address }}:</strong> [{{ t.yourAddress }}]</p>
-            <p><strong>Email:</strong> <a href="mailto:contact@example.com">contact@example.com</a></p>
+            <p><strong>{{ t.name }}:</strong> Lisowski François</p>
+            <p><strong>{{ t.address }}:</strong> 29 Impasse Louis Galvani B 69100 Villeurbanne</p>
+            <p><strong>Email:</strong> <a href="mailto:francois.lisowski@proton.me">francois.lisowski@proton.me</a></p>
           </div>
         </section>
 

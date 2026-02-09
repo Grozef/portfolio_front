@@ -15,21 +15,21 @@
         <section>
           <h2>1. {{ t.section1Title }}</h2>
           <div class="info-box">
-            <p><strong>{{ t.companyName }}:</strong> [Your name or company name]</p>
-            <p><strong>{{ t.legalStatus }}:</strong> [Self-employed / LLC / etc.]</p>
-            <p><strong>{{ t.address }}:</strong> [Your complete address]</p>
-            <p><strong>Email:</strong> <a href="mailto:contact@example.com">contact@example.com</a></p>
-            <p><strong>{{ t.phone }}:</strong> [Your phone number]</p>
-            <p><strong>{{ t.siret }}:</strong> [Your SIRET number if applicable]</p>
-            <p><strong>{{ t.vat }}:</strong> [If applicable]</p>
+            <p><strong>{{ t.companyName }}:</strong> Lisowski François / Da Lisowsking Company (DLC)</p>
+            <p><strong>{{ t.legalStatus }}:</strong> Self-employed </p>
+            <p><strong>{{ t.address }}:</strong> 29 Impasse Louis Galvani B 69100 Villeurbanne</p>
+            <p><strong>Email:</strong> <a href="mailto:francois.lisowski@proton.me.com">contact@example.com</a></p>
+            <p><strong>{{ t.phone }}:</strong> Nope</p>
+            <p><strong>{{ t.siret }}:</strong> </p>
+            <p><strong>{{ t.vat }}:</strong> 20%</p>
           </div>
         </section>
 
         <section>
           <h2>2. {{ t.section2Title }}</h2>
           <p>
-            <strong>{{ t.directorTitle }}:</strong> [Your name]<br>
-            <strong>Contact:</strong> <a href="mailto:contact@example.com">contact@example.com</a>
+            <strong>{{ t.directorTitle }}:</strong> Lisowski François<br>
+            <strong>Contact:</strong> <a href="mailto:francois.lisowski@proton.me.com">francois.lisowski@proton.me.com</a>
           </p>
         </section>
 
@@ -128,12 +128,7 @@
             </router-link>
           </div>
         </section>
-        <section>
-            <div class="legal-notice">
-    <AdBlockDetector />
-    <!-- rest of content -->
-  </div>
-        </section>
+          <AdBlockDetector />
       </div>
     </div>
   </div>
