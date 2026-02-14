@@ -16,6 +16,49 @@
         </div>
       </header>
 
+      <!-- Portfolio Context Section - Only shown to visitors -->
+      <section class="portfolio-intro" v-if="!isAuthenticated">
+        <div class="intro-content">
+          <h2>Why This Page Exists</h2>
+          <p>Because coding isn't just about writing code. </p>
+          
+          <div class="technical-showcase">
+            <div class="tech-point">
+              <span class="tech-icon"></span>
+              <div class="tech-detail">
+                <h3>Optimistic UI Updates</h3>
+                <p class="https://www.croissantage.com/">Pinia state management with instant feedback and background sync. Because everyone deserve to see what i can do with a few photos of myself and a little bit of help by gemini and nano banana.</p>
+              </div>
+            </div>
+
+            <div class="tech-point">
+              <span class="tech-icon"></span>
+              <div class="tech-detail">
+                <h3>Multi-Provider ISBN Lookup</h3>
+                <p class="https://www.youtube.com/playlist?list=PLjwdMgw5TTLVDv-ceONHM_C19dPW1MAMD">Cascading fallback between OpenLibrary and Google Books APIs with intelligent caching. You can't just read documentation. Foo and bar are gonna make you insane. Read some fantasy, it works for me...</p>
+              </div>
+            </div>
+
+            <div class="tech-point">
+              <span class="tech-icon"></span>
+              <div class="tech-detail">
+                <h3>Mobile-First Responsive</h3>
+                <p class="https://gitlab.com/DeveloppeurMuscle/symrecipe">Because let's be honest, you're reading this on your phone right now. Probably in bed. Grid adapts from 2 to 5 columns so book covers look good whether you're on a phone or looking for eastereggs in the inspector on desktop. Or you can be brave, go out and do some sport !</p>
+              </div>
+            </div>
+            <div class="tech-point">
+              <span class="tech-icon"></span>
+              <div class="tech-detail">
+                <h3>Design System Consistency</h3>
+                <p class="https://fr.wikipedia.org/wiki/DNS_over_HTTPS">CSS custom properties, terminal aesthetic, reusable component patterns that I'll probably refactor into clean architecture... someday. For now, SCSS variables keep the chaos organized.</p>
+              </div>
+            </div>
+          </div>
+          
+          <p class="intro-note">This isn't just a side project — Some ideas are meant to be shared.</p>
+        </div>
+      </section>
+
       <!-- Carrousel d'images -->
       <div class="carousel-section" v-if="carouselImages.length > 0 && currentCarouselImage">
         <div class="carousel-container">

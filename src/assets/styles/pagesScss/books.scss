@@ -1,4 +1,3 @@
-
 .books-page {
   min-height: 100vh;
   background: var(--terminal-bg);
@@ -41,6 +40,129 @@
     order: 0;
     flex: initial;
     text-align: left;
+  }
+}
+
+/* Portfolio Context Section */
+.portfolio-intro {
+  max-width: 1200px;
+  margin: 1.5rem auto;
+  padding: 0 1rem;
+
+  @media (min-width: 769px) {
+    margin: 2rem auto;
+    padding: 0 2rem;
+  }
+}
+
+.intro-content {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(0, 255, 159, 0.03) 100%);
+  border: 1px solid var(--terminal-border);
+  border-left: 4px solid var(--terminal-accent);
+  border-radius: 4px;
+  padding: 1.5rem;
+
+  @media (min-width: 769px) {
+    padding: 2rem;
+  }
+
+  h2 {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    color: var(--terminal-accent);
+    margin: 0 0 1rem 0;
+
+    @media (min-width: 769px) {
+      font-size: 1.5rem;
+    }
+  }
+
+  > p {
+    color: var(--terminal-text);
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+
+    @media (min-width: 769px) {
+      font-size: 1rem;
+    }
+  }
+}
+
+.technical-showcase {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  margin: 1.5rem 0;
+
+  @media (min-width: 640px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.tech-point {
+  display: flex;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--terminal-border);
+  border-radius: 4px;
+  transition: all 0.3s ease;
+
+  &:hover {
+    border-color: var(--terminal-accent);
+    transform: translateY(-2px);
+  }
+}
+
+.tech-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.tech-detail {
+  flex: 1;
+
+  h3 {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--terminal-accent);
+    margin: 0 0 0.25rem 0;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+
+    @media (min-width: 769px) {
+      font-size: 0.85rem;
+    }
+  }
+
+  p {
+    font-size: 0.8rem;
+    color: var(--terminal-text-dim);
+    margin: 0;
+    line-height: 1.4;
+
+    @media (min-width: 769px) {
+      font-size: 0.85rem;
+    }
+  }
+}
+
+.intro-note {
+  font-style: italic;
+  color: var(--terminal-text-dim);
+  font-size: 0.9rem;
+  border-top: 1px solid var(--terminal-border);
+  padding-top: 1rem;
+  margin-top: 1.5rem;
+
+  @media (min-width: 769px) {
+    font-size: 0.95rem;
   }
 }
 
