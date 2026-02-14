@@ -102,7 +102,7 @@ body.sword-cursor-active * {
 /* Conteneur interne pour l'alignement et l'animation */
 .sword-assembly {
   position: absolute;
-  top: -0px; /* Ajuste la pointe sur le curseur */
+  top: 2px; /* Ajuste la pointe sur le curseur */
   left: -2px; 
   display: flex;
   flex-direction: column;

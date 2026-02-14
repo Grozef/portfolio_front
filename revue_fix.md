@@ -58,7 +58,7 @@ A horizontal scroll carousel of GitHub repositories fetched via API, with projec
 
 **Weaknesses:**
 - No project screenshots or visuals. Every card is text-only. A portfolio without visuals is fundamentally broken.
-- The `SwordTrigger` and Stoic quote at the bottom feel random and disconnected from the projects context.
+- The `SwordTrigger` and Stoic quote at the bottom feel random and disconnected from the projects context. -> intentionnal Do not change
 - On mobile (85vw cards), horizontal scrolling conflicts with page navigation. Users may accidentally swipe between cards when trying to scroll the page.
 
 **Improvements:**
