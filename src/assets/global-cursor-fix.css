@@ -1,22 +1,21 @@
-/* FIX: Global cursor override - hide ALL default cursors */
-/* This ensures only the custom cursor is visible throughout the site */
+/* Custom cursor override - only active when .custom-cursor-active is on <html> */
 
-* {
+.custom-cursor-active * {
   cursor: none !important;
 }
 
-html,
-body,
-div,
-span,
-a,
-button,
-input,
-textarea,
-select,
-[data-cursor-hover],
-[role="button"],
-.clickable {
+.custom-cursor-active html,
+.custom-cursor-active body,
+.custom-cursor-active div,
+.custom-cursor-active span,
+.custom-cursor-active a,
+.custom-cursor-active button,
+.custom-cursor-active input,
+.custom-cursor-active textarea,
+.custom-cursor-active select,
+.custom-cursor-active [data-cursor-hover],
+.custom-cursor-active [role="button"],
+.custom-cursor-active .clickable {
   cursor: none !important;
 }
 
@@ -26,16 +25,15 @@ select,
   pointer-events: none !important;
 }
 
-/* Remove any competing cursor styles */
-a:hover,
-button:hover,
-input:hover,
-textarea:hover,
-select:hover {
+/* Remove any competing cursor styles when custom cursor active */
+.custom-cursor-active a:hover,
+.custom-cursor-active button:hover,
+.custom-cursor-active input:hover,
+.custom-cursor-active textarea:hover,
+.custom-cursor-active select:hover {
   cursor: none !important;
 }
 
-/* Override any framework or library cursor styles */
-[style*="cursor"] {
+.custom-cursor-active [style*="cursor"] {
   cursor: none !important;
 }

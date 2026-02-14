@@ -93,6 +93,14 @@
         <p class="tagline">
           Built with Vue.js & Laravel
         </p>
+        <button 
+          class="cursor-toggle" 
+          @click="toggleCursor" 
+          :title="isCustomCursorEnabled ? 'Switch to system cursor' : 'Switch to custom cursor'"
+          data-cursor-hover
+        >
+          {{ isCustomCursorEnabled ? 'Disable custom cursor' : 'Enable custom cursor' }}
+        </button>
       </div>
     </div>
   </footer>
@@ -102,8 +110,10 @@
 import { computed } from 'vue'
 import { useEasterEggs } from '@/composables/useEasterEggs'
 import { use8BitSounds } from '@/composables/use8BitSounds'
+import { useCursorPreference } from '@/composables/useCursorPreference'
 
 const { discoverEgg, EASTER_EGGS } = useEasterEggs()
+const { isCustomCursorEnabled, toggleCursor } = useCursorPreference()
 
 const handleHumansTxtClick = () => {
   discoverEgg(EASTER_EGGS.HUMANS_TXT)
@@ -231,6 +241,29 @@ const { playHoverSound, toggleMusic } = use8BitSounds()
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
+  }
+}
+
+.cursor-toggle {
+  display: inline-block;
+  margin-top: 0.75rem;
+  padding: 0.3rem 0.75rem;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+  color: rgba(255, 255, 255, 0.5);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  cursor: pointer !important;
+  transition: all 0.2s ease;
+
+  &:hover {
+    color: #00ffff;
+    border-color: rgba(0, 255, 255, 0.3);
+  }
+
+  @media (pointer: coarse) {
+    display: none;
   }
 }
 

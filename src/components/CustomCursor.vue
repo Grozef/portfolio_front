@@ -1,8 +1,10 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useEasterEggs } from '@/composables/useEasterEggs'
+import { useCursorPreference } from '@/composables/useCursorPreference'
 
 const { discoverEgg, EASTER_EGGS } = useEasterEggs()
+const { isCustomCursorEnabled } = useCursorPreference()
 
 const cursorX = ref(0)
 const cursorY = ref(0)
@@ -111,7 +113,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div v-if="!isMobile" class="custom-cursor" :class="{ visible: isVisible }">
+  <div v-if="!isMobile && isCustomCursorEnabled" class="custom-cursor" :class="{ visible: isVisible }">
     <div v-if="!isSleeping"
       class="cursor-ring"
       :class="{ hovering: isHovering, clicking: isClicking }"

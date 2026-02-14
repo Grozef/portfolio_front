@@ -28,7 +28,7 @@
             </div>
             <div class="info-item">
               <span class="label">Response Time</span>
-              <span class="value">Within a year</span>
+              <span class="value">Within 48 hours</span>
             </div>
           </div>
 
@@ -40,7 +40,7 @@
               <p>{{ easterEggProgress.percentage }}% Complete</p>
             </div>
             <p class="reset-hint">
-              Type <code>resetEasterEggs()</code> in console to reset progress
+              Type <code>resetEgg()</code> in console to reset progress
             </p>
           </div>
         </div>
@@ -133,6 +133,7 @@ import { useRouter } from 'vue-router'
 import BluescreenOfDeath from '@/components/BluescreenOfDeath.vue'
 import WeatherBackground from '@/components/WeatherBackground.vue'
 import { useEasterEggs } from '@/composables/useEasterEggs'
+import { submitContactForm } from '@/services/contact'
 
 const router = useRouter()
 const { progress: easterEggProgress, discoverEgg, EASTER_EGGS } = useEasterEggs()
@@ -247,21 +248,29 @@ const handleSubmit = async () => {
   submitMessage.value = ''
   
   try {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500))
+    const result = await submitContactForm({
+      name: formData.value.name,
+      email: formData.value.email,
+      subject: formData.value.subject,
+      message: formData.value.message
+    })
     
-    submitMessage.value = 'Message sent successfully! I\'ll get back to you soon.'
-    submitStatus.value = 'success'
-    
-    // Reset form
-    formData.value = {
-      name: '',
-      email: '',
-      subject: '',
-      message: ''
+    if (result.success) {
+      submitMessage.value = 'Message sent successfully! I\'ll get back to you soon.'
+      submitStatus.value = 'success'
+      
+      formData.value = {
+        name: '',
+        email: '',
+        subject: '',
+        message: ''
+      }
+    } else {
+      submitMessage.value = result.message || 'Failed to send message. Please try again.'
+      submitStatus.value = 'error'
     }
   } catch (error) {
-    submitMessage.value = 'Failed to send message. Please try again.'
+    submitMessage.value = 'Network error. Please try again later.'
     submitStatus.value = 'error'
   } finally {
     isSubmitting.value = false
@@ -281,10 +290,6 @@ const handleSubmit = async () => {
   padding: 6rem 2rem 4rem;
 }
 
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  position: relative;
 .fixed-weather-header {
   position: fixed;
   top: 0;
@@ -293,6 +298,11 @@ const handleSubmit = async () => {
   z-index: 999;
   pointer-events: none;
 }
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
   z-index: 1;
 }
 

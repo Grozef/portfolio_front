@@ -293,7 +293,7 @@
 </template>
 
 <script setup>
-import { ref, nextTick, onMounted, watch, computed } from 'vue'
+import { ref, nextTick, onMounted, onUnmounted, watch, computed } from 'vue'
 import { useTerminalStore } from '@/stores/terminal'
 import { useGitHubStore } from '@/stores/github'
 import { useRouter } from 'vue-router'
@@ -366,12 +366,21 @@ const handleKonamiActivation = () => {
 
 useKonamiCode(handleKonamiActivation)
 
+const isMobileTerminal = ref(false)
+
+const checkMobile = () => {
+  isMobileTerminal.value = window.innerWidth < 600
+}
+
 const prompt = computed(() => {
   const time = new Date().toLocaleTimeString('en-US', {
     hour12: false,
     hour: '2-digit',
     minute: '2-digit'
   })
+  if (isMobileTerminal.value) {
+    return `$`
+  }
   return `visitor@portfolio [${time}]`
 })
 
@@ -682,9 +691,9 @@ const outputAbout = () => {
     format: 'about',
     content: {
       name: 'Full Stack Developer',
-      title: 'Cook and filosopher when i got the time',
+      title: 'Cook and philosopher when I get the time',
       bio: `I’m a passionate developer with over 3 years of experience.
-            I first studied at the Chambre de Commerce et d’Industrie (CCI) of Lyon, where i developed my skills (pun intended) in both frontend and backend development, where i first earned a degree in Web and Mobile Development (Developpeur Web et Web Mobile, DWWM - RNCP level 5) in 2024. I then continued my studies at the IT Academy (Concepteur Developpeur d'Applications CDA - RNCP level 6), completing a two-year work-study program in 2026.`,
+            I first studied at the Chambre de Commerce et d’Industrie (CCI) of Lyon, where I developed my skills (pun intended) in both frontend and backend development, where I first earned a degree in Web and Mobile Development (Developpeur Web et Web Mobile, DWWM - RNCP level 5) in 2024. I then continued my studies at the IT Academy (Concepteur Developpeur d'Applications CDA - RNCP level 6), completing a two-year work-study program in 2026.`,
       location: 'Lyon, France & Chichigneux, Groland',
       status: 'Open to opportunities'
     }
@@ -839,12 +848,21 @@ watch(() => terminalStore.history.length, () => {
 
 onMounted(() => {
   focusInput()
+  checkMobile()
+  window.addEventListener('resize', checkMobile)
 
   // Welcome message
-  terminalStore.addToHistory({
-    type: 'output',
-    format: 'ascii',
-    content: `
+  const mobileWelcome = `
+  ╔══════════════════════════════╗
+  ║                              ║
+  ║     PORTFOLIO TERMINAL       ║
+  ║                              ║
+  ║  Type 'help' to start        ║
+  ║  Type 'gui' for GUI mode     ║
+  ║                              ║
+  ╚══════════════════════════════╝`
+
+  const desktopWelcome = `
   ╔════════════════════════════════════════════════════════════════════════════╗
   ║                                                                            ║
   ║   ██████╗  ██████╗ ██████╗ ████████╗███████╗ ██████╗ ██╗     ██╗ ██████╗   ║
@@ -859,7 +877,16 @@ onMounted(() => {
   ║   Type 'gui' to switch to graphical mode                                   ║
   ║                                                                            ║
   ╚════════════════════════════════════════════════════════════════════════════╝`
+
+  terminalStore.addToHistory({
+    type: 'output',
+    format: 'ascii',
+    content: isMobileTerminal.value ? mobileWelcome : desktopWelcome
   })
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', checkMobile)
 })
 </script>
 
@@ -920,6 +947,12 @@ onMounted(() => {
     padding: 0.75rem 1rem;
     border-top: 1px solid var(--terminal-border);
     background: var(--terminal-bg-secondary);
+    min-width: 0;
+    overflow: hidden;
+
+    @media (max-width: 480px) {
+      padding: 0.5rem 0.75rem;
+    }
   }
 
   &__input {
@@ -993,9 +1026,15 @@ onMounted(() => {
   font-size: 0.6rem;
   line-height: 1.2;
   color: var(--terminal-accent);
+  overflow-x: auto;
+  max-width: 100%;
 
   @media (max-width: 768px) {
     font-size: 0.4rem;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 0.35rem;
   }
 }
 

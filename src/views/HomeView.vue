@@ -303,16 +303,16 @@ onMounted(() => {
   width: 100%;
   max-width: 1000px;
   height: 70vh;
-  min-height: 500px;
+  min-height: 400px;
 
   @media (max-width: 768px) {
-    height: 60vh;
-    min-height: 400px;
+    height: calc(100vh - 8rem);
+    min-height: 300px;
   }
 
   @media (max-width: 480px) {
-    height: 55vh;
-    min-height: 350px;
+    height: calc(100vh - 6rem);
+    min-height: 250px;
   }
 }
 </style>

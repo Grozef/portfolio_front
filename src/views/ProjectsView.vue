@@ -287,7 +287,7 @@ onMounted(async () => {
 
 .project-card {
   flex: 0 0 60vw;
-  min-width: 400px;
+  min-width: 0;
   max-width: 700px;
   aspect-ratio: 4/3;
   scroll-snap-align: center;
@@ -319,7 +319,14 @@ onMounted(async () => {
 
   @media (max-width: 768px) {
     flex: 0 0 85vw;
-    min-width: 280px;
+    padding: 1.5rem;
+    aspect-ratio: auto;
+    min-height: 300px;
+  }
+
+  @media (max-width: 480px) {
+    flex: 0 0 90vw;
+    padding: 1rem;
   }
 }
 

@@ -38,6 +38,10 @@
                 <span class="key">WASD</span>
                 <span class="desc">Alternative controls</span>
               </div>
+              <div class="hint">
+                <span class="key">SWIPE</span>
+                <span class="desc">Touch to change direction</span>
+              </div>
             </div>
           </div>
 
@@ -233,6 +237,46 @@ const handleKeyDown = (event) => {
   }
 }
 
+// Touch controls
+let touchStartX = 0
+let touchStartY = 0
+
+const handleTouchStart = (e) => {
+  touchStartX = e.touches[0].clientX
+  touchStartY = e.touches[0].clientY
+}
+
+const handleTouchEnd = (e) => {
+  if (!isPlaying.value) {
+    if (!isGameOver.value) {
+      startGame()
+    } else {
+      startGame()
+    }
+    return
+  }
+
+  const touchEndX = e.changedTouches[0].clientX
+  const touchEndY = e.changedTouches[0].clientY
+
+  const diffX = touchEndX - touchStartX
+  const diffY = touchEndY - touchStartY
+
+  const minSwipe = 30
+
+  if (Math.abs(diffX) > Math.abs(diffY)) {
+    if (Math.abs(diffX) > minSwipe) {
+      if (diffX > 0 && dx !== -1) { dx = 1; dy = 0 }
+      else if (diffX < 0 && dx !== 1) { dx = -1; dy = 0 }
+    }
+  } else {
+    if (Math.abs(diffY) > minSwipe) {
+      if (diffY > 0 && dy !== -1) { dx = 0; dy = 1 }
+      else if (diffY < 0 && dy !== 1) { dx = 0; dy = -1 }
+    }
+  }
+}
+
 onMounted(() => {
   const canvas = gameCanvas.value
   if (canvas) {
@@ -247,11 +291,15 @@ onMounted(() => {
   discoverEgg(EASTER_EGGS.FOUND_404)
 
   document.addEventListener('keydown', handleKeyDown)
+  document.addEventListener('touchstart', handleTouchStart, { passive: true })
+  document.addEventListener('touchend', handleTouchEnd, { passive: true })
 })
 
 onUnmounted(() => {
   if (gameLoop) clearInterval(gameLoop)
   document.removeEventListener('keydown', handleKeyDown)
+  document.removeEventListener('touchstart', handleTouchStart)
+  document.removeEventListener('touchend', handleTouchEnd)
 })
 </script>
 
@@ -345,6 +393,10 @@ onUnmounted(() => {
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.3s ease;
+  width: 100%;
+  max-width: 400px;
+  height: auto;
+  touch-action: none;
 
   &:hover {
     border-color: var(--terminal-accent);
@@ -352,11 +404,6 @@ onUnmounted(() => {
 
   &.game-over {
     opacity: 0.5;
-  }
-
-  @media (max-width: 500px) {
-    width: 100%;
-    height: auto;
   }
 }
 

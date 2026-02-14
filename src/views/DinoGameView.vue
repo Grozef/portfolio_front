@@ -13,7 +13,7 @@
       </div>
     </div>
 
-    <div class="game-container">
+    <div ref="gameContainer" class="game-container">
       <canvas 
         ref="gameCanvas" 
         :width="canvasWidth" 
@@ -60,6 +60,7 @@ const router = useRouter()
 const { discoverEgg, isDiscovered, EASTER_EGGS } = useEasterEggs()
 
 const gameCanvas = ref(null)
+const gameContainer = ref(null)
 const canvasWidth = 800
 const canvasHeight = 200
 
@@ -426,30 +427,20 @@ onUnmounted(() => {
 .game-container {
   position: relative;
   max-width: 800px;
+  width: 100%;
   margin: 0 auto;
   background: #f7f7f7;
   border: 2px solid var(--terminal-border);
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-
-  @media (max-width: 850px) {
-    transform: scale(0.9);
-    transform-origin: top center;
-  }
-
-  @media (max-width: 768px) {
-    transform: scale(0.75);
-  }
-
-  @media (max-width: 600px) {
-    transform: scale(0.6);
-  }
 }
 
 canvas {
   display: block;
   cursor: pointer;
+  width: 100%;
+  height: auto;
 }
 
 .game-overlay {

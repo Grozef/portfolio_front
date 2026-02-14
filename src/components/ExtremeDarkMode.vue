@@ -1,5 +1,5 @@
 <template>
-  <div v-if="isActive" class="extreme-dark-mode">
+  <div v-if="isActive && !isTouchDevice" class="extreme-dark-mode">
     <canvas ref="canvasRef" class="flashlight-canvas"></canvas>
     <div class="dark-mode-hint">
       <span class="hint-text">Press CTRL+Z to toggle Extreme Dark Mode</span>
@@ -15,6 +15,7 @@ const { isActive } = useExtremeDarkMode()
 const canvasRef = ref(null)
 const mouseX = ref(window.innerWidth / 2)
 const mouseY = ref(window.innerHeight / 2)
+const isTouchDevice = ref(false)
 let animationFrameId = null
 
 const handleMouseMove = (e) => {
@@ -80,7 +81,7 @@ const resizeCanvas = () => {
 }
 
 watch(isActive, (newValue) => {
-  if (newValue) {
+  if (newValue && !isTouchDevice.value) {
     setTimeout(() => {
       resizeCanvas()
       drawFlashlight()
@@ -93,10 +94,12 @@ watch(isActive, (newValue) => {
 })
 
 onMounted(() => {
+  isTouchDevice.value = 'ontouchstart' in window || navigator.maxTouchPoints > 0
+
   window.addEventListener('resize', resizeCanvas)
   document.addEventListener('mousemove', handleMouseMove)
 
-  if (isActive.value) {
+  if (isActive.value && !isTouchDevice.value) {
     resizeCanvas()
     drawFlashlight()
   }
