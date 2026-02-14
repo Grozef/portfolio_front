@@ -271,4 +271,4 @@ onMounted(async () => {
 })
 </script>
 
-<style lang="scss" src="@/assets/projects.scss"></style>
+<style lang="scss" src="@/assets/styles/pagesScss/projects.scss"></style>

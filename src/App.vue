@@ -159,8 +159,8 @@ onMounted(() => {
 </script>
 
 <style lang="scss">
-@use '@/assets/main.scss';
-@use '@/assets/global-cursor-fix.css';
+@use '@/assets/styles/main.scss';
+@use '@/assets/styles/componentsScss/global-cursor.css';
 
 #app {
   min-height: 100vh;

@@ -40,7 +40,7 @@ The landing page is a fully interactive terminal emulator. Users type commands (
 
 ### 2. Projects Page
 
-A horizontal scroll carousel of GitHub repositories fetched via API, with project cards and a detail modal.
+<!-- A horizontal scroll carousel of GitHub repositories fetched via API, with project cards and a detail modal.
 
 | Criterion | Score | Notes |
 |---|---|---|
@@ -64,7 +64,7 @@ A horizontal scroll carousel of GitHub repositories fetched via API, with projec
 **Improvements:**
 1. **(Critical)** Add curated project descriptions, screenshots, and role/outcome information instead of relying solely on GitHub API data.
 2. **(Critical)** Switch to a vertical card grid on mobile. Horizontal scroll on touch devices with full-width cards is frustrating.
-3. **(Important)** Fix the scroll position drift by calculating actual card width + gap instead of `containerWidth * 0.6`.
+3. **(Important)** Fix the scroll position drift by calculating actual card width + gap instead of `containerWidth * 0.6`. -->
 
 ---
 

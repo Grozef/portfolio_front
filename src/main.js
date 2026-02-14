@@ -9,7 +9,7 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
-import './assets/sword-cursor.css'
+import './assets/styles/componentsScss/sword-cursor.css'
 
 const app = createApp(App)
 
