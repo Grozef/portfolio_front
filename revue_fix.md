@@ -67,7 +67,7 @@ The landing page is a fully interactive terminal emulator. Users type commands (
 3. **(Important)** Fix the scroll position drift by calculating actual card width + gap instead of `containerWidth * 0.6`. -->
 
 ---
-
+<!-- 
 ### 3. Books Page (Library)
 
 A personal reading tracker with book covers fetched from OpenLibrary/Google Books APIs, status filters, ratings, and an image carousel.
@@ -92,11 +92,11 @@ A personal reading tracker with book covers fetched from OpenLibrary/Google Book
 - Admin controls (Add Book, Carousel, Logout) are visible to authenticated users in the same UI as the public page, which is fine but the admin views themselves (AdminBooksView, AdminCarouselView) have almost no responsiveness.
 
 **Improvements:**
-1. **(Important)** Add a brief intro explaining why the library exists (e.g., "I believe continuous learning is fundamental to great engineering").
-2. **(Nice-to-have)** Remove the commented-out `EyeTrackingPortrait` component.
-3. **(Nice-to-have)** Add reading statistics visualization (books per year, genre breakdown).
+1. **(Important)** Add a brief intro explaining why the library exists (e.g., "I believe continuous learning is fundamental to great engineering"). // fix
+2. **(Nice-to-have)** Remove the commented-out `EyeTrackingPortrait` component. // ok
+3. **(Nice-to-have)** Add reading statistics visualization (books per year, genre breakdown). // ok
 
----
+--- -->
 
 <!-- ### 4. About Page
 
@@ -128,7 +128,7 @@ Standard bio page with sections: hero, bio, skills, experience timeline, quote, 
 
 ---
 
-### 5. Contact Page
+<!-- ### 5. Contact Page
 
 Contact form with weather background widget, easter egg progress tracker, and the BSOD progressive button easter egg.
 
@@ -153,12 +153,12 @@ Contact form with weather background widget, easter egg progress tracker, and th
 - The `fixed-weather-header` with `z-index: 999` conflicts with the navigation header's `z-index: 100` and creates stacking issues.
 
 **Improvements:**
-1. **(Critical)** Move the API key to the backend and proxy weather requests. Never expose API keys in client code.
-2. **(Critical)** Remove or visually distinguish the "Contact me faster" button. Two visually similar buttons where one submits a form and the other is a joke creates UX confusion.
-3. **(Important)** Add inline form validation with error messages.
+1. **(Critical)** Move the API key to the backend and proxy weather requests. Never expose API keys in client code. //done
+2. **(Critical)** Remove or visually distinguish the "Contact me faster" button. Two visually similar buttons where one submits a form and the other is a joke creates UX confusion. // Intentionnal
+3. **(Important)** Add inline form validation with error messages. // ok
 
----
-
+--- -->
+<!-- 
 ### 6. Easter Eggs System
 
 20 hidden easter eggs across the site: Konami code, ASCII art, BSOD, Rickroll, sword cursor, vim quit, dino game, weather chaos, progressive button, hidden music, 8-bit sounds, fake admin terminal, etc.
@@ -180,13 +180,13 @@ Contact form with weather background widget, easter egg progress tracker, and th
 **Weaknesses:**
 - The rick roll on the "X" (formerly Twitter) link in the footer is deceptive. Some recruiters may see this as unprofessional.
 - The sword cursor replaces the default cursor and has no obvious deactivation for users who triggered it accidentally.
-- The `AdBlockDetector` component is present but its purpose in a portfolio context is unclear.
+- The `AdBlockDetector` component is present but its purpose in a portfolio context is unclear. // u don't really understand human humor don't you ?
 
 **Improvements:**
-1. **(Important)** Add a subtle hint system (e.g., small icons, tooltips) so visitors know easter eggs exist without reading the console.
-2. **(Nice-to-have)** Move the Rickroll to a more discoverable location rather than disguising it as a real social link.
+1. **(Important)** Add a subtle hint system (e.g., small icons, tooltips) so visitors know easter eggs exist without reading the console. //humans.txt
+2. **(Nice-to-have)** Move the Rickroll to a more discoverable location rather than disguising it as a real social link. // INTHInKABLE
 
----
+--- -->
 
 ## Overall Assessment
 
@@ -204,20 +204,20 @@ This is a technically ambitious portfolio with genuine personality, but it funda
 
 ### Top 3 Weaknesses
 
-1. **No project case studies.** This is the single biggest gap. Projects are raw GitHub repo descriptions with no screenshots, no problem framing, no process, no outcomes. A hiring manager sees a list of repo names and descriptions like "No description available." This alone disqualifies the portfolio for most UX or product-focused roles.
+1. **No project case studies.** This is the single biggest gap. Projects are raw GitHub repo descriptions with no screenshots, no problem framing, no process, no outcomes. A hiring manager sees a list of repo names and descriptions like "No description available." This alone disqualifies the portfolio for most UX or product-focused roles. // done ?
 
 2. **Responsiveness is incomplete.** The following views/components have zero or near-zero media queries:
-   - `TerminalInterfaceViewport.vue` (40K file, 0 media queries)
-   - `LoginView.vue` (0 media queries)
-   - `AdminDashboard.vue` (0 media queries)
-   - `AdminCarouselView.vue` (0 media queries)
+   - `TerminalInterfaceViewport.vue` (40K file, 0 media queries) // dead code
+   - `LoginView.vue` (0 media queries) // admin is desktop only, that's ok
+   - `AdminDashboard.vue` (0 media queries)  // admin is desktop only, that's ok
+   - `AdminCarouselView.vue` (0 media queries) // admin is desktop only, that's ok
    - `TerminalInterface.vue` (only 4 media queries for 1424 lines)
-   - `WeatherBackground.vue` weather info chip has no responsive positioning -- `top: 6rem; right: 2rem` breaks on mobile
+   - `WeatherBackground.vue` weather info chip has no responsive positioning -- `top: 6rem; right: 2rem` breaks on mobile // done
    - `ProjectsView.vue` horizontal scroll on mobile is problematic
-   - The footer 3-column grid collapses at 768px but `minmax(250px, 1fr)` can still overflow on small screens
+   - The footer 3-column grid collapses at 768px but `minmax(250px, 1fr)` can still overflow on small screens // done
 
 3. **Accessibility is virtually absent.** Only 4 `aria-*` attributes in the entire codebase. No skip-to-content link, no ARIA labels on interactive elements, no focus management, no keyboard navigation for the terminal, no screen reader support, no `alt` text on dynamic images. The custom cursor (`cursor: none` on body) removes the system cursor for all users including those who need it.
-
+-> i need to improve that
 ### Positioning Analysis
 
 **Best suited for:** Junior to mid-level full-stack developer roles at small startups or agencies that value personality and technical breadth over design polish. Companies building internal tools, SaaS products, or anything Vue.js/Laravel. The French education context (CCI Lyon, alternance) positions this for the French market specifically.

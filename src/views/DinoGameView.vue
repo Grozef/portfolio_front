@@ -5,8 +5,8 @@
         <span>&larr;</span> Back
       </button>
       <div class="game-title">
-        <h1>🦕 Easter Egg Unlocked!</h1>
-        <p>You found the secret dinosaur game!</p>
+        <h1> Easter Egg Unlocked!</h1>
+        <p>You found the secret 'we don't know what the fudge this thing is XD ' game!</p>
       </div>
       <div class="high-score">
         HI: {{ String(highScore).padStart(5, '0') }}
@@ -15,15 +15,14 @@
 
     <div ref="gameContainer" class="game-container">
       <canvas 
-        ref="gameCanvas" 
-        :width="canvasWidth" 
-        :height="canvasHeight"
+        ref="gameCanvas"
         @click="handleCanvasClick"
+        @touchstart.prevent="handleJump"
       ></canvas>
       
       <div v-if="gameState === 'ready'" class="game-overlay">
         <div class="start-message">
-          <h2>Press SPACE or Click to Start</h2>
+          <h2>Press SPACE, Click or Tap to Start</h2>
           <p>Jump over the cacti to survive!</p>
         </div>
       </div>
@@ -32,9 +31,9 @@
         <div class="game-over-message">
           <h2>GAME OVER</h2>
           <p class="final-score">Score: {{ score }}</p>
-          <p v-if="score > highScore" class="new-record">🎉 New High Score! 🎉</p>
+          <p v-if="score > highScore" class="new-record"> New High Score! </p>
           <button class="restart-btn" @click="restart" data-cursor-hover>
-            Press SPACE or Click to Restart
+            Press SPACE, Click or Tap to Restart
           </button>
         </div>
       </div>
@@ -45,14 +44,14 @@
     </div>
 
     <div class="game-instructions">
-      <p><strong>Controls:</strong> Press SPACEBAR or ARROW UP to jump | Click anywhere to jump</p>
-      <p class="easter-egg-note">Congratulations on discovering this easter egg through the BSOD sequence!</p>
+      <p><strong>Controls:</strong> Press SPACEBAR or ARROW UP to jump | Click/Tap anywhere to jump</p>
+      <p class="easter-egg-note">Congratulations on discovering this easter egg !</p>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useEasterEggs } from '@/composables/useEasterEggs'
 
@@ -61,10 +60,14 @@ const { discoverEgg, isDiscovered, EASTER_EGGS } = useEasterEggs()
 
 const gameCanvas = ref(null)
 const gameContainer = ref(null)
-const canvasWidth = 800
-const canvasHeight = 200
 
-const gameState = ref('ready') // 'ready', 'playing', 'over'
+const BASE_WIDTH = 800
+const BASE_HEIGHT = 200
+let canvasWidth = BASE_WIDTH
+let canvasHeight = BASE_HEIGHT
+let scale = 1
+
+const gameState = ref('ready')
 const score = ref(0)
 const highScore = ref(parseInt(localStorage.getItem('dino_high_score') || '0'))
 
@@ -73,32 +76,54 @@ let animationId = null
 let gameSpeed = 5
 let gravity = 0.6
 
-// Dino properties
 const dino = ref({
   x: 50,
-  y: 150,
-  width: 40,
-  height: 40,
+  y: 126,
+  width: 62,
+  height: 54,
   velocityY: 0,
   isJumping: false,
-  jumpForce: -12
+  jumpForce: -12,
+  runFrame: 0
 })
 
-// Obstacles
 const obstacles = ref([])
 let obstacleSpawnTimer = 0
-const obstacleSpawnInterval = 120 // frames
+const obstacleSpawnInterval = 120
 
-// Ground
 const ground = {
   x: 0,
   y: 180,
-  width: canvasWidth,
+  width: BASE_WIDTH,
   height: 20
 }
 
 const goBack = () => {
   router.push('/contact')
+}
+
+const resizeCanvas = () => {
+  if (!gameCanvas.value || !gameContainer.value) return
+  
+  const container = gameContainer.value
+  const containerWidth = container.clientWidth
+  const containerHeight = container.clientHeight
+  
+  const scaleX = containerWidth / BASE_WIDTH
+  const scaleY = containerHeight / BASE_HEIGHT
+  scale = Math.min(scaleX, scaleY, 1)
+  
+  canvasWidth = BASE_WIDTH
+  canvasHeight = BASE_HEIGHT
+  
+  gameCanvas.value.width = canvasWidth
+  gameCanvas.value.height = canvasHeight
+  gameCanvas.value.style.width = `${canvasWidth * scale}px`
+  gameCanvas.value.style.height = `${canvasHeight * scale}px`
+  
+  if (gameState.value === 'ready') {
+    draw()
+  }
 }
 
 const handleJump = () => {
@@ -129,11 +154,11 @@ const startGame = () => {
   obstacles.value = []
   obstacleSpawnTimer = 0
   gameSpeed = 5
-  dino.value.y = 150
+  dino.value.y = 126
   dino.value.velocityY = 0
   dino.value.isJumping = false
+  dino.value.runFrame = 0
   
-  // Discover easter egg
   discoverEgg(EASTER_EGGS.FOUND_404)
   
   gameLoop()
@@ -145,9 +170,9 @@ const restart = () => {
 
 const spawnObstacle = () => {
   const types = [
-    { width: 20, height: 40 }, // Small cactus
-    { width: 40, height: 40 }, // Large cactus
-    { width: 60, height: 40 }  // Multiple cacti
+    { width: 17, height: 35, type: 'small' },
+    { width: 25, height: 50, type: 'large' },
+    { width: 50, height: 35, type: 'double' }
   ]
   
   const type = types[Math.floor(Math.random() * types.length)]
@@ -156,40 +181,37 @@ const spawnObstacle = () => {
     x: canvasWidth,
     y: ground.y - type.height,
     width: type.width,
-    height: type.height
+    height: type.height,
+    type: type.type
   })
 }
 
 const updateGame = () => {
   if (gameState.value !== 'playing') return
 
-  // Update dino
   dino.value.velocityY += gravity
   dino.value.y += dino.value.velocityY
 
-  // Ground collision
-  if (dino.value.y >= 150) {
-    dino.value.y = 150
+  if (dino.value.y >= 126) {
+    dino.value.y = 126
     dino.value.velocityY = 0
     dino.value.isJumping = false
   }
 
-  // Update obstacles
+  dino.value.runFrame++
+
   obstacles.value.forEach(obstacle => {
     obstacle.x -= gameSpeed
   })
 
-  // Remove off-screen obstacles
   obstacles.value = obstacles.value.filter(obstacle => obstacle.x + obstacle.width > 0)
 
-  // Spawn new obstacles
   obstacleSpawnTimer++
   if (obstacleSpawnTimer >= obstacleSpawnInterval) {
     spawnObstacle()
     obstacleSpawnTimer = 0
   }
 
-  // Check collisions
   for (let obstacle of obstacles.value) {
     if (checkCollision(dino.value, obstacle)) {
       gameOver()
@@ -197,27 +219,23 @@ const updateGame = () => {
     }
   }
 
-  // Update score
   score.value++
   
-  // Unlock DINO_GAME easter egg at 1000 points
   if (score.value === 1000 && !isDiscovered(EASTER_EGGS.DINO_GAME)) {
     discoverEgg(EASTER_EGGS.DINO_GAME)
   }
   
-  // Increase difficulty
   if (score.value % 500 === 0) {
     gameSpeed += 0.5
   }
 }
 
 const checkCollision = (dino, obstacle) => {
-  // Reduce hitbox for better gameplay
   const dinoHitbox = {
-    x: dino.x + 5,
-    y: dino.y + 5,
-    width: dino.width - 10,
-    height: dino.height - 10
+    x: dino.x + 8,
+    y: dino.y + 8,
+    width: dino.width - 16,
+    height: dino.height - 12
   }
 
   return (
@@ -244,34 +262,81 @@ const gameOver = () => {
 const drawDino = () => {
   if (!ctx) return
   
-  // Draw dino as a simple rectangle with legs
+  const d = dino.value
+  const isDead = gameState.value === 'over'
+  const legCycle = Math.floor(d.runFrame / 6) % 2
+  
+  ctx.save()
   ctx.fillStyle = '#535353'
   
-  // Body
-  ctx.fillRect(dino.value.x, dino.value.y, dino.value.width, dino.value.height - 10)
+  // Corps principal (rectangulaire)
+  ctx.fillRect(d.x + 16, d.y + 24, 26, 18)
   
-  // Head
-  ctx.fillRect(dino.value.x + 25, dino.value.y - 10, 15, 15)
+  // Ventre arrondi
+  ctx.fillRect(d.x + 14, d.y + 28, 2, 10)
+  ctx.fillRect(d.x + 16, d.y + 26, 2, 2)
   
-  // Eye
-  ctx.fillStyle = '#fff'
-  ctx.fillRect(dino.value.x + 32, dino.value.y - 5, 3, 3)
+  // Tête rectangulaire T-Rex
+  ctx.fillRect(d.x + 38, d.y + 6, 20, 16)
   
-  // Legs (animated)
+  // Cou qui relie tête et corps
+  ctx.fillRect(d.x + 34, d.y + 18, 8, 10)
+  
+  // Museau/bouche
+  ctx.fillRect(d.x + 58, d.y + 14, 4, 6)
+  
+  // Œil
+  if (isDead) {
+    ctx.fillStyle = '#fff'
+    ctx.fillRect(d.x + 48, d.y + 10, 4, 4)
+    ctx.fillStyle = '#535353'
+    // Croix pour mort
+    ctx.fillRect(d.x + 48, d.y + 11, 4, 1)
+    ctx.fillRect(d.x + 49, d.y + 10, 1, 4)
+  } else {
+    ctx.fillStyle = '#fff'
+    ctx.fillRect(d.x + 48, d.y + 10, 4, 4)
+    ctx.fillStyle = '#535353'
+    ctx.fillRect(d.x + 49, d.y + 11, 2, 2)
+  }
+  
+  // Petits bras T-Rex (très courts!)
   ctx.fillStyle = '#535353'
-  const legAnimation = Math.floor(score.value / 10) % 2
-  if (!dino.value.isJumping) {
-    if (legAnimation === 0) {
-      ctx.fillRect(dino.value.x + 5, dino.value.y + 30, 8, 10)
-      ctx.fillRect(dino.value.x + 25, dino.value.y + 30, 8, 10)
+  ctx.fillRect(d.x + 30, d.y + 26, 4, 6)
+  ctx.fillRect(d.x + 30, d.y + 32, 3, 2)
+  
+  // Queue horizontale longue
+  ctx.fillRect(d.x, d.y + 26, 16, 8)
+  ctx.fillRect(d.x - 4, d.y + 28, 4, 4)
+  
+  // Jambes puissantes avec animation
+  if (!d.isJumping && !isDead) {
+    if (legCycle === 0) {
+      // Jambe gauche levée
+      ctx.fillRect(d.x + 20, d.y + 42, 6, 8)
+      ctx.fillRect(d.x + 20, d.y + 49, 8, 3)
+      
+      // Jambe droite au sol
+      ctx.fillRect(d.x + 32, d.y + 42, 6, 10)
+      ctx.fillRect(d.x + 32, d.y + 51, 8, 3)
     } else {
-      ctx.fillRect(dino.value.x + 10, dino.value.y + 30, 8, 10)
-      ctx.fillRect(dino.value.x + 20, dino.value.y + 30, 8, 10)
+      // Jambe gauche au sol
+      ctx.fillRect(d.x + 20, d.y + 42, 6, 10)
+      ctx.fillRect(d.x + 20, d.y + 51, 8, 3)
+      
+      // Jambe droite levée
+      ctx.fillRect(d.x + 32, d.y + 42, 6, 8)
+      ctx.fillRect(d.x + 32, d.y + 49, 8, 3)
     }
   } else {
-    ctx.fillRect(dino.value.x + 10, dino.value.y + 30, 8, 10)
-    ctx.fillRect(dino.value.x + 20, dino.value.y + 30, 8, 10)
+    // Jambes statiques
+    ctx.fillRect(d.x + 20, d.y + 42, 6, 10)
+    ctx.fillRect(d.x + 20, d.y + 51, 8, 3)
+    ctx.fillRect(d.x + 32, d.y + 42, 6, 10)
+    ctx.fillRect(d.x + 32, d.y + 51, 8, 3)
   }
+  
+  ctx.restore()
 }
 
 const drawObstacles = () => {
@@ -279,13 +344,25 @@ const drawObstacles = () => {
   
   ctx.fillStyle = '#535353'
   obstacles.value.forEach(obstacle => {
-    // Draw cactus-like obstacles
-    ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height)
-    
-    // Add some details to make it look like a cactus
-    if (obstacle.width > 20) {
-      ctx.fillRect(obstacle.x + 5, obstacle.y + 10, 4, 8)
-      ctx.fillRect(obstacle.x + obstacle.width - 9, obstacle.y + 10, 4, 8)
+    if (obstacle.type === 'small') {
+      // Small cactus
+      ctx.fillRect(obstacle.x + 5, obstacle.y, 7, obstacle.height)
+      ctx.fillRect(obstacle.x, obstacle.y + 10, 4, 12)
+      ctx.fillRect(obstacle.x + 13, obstacle.y + 15, 4, 10)
+    } else if (obstacle.type === 'large') {
+      // Large cactus
+      ctx.fillRect(obstacle.x + 8, obstacle.y, 9, obstacle.height)
+      ctx.fillRect(obstacle.x, obstacle.y + 15, 6, 18)
+      ctx.fillRect(obstacle.x + 19, obstacle.y + 20, 6, 15)
+    } else if (obstacle.type === 'double') {
+      // Double small cactus
+      ctx.fillRect(obstacle.x + 5, obstacle.y, 7, obstacle.height)
+      ctx.fillRect(obstacle.x, obstacle.y + 10, 4, 12)
+      ctx.fillRect(obstacle.x + 13, obstacle.y + 15, 4, 10)
+      
+      ctx.fillRect(obstacle.x + 30, obstacle.y, 7, obstacle.height)
+      ctx.fillRect(obstacle.x + 25, obstacle.y + 10, 4, 12)
+      ctx.fillRect(obstacle.x + 38, obstacle.y + 15, 4, 10)
     }
   })
 }
@@ -300,7 +377,6 @@ const drawGround = () => {
   ctx.lineTo(canvasWidth, ground.y)
   ctx.stroke()
   
-  // Animated ground pattern
   const pattern = Math.floor(score.value / 5) % 40
   for (let i = -pattern; i < canvasWidth; i += 40) {
     ctx.fillStyle = '#535353'
@@ -308,14 +384,33 @@ const drawGround = () => {
   }
 }
 
+const drawClouds = () => {
+  if (!ctx) return
+  
+  const cloudX = (score.value * 0.5) % (canvasWidth + 100)
+  
+  ctx.fillStyle = '#c4c4c4'
+  ctx.beginPath()
+  ctx.arc(canvasWidth - cloudX, 40, 15, 0, Math.PI * 2)
+  ctx.arc(canvasWidth - cloudX + 20, 40, 20, 0, Math.PI * 2)
+  ctx.arc(canvasWidth - cloudX + 40, 40, 15, 0, Math.PI * 2)
+  ctx.fill()
+  
+  const cloudX2 = (score.value * 0.3) % (canvasWidth + 100)
+  ctx.beginPath()
+  ctx.arc(canvasWidth - cloudX2 - 200, 70, 12, 0, Math.PI * 2)
+  ctx.arc(canvasWidth - cloudX2 - 185, 70, 15, 0, Math.PI * 2)
+  ctx.arc(canvasWidth - cloudX2 - 170, 70, 12, 0, Math.PI * 2)
+  ctx.fill()
+}
+
 const draw = () => {
   if (!ctx) return
   
-  // Clear canvas
   ctx.fillStyle = '#f7f7f7'
   ctx.fillRect(0, 0, canvasWidth, canvasHeight)
   
-  // Draw game elements
+  drawClouds()
   drawGround()
   drawDino()
   drawObstacles()
@@ -333,13 +428,16 @@ const gameLoop = () => {
 onMounted(() => {
   if (gameCanvas.value) {
     ctx = gameCanvas.value.getContext('2d')
-    draw() // Initial draw
+    resizeCanvas()
+    draw()
   }
   
+  window.addEventListener('resize', resizeCanvas)
   document.addEventListener('keydown', handleKeyPress)
 })
 
 onUnmounted(() => {
+  window.removeEventListener('resize', resizeCanvas)
   document.removeEventListener('keydown', handleKeyPress)
   if (animationId) {
     cancelAnimationFrame(animationId)
@@ -347,221 +445,6 @@ onUnmounted(() => {
 })
 </script>
 
-<style lang="scss" scoped>
-.dino-game-page {
-  min-height: 100vh;
-  background: var(--terminal-bg);
-  display: flex;
-  flex-direction: column;
-  padding: 2rem;
+<style src="@/assets/styles/pagesScss/dino.scss" lang="scss" scoped>
 
-  @media (max-width: 900px) {
-    padding: 1rem;
-  }
-}
-
-.game-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 2rem;
-  gap: 1rem;
-
-  @media (max-width: 768px) {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-}
-
-.back-btn {
-  background: transparent;
-  border: 1px solid var(--terminal-border);
-  color: var(--terminal-text);
-  padding: 0.75rem 1.5rem;
-  font-family: var(--font-mono);
-  font-size: 0.875rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  white-space: nowrap;
-
-  &:hover {
-    border-color: var(--terminal-accent);
-    color: var(--terminal-accent);
-  }
-}
-
-.game-title {
-  flex: 1;
-  text-align: center;
-
-  h1 {
-    font-family: var(--font-display);
-    font-size: 2rem;
-    color: var(--terminal-accent);
-    margin-bottom: 0.5rem;
-
-    @media (max-width: 768px) {
-      font-size: 1.5rem;
-    }
-  }
-
-  p {
-    font-family: var(--font-mono);
-    color: var(--terminal-text-dim);
-    font-size: 0.9rem;
-  }
-}
-
-.high-score {
-  font-family: var(--font-mono);
-  font-size: 1.2rem;
-  color: var(--terminal-text);
-  font-weight: 600;
-  white-space: nowrap;
-
-  @media (max-width: 768px) {
-    font-size: 1rem;
-  }
-}
-
-.game-container {
-  position: relative;
-  max-width: 800px;
-  width: 100%;
-  margin: 0 auto;
-  background: #f7f7f7;
-  border: 2px solid var(--terminal-border);
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-}
-
-canvas {
-  display: block;
-  cursor: pointer;
-  width: 100%;
-  height: auto;
-}
-
-.game-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 10;
-}
-
-.start-message,
-.game-over-message {
-  text-align: center;
-  color: white;
-  padding: 2rem;
-
-  h2 {
-    font-family: var(--font-display);
-    font-size: 2.5rem;
-    margin-bottom: 1rem;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-
-    @media (max-width: 768px) {
-      font-size: 2rem;
-    }
-  }
-
-  p {
-    font-family: var(--font-mono);
-    font-size: 1.2rem;
-    margin-bottom: 0.5rem;
-
-    @media (max-width: 768px) {
-      font-size: 1rem;
-    }
-  }
-
-  .final-score {
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: var(--terminal-accent);
-
-    @media (max-width: 768px) {
-      font-size: 1.2rem;
-    }
-  }
-
-  .new-record {
-    color: #ffd700;
-    font-size: 1.3rem;
-    animation: pulse 1s ease infinite;
-
-    @media (max-width: 768px) {
-      font-size: 1.1rem;
-    }
-  }
-}
-
-.restart-btn {
-  margin-top: 1.5rem;
-  background: var(--terminal-accent);
-  border: none;
-  color: var(--terminal-bg);
-  padding: 1rem 2rem;
-  font-family: var(--font-mono);
-  font-size: 1rem;
-  cursor: pointer;
-  border-radius: 4px;
-  transition: all 0.3s ease;
-
-  &:hover {
-    opacity: 0.9;
-    transform: scale(1.05);
-  }
-}
-
-.score-display {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  font-family: var(--font-mono);
-  font-size: 1.5rem;
-  color: #535353;
-  font-weight: 600;
-  z-index: 5;
-}
-
-.game-instructions {
-  max-width: 800px;
-  margin: 2rem auto 0;
-  text-align: center;
-
-  p {
-    font-family: var(--font-mono);
-    color: var(--terminal-text-dim);
-    font-size: 0.9rem;
-    margin-bottom: 0.5rem;
-
-    strong {
-      color: var(--terminal-text);
-    }
-  }
-
-  .easter-egg-note {
-    color: var(--terminal-accent);
-    font-size: 0.85rem;
-    margin-top: 1rem;
-  }
-}
-
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.7;
-  }
-}
 </style>

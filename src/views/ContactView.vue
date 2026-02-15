@@ -1,7 +1,5 @@
 <template>
   <div class="contact-page">
-    <!-- Weather background overlay -->
-    <!-- Fixed weather header -->
     <header class="fixed-weather-header">
       <WeatherBackground />
     </header>
@@ -32,7 +30,6 @@
             </div>
           </div>
 
-          <!-- Easter Egg Progress Display (no reset button) -->
           <div class="easter-egg-progress">
             <h3>Easter Eggs Progress</h3>
             <div class="progress-info">
@@ -46,79 +43,135 @@
         </div>
 
         <div class="contact-form-wrapper">
-          <form @submit.prevent="handleSubmit" class="contact-form">
-            <div class="form-group">
-              <label for="name">Name</label>
+          <form @submit.prevent="handleSubmit" class="contact-form" novalidate>
+            <div class="form-group" :class="{ 'has-error': fieldErrors.name }">
+              <label for="name">
+                Name
+                <span class="char-count">{{ formData.name.length }}/100</span>
+              </label>
               <input
                 id="name"
                 v-model="formData.name"
                 type="text"
                 required
+                maxlength="100"
                 placeholder="Your name"
+                aria-required="true"
+                aria-invalid="fieldErrors.name ? 'true' : 'false'"
+                aria-describedby="name-error"
+                @blur="validateField('name')"
               />
+              <span v-if="fieldErrors.name" id="name-error" class="error-message" role="alert">
+                {{ fieldErrors.name }}
+              </span>
             </div>
 
-            <div class="form-group">
-              <label for="email">Email</label>
+            <div class="form-group" :class="{ 'has-error': fieldErrors.email }">
+              <label for="email">
+                Email
+                <span class="char-count">{{ formData.email.length }}/150</span>
+              </label>
               <input
                 id="email"
                 v-model="formData.email"
                 type="email"
                 required
+                maxlength="150"
                 placeholder="your.email@example.com"
+                aria-required="true"
+                aria-invalid="fieldErrors.email ? 'true' : 'false'"
+                aria-describedby="email-error"
+                @blur="validateField('email')"
               />
+              <span v-if="fieldErrors.email" id="email-error" class="error-message" role="alert">
+                {{ fieldErrors.email }}
+              </span>
             </div>
 
-            <div class="form-group">
-              <label for="subject">Subject</label>
+            <div class="form-group" :class="{ 'has-error': fieldErrors.subject }">
+              <label for="subject">
+                Subject
+                <span class="char-count">{{ formData.subject.length }}/200</span>
+              </label>
               <input
                 id="subject"
                 v-model="formData.subject"
                 type="text"
                 required
+                maxlength="200"
                 placeholder="What's this about?"
+                aria-required="true"
+                aria-invalid="fieldErrors.subject ? 'true' : 'false'"
+                aria-describedby="subject-error"
+                @blur="validateField('subject')"
               />
+              <span v-if="fieldErrors.subject" id="subject-error" class="error-message" role="alert">
+                {{ fieldErrors.subject }}
+              </span>
             </div>
 
-            <div class="form-group">
-              <label for="message">Message</label>
+            <div class="form-group" :class="{ 'has-error': fieldErrors.message }">
+              <label for="message">
+                Message
+                <span class="char-count">{{ formData.message.length }}/2000</span>
+              </label>
               <textarea
                 id="message"
                 v-model="formData.message"
                 required
+                maxlength="2000"
                 rows="6"
                 placeholder="Your message..."
+                aria-required="true"
+                aria-invalid="fieldErrors.message ? 'true' : 'false'"
+                aria-describedby="message-error"
+                @blur="validateField('message')"
               ></textarea>
+              <span v-if="fieldErrors.message" id="message-error" class="error-message" role="alert">
+                {{ fieldErrors.message }}
+              </span>
             </div>
 
             <button 
               type="submit" 
               class="submit-btn"
-              :disabled="isSubmitting"
+              :disabled="isSubmitting || canSubmit"
               data-cursor-hover
+              aria-label="Send contact message"
             >
               {{ isSubmitting ? 'Sending...' : 'Send Message' }}
             </button>
 
-            <!-- Progressive button easter egg -->
             <button 
               type="button"
               @click="handleProgressiveClick"
               class="submit-btn progressive-btn"
               data-cursor-hover
+              aria-label="Progressive button easter egg"
             >
               {{ progressiveButtonText }}
             </button>
           </form>
 
-          <p v-if="submitMessage" :class="['submit-message', submitStatus]">
-            {{ submitMessage }}
-          </p>
+          <div 
+            v-if="submitMessage" 
+            :class="['submit-message', submitStatus]"
+            role="alert"
+            aria-live="polite"
+          >
+            <span>{{ submitMessage }}</span>
+            <button 
+              @click="closeSubmitMessage" 
+              class="close-message-btn"
+              aria-label="Close message"
+            >
+              ✕
+            </button>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Blue Screen of Death -->
     <BluescreenOfDeath 
       :show="showBSOD" 
       :clickCount="progressiveClickCount"
@@ -128,15 +181,23 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import BluescreenOfDeath from '@/components/BluescreenOfDeath.vue'
 import WeatherBackground from '@/components/WeatherBackground.vue'
 import { useEasterEggs } from '@/composables/useEasterEggs'
+import { useFormValidation } from '@/composables/useFormValidation'
 import { submitContactForm } from '@/services/contact'
 
 const router = useRouter()
 const { progress: easterEggProgress, discoverEgg, EASTER_EGGS } = useEasterEggs()
+
+const STORAGE_KEY = 'progressive_button_clicks'
+const POST_BSOD_KEY = 'post_bsod_clicks'
+const BSOD_OCCURRED_KEY = 'bsod_occurred'
+const RATE_LIMIT_KEY = 'contact_form_submissions'
+const RATE_LIMIT_WINDOW = 3600000 // 1 hour
+const MAX_SUBMISSIONS = 5
 
 const formData = ref({
   name: '',
@@ -145,40 +206,26 @@ const formData = ref({
   message: ''
 })
 
+const { validateField, validateForm, fieldErrors, clearErrors } = useFormValidation()
+
 const isSubmitting = ref(false)
 const submitMessage = ref('')
 const submitStatus = ref('')
-
-// Progressive button easter egg with persistent tracking
-const STORAGE_KEY = 'progressive_button_clicks'
-const POST_BSOD_KEY = 'post_bsod_clicks'
-const BSOD_OCCURRED_KEY = 'bsod_occurred'
 
 const progressiveClickCount = ref(0)
 const postBsodClicks = ref(0)
 const bsodOccurred = ref(false)
 const showBSOD = ref(false)
 
-// Load state from localStorage
-onMounted(() => {
-  const stored = localStorage.getItem(STORAGE_KEY)
-  if (stored) {
-    progressiveClickCount.value = parseInt(stored, 10) || 0
-  }
-  
-  const bsodOccurredStored = localStorage.getItem(BSOD_OCCURRED_KEY)
-  if (bsodOccurredStored === 'true') {
-    bsodOccurred.value = true
-  }
-  
-  const postBsodStored = localStorage.getItem(POST_BSOD_KEY)
-  if (postBsodStored) {
-    postBsodClicks.value = parseInt(postBsodStored, 10) || 0
-  }
+const canSubmit = computed(() => {
+  return !formData.value.name || 
+         !formData.value.email || 
+         !formData.value.subject || 
+         !formData.value.message ||
+         Object.keys(fieldErrors.value).length > 0
 })
 
 const progressiveButtonText = computed(() => {
-  // Post-BSOD state: different messages
   if (bsodOccurred.value) {
     if (postBsodClicks.value === 0) return 'Try Again?'
     if (postBsodClicks.value === 1) return 'Still clicking?'
@@ -186,7 +233,6 @@ const progressiveButtonText = computed(() => {
     return 'Contact me faster'
   }
   
-  // Pre-BSOD state: original messages
   const count = progressiveClickCount.value
   if (count === 0) return 'Contact me faster'
   if (count < 5) return 'Please stop...'
@@ -196,54 +242,56 @@ const progressiveButtonText = computed(() => {
   return 'Contact me faster'
 })
 
-const handleProgressiveClick = () => {
-  // Post-BSOD logic: count to 3 clicks then redirect to dino game
-  if (bsodOccurred.value) {
-    postBsodClicks.value++
-    localStorage.setItem(POST_BSOD_KEY, postBsodClicks.value.toString())
+const checkRateLimit = () => {
+  try {
+    const stored = localStorage.getItem(RATE_LIMIT_KEY)
+    if (!stored) return true
     
-    if (postBsodClicks.value >= 3) {
-      // Reset states
-      bsodOccurred.value = false
-      postBsodClicks.value = 0
-      localStorage.removeItem(BSOD_OCCURRED_KEY)
-      localStorage.removeItem(POST_BSOD_KEY)
-      
-      // Redirect to dino game
-      router.push('/easter-egg/dino')
+    const submissions = JSON.parse(stored)
+    const now = Date.now()
+    const recentSubmissions = submissions.filter(time => now - time < RATE_LIMIT_WINDOW)
+    
+    if (recentSubmissions.length >= MAX_SUBMISSIONS) {
+      const oldestSubmission = Math.min(...recentSubmissions)
+      const waitTime = Math.ceil((RATE_LIMIT_WINDOW - (now - oldestSubmission)) / 60000)
+      submitMessage.value = `Too many submissions. Please wait ${waitTime} minutes.`
+      submitStatus.value = 'error'
+      return false
     }
-    return
-  }
-  
-  // Pre-BSOD logic: count to 15 clicks
-  progressiveClickCount.value++
-  localStorage.setItem(STORAGE_KEY, progressiveClickCount.value.toString())
-  
-  // Discover easter egg on first click
-  if (progressiveClickCount.value === 1) {
-    discoverEgg(EASTER_EGGS.PROGRESSIVE_BUTTON)
-  }
-  
-  // Trigger BSOD at exactly 15 clicks
-  if (progressiveClickCount.value === 15) {
-    showBSOD.value = true
+    
+    return true
+  } catch (e) {
+    console.error('Rate limit check failed:', e)
+    return true
   }
 }
 
-const handleCloseBSOD = () => {
-  showBSOD.value = false
-  
-  // Set BSOD occurred flag and reset pre-BSOD counter
-  bsodOccurred.value = true
-  progressiveClickCount.value = 0
-  postBsodClicks.value = 0
-  
-  localStorage.setItem(BSOD_OCCURRED_KEY, 'true')
-  localStorage.setItem(STORAGE_KEY, '0')
-  localStorage.setItem(POST_BSOD_KEY, '0')
+const recordSubmission = () => {
+  try {
+    const stored = localStorage.getItem(RATE_LIMIT_KEY)
+    const submissions = stored ? JSON.parse(stored) : []
+    const now = Date.now()
+    
+    submissions.push(now)
+    const recentSubmissions = submissions.filter(time => now - time < RATE_LIMIT_WINDOW)
+    
+    localStorage.setItem(RATE_LIMIT_KEY, JSON.stringify(recentSubmissions))
+  } catch (e) {
+    console.error('Failed to record submission:', e)
+  }
 }
 
 const handleSubmit = async () => {
+  clearErrors()
+  
+  const formErrors = validateForm(formData.value)
+  if (Object.keys(formErrors).length > 0) {
+    Object.assign(fieldErrors.value, formErrors)
+    return
+  }
+  
+  if (!checkRateLimit()) return
+  
   isSubmitting.value = true
   submitMessage.value = ''
   
@@ -258,6 +306,7 @@ const handleSubmit = async () => {
     if (result.success) {
       submitMessage.value = 'Message sent successfully! I\'ll get back to you soon.'
       submitStatus.value = 'success'
+      recordSubmission()
       
       formData.value = {
         name: '',
@@ -268,265 +317,97 @@ const handleSubmit = async () => {
     } else {
       submitMessage.value = result.message || 'Failed to send message. Please try again.'
       submitStatus.value = 'error'
+      if (result.errors) {
+        Object.assign(fieldErrors.value, result.errors)
+      }
     }
   } catch (error) {
     submitMessage.value = 'Network error. Please try again later.'
     submitStatus.value = 'error'
   } finally {
     isSubmitting.value = false
-    
-    setTimeout(() => {
-      submitMessage.value = ''
-      submitStatus.value = ''
-    }, 5000)
   }
 }
+
+const closeSubmitMessage = () => {
+  submitMessage.value = ''
+  submitStatus.value = ''
+}
+
+const handleProgressiveClick = () => {
+  if (bsodOccurred.value) {
+    postBsodClicks.value++
+    try {
+      localStorage.setItem(POST_BSOD_KEY, postBsodClicks.value.toString())
+    } catch (e) {
+      console.error('localStorage error:', e)
+    }
+    
+    if (postBsodClicks.value >= 3) {
+      bsodOccurred.value = false
+      postBsodClicks.value = 0
+      try {
+        localStorage.removeItem(BSOD_OCCURRED_KEY)
+        localStorage.removeItem(POST_BSOD_KEY)
+      } catch (e) {
+        console.error('localStorage error:', e)
+      }
+      router.push('/easter-egg/dino')
+    }
+    return
+  }
+  
+  progressiveClickCount.value++
+  try {
+    localStorage.setItem(STORAGE_KEY, progressiveClickCount.value.toString())
+  } catch (e) {
+    console.error('localStorage error:', e)
+  }
+  
+  if (progressiveClickCount.value === 1) {
+    discoverEgg(EASTER_EGGS.PROGRESSIVE_BUTTON)
+  }
+  
+  if (progressiveClickCount.value === 15) {
+    showBSOD.value = true
+  }
+}
+
+const handleCloseBSOD = () => {
+  showBSOD.value = false
+  bsodOccurred.value = true
+  progressiveClickCount.value = 0
+  postBsodClicks.value = 0
+  
+  try {
+    localStorage.setItem(BSOD_OCCURRED_KEY, 'true')
+    localStorage.setItem(STORAGE_KEY, '0')
+    localStorage.setItem(POST_BSOD_KEY, '0')
+  } catch (e) {
+    console.error('localStorage error:', e)
+  }
+}
+
+onMounted(() => {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY)
+    if (stored !== null && stored !== '0') {
+      progressiveClickCount.value = parseInt(stored, 10)
+    }
+    
+    const bsodOccurredStored = localStorage.getItem(BSOD_OCCURRED_KEY)
+    if (bsodOccurredStored === 'true') {
+      bsodOccurred.value = true
+    }
+    
+    const postBsodStored = localStorage.getItem(POST_BSOD_KEY)
+    if (postBsodStored !== null && postBsodStored !== '0') {
+      postBsodClicks.value = parseInt(postBsodStored, 10)
+    }
+  } catch (e) {
+    console.error('localStorage read error:', e)
+  }
+})
 </script>
 
-<style lang="scss" scoped>
-.contact-page {
-  position: relative;
-  min-height: 100vh;
-  padding: 6rem 2rem 4rem;
-}
-
-.fixed-weather-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 999;
-  pointer-events: none;
-}
-
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  position: relative;
-  z-index: 1;
-}
-
-.page-header {
-  text-align: center;
-  margin-bottom: 3rem;
-}
-
-.page-title {
-  font-family: var(--font-display);
-  font-size: 3.5rem;
-  font-weight: 700;
-  color: var(--terminal-accent);
-  margin-bottom: 1rem;
-  
-  @media (max-width: 768px) {
-    font-size: 2.5rem;
-  }
-}
-
-.page-subtitle {
-  font-family: var(--font-serif);
-  font-size: 1.25rem;
-  color: var(--terminal-text-dim);
-  
-  @media (max-width: 768px) {
-    font-size: 1rem;
-  }
-}
-
-.contact-content {
-  display: grid;
-  grid-template-columns: 1fr 2fr;
-  gap: 4rem;
-  margin-top: 3rem;
-
-  @media (max-width: 968px) {
-    grid-template-columns: 1fr;
-    gap: 3rem;
-  }
-}
-
-.contact-info {
-  h2 {
-    font-family: var(--font-display);
-    font-size: 2rem;
-    color: var(--terminal-accent);
-    margin-bottom: 2rem;
-  }
-}
-
-.info-items {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-.info-item {
-  .label {
-    display: block;
-    font-family: var(--font-mono);
-    font-size: 0.875rem;
-    color: var(--terminal-text-dim);
-    margin-bottom: 0.5rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  .value {
-    font-family: var(--font-serif);
-    font-size: 1.125rem;
-    color: var(--terminal-text);
-    
-    &[href] {
-      color: var(--terminal-accent);
-      transition: color 0.3s ease;
-      
-      &:hover {
-        color: var(--terminal-accent-secondary);
-      }
-    }
-  }
-}
-
-.easter-egg-progress {
-  margin-top: 3rem;
-  padding: 1.5rem;
-  background: var(--terminal-bg-secondary);
-  border: 1px solid var(--terminal-border);
-  border-radius: 8px;
-
-  h3 {
-    font-family: var(--font-mono);
-    font-size: 1.125rem;
-    color: var(--terminal-accent);
-    margin-bottom: 1rem;
-  }
-
-  .progress-info {
-    margin-bottom: 1rem;
-    
-    p {
-      font-family: var(--font-mono);
-      font-size: 0.875rem;
-      color: var(--terminal-text);
-      margin: 0.25rem 0;
-    }
-  }
-  
-  .reset-hint {
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    color: var(--terminal-text-dim);
-    font-style: italic;
-    
-    code {
-      padding: 0.2rem 0.4rem;
-      background: var(--terminal-bg);
-      border: 1px solid var(--terminal-border);
-      border-radius: 3px;
-      color: var(--terminal-accent);
-    }
-  }
-}
-
-.contact-form-wrapper {
-  background: var(--terminal-bg-secondary);
-  padding: 2rem;
-  border-radius: 12px;
-  border: 1px solid var(--terminal-border);
-}
-
-.contact-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-
-  label {
-    font-family: var(--font-mono);
-    font-size: 0.875rem;
-    color: var(--terminal-text-dim);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  input,
-  textarea {
-    padding: 0.75rem 1rem;
-    font-family: var(--font-mono);
-    font-size: 0.875rem;
-    color: var(--terminal-text);
-    background: var(--terminal-bg);
-    border: 1px solid var(--terminal-border);
-    border-radius: 4px;
-    transition: all 0.3s ease;
-
-    &:focus {
-      outline: none;
-      border-color: var(--terminal-accent);
-    }
-
-    &::placeholder {
-      color: var(--terminal-text-dim);
-    }
-  }
-
-  textarea {
-    resize: vertical;
-    min-height: 120px;
-  }
-}
-
-.submit-btn {
-  padding: 1rem 2rem;
-  font-family: var(--font-mono);
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--terminal-bg);
-  background: var(--terminal-accent);
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-
-  &:hover:not(:disabled) {
-    background: var(--terminal-text);
-    transform: translateY(-2px);
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-}
-
-.progressive-btn {
-  background: var(--terminal-accent-secondary);
-  margin-bottom: 0.5rem;
-}
-
-.submit-message {
-  margin-top: 1rem;
-  padding: 1rem;
-  border-radius: 4px;
-  font-family: var(--font-mono);
-  font-size: 0.875rem;
-  text-align: center;
-
-  &.success {
-    background: rgba(39, 202, 64, 0.1);
-    color: var(--terminal-success);
-    border: 1px solid var(--terminal-success);
-  }
-
-  &.error {
-    background: rgba(255, 68, 68, 0.1);
-    color: var(--terminal-error);
-    border: 1px solid var(--terminal-error);
-  }
-}
-</style>
+<style src="@/assets/styles/pagesScss/contact.scss" lang="scss" scoped></style>

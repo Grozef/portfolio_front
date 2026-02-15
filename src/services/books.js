@@ -17,10 +17,15 @@ export const booksService = {
     return response.data.data
   },
   
-  async getBook(id) {
-    const response = await api.get(`/books/${id}`)
-    return response.data.data
-  },
+getBooks: async (params = {}) => {
+  const response = await api.get('/books', { 
+    params: { 
+      ...params,
+      per_page: 50
+    } 
+  })
+  return response.data.data
+},
   
   async getStats() {
     const response = await api.get('/books/stats')
