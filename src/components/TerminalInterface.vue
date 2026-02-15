@@ -1,295 +1,409 @@
 <template>
-  <div class="terminal" @click="focusInput">
-    <div class="terminal__header">
-      <div class="terminal__controls">
-        <span class="control control--close"></span>
-        <span class="control control--minimize"></span>
-        <span class="control control--maximize"></span>
+  <div class="terminal-wrapper">
+    <!-- Bandeau sticky en haut -->
+    <transition name="slide-down">
+      <div class="quick-nav" v-if="showQuickNav">
+        <div class="quick-nav__content">
+          <p class="quick-nav__hint">
+            <span class="quick-nav__icon">💡</span>
+            Not comfortable with terminal commands? 
+            <button @click="router.push('/projects')" class="quick-nav__btn" data-cursor-hover>
+              Switch to GUI Mode →
+            </button>
+          </p>
+          <button @click="dismissQuickNav" class="quick-nav__close" aria-label="Close banner">
+            ✕
+          </button>
+        </div>
       </div>
-      <span class="terminal__title">portfolio@terminal ~ </span>
-      <div class="terminal__status">
-        <span class="status-dot" :class="{ active: !terminalStore.isProcessing }"></span>
-        <span class="status-text">{{ terminalStore.isProcessing ? 'Processing...' : 'Ready' }}</span>
+    </transition>
+
+    <!-- Section "Why Terminal?" -->
+    <transition name="fade">
+      <div class="terminal-info" v-if="showTerminalInfo">
+        <div class="info-card">
+          <button @click="dismissTerminalInfo" class="info-close" aria-label="Close info">✕</button>
+          <h3>🖥️ Why a Terminal Interface?</h3>
+          <p>
+            This portfolio uses a terminal interface to showcase technical skills 
+            and create an interactive experience for developers and tech enthusiasts.
+          </p>
+          <p class="info-hint">
+            <strong>Pro tip:</strong> Type "help" to see all available commands, or use the quick access cards below!
+          </p>
+        </div>
+      </div>
+    </transition>
+
+    <!-- Mode démo indicator -->
+    <transition name="fade">
+      <div class="demo-indicator" v-if="demoMode">
+        <span class="demo-text">📺 Demo Mode Active</span>
+        <button @click="stopDemoMode" class="demo-stop" data-cursor-hover>
+          Stop Demo
+        </button>
+      </div>
+    </transition>
+
+    <!-- Terminal principal -->
+    <div class="terminal" @click="focusInput">
+      <div class="terminal__header">
+        <div class="terminal__controls">
+          <span class="control control--close"></span>
+          <span class="control control--minimize"></span>
+          <span class="control control--maximize"></span>
+        </div>
+        <span class="terminal__title">portfolio@terminal ~ </span>
+        <div class="terminal__status">
+          <span class="status-dot" :class="{ active: !terminalStore.isProcessing }"></span>
+          <span class="status-text">{{ terminalStore.isProcessing ? 'Processing...' : 'Ready' }}</span>
+        </div>
+      </div>
+
+      <div ref="outputRef" class="terminal__output">
+        <div v-for="entry in terminalStore.formattedHistory" :key="entry.id" class="output-entry"
+          :class="`output-entry--${entry.type}`">
+          <!-- Tout ton code template existant reste IDENTIQUE -->
+          <template v-if="entry.type === 'input'">
+            <span class="prompt">{{ prompt }} $</span>
+            <span class="command">{{ entry.content }}</span>
+          </template>
+
+          <template v-else-if="entry.format === 'ascii'">
+            <pre class="ascii-art">{{ entry.content }}</pre>
+          </template>
+
+          <template v-else-if="entry.format === 'help'">
+            <div class="help-output">
+              <p class="help-title">Available Commands:</p>
+              <div class="help-list">
+                <div v-for="cmd in entry.content" :key="cmd.name" class="help-item">
+                  <span class="cmd-name">{{ cmd.name }}</span>
+                  <span class="cmd-desc">{{ cmd.description }}</span>
+                </div>
+              </div>
+            </div>
+          </template>
+
+          <template v-else-if="entry.format === 'about'">
+            <div class="about-output">
+              <p class="about-name">{{ entry.content.name }}</p>
+              <p class="about-title">{{ entry.content.title }}</p>
+              <p class="about-bio">{{ entry.content.bio }}</p>
+              <p class="about-meta">
+                <span class="label">Location:</span> {{ entry.content.location }}
+              </p>
+              <p class="about-meta">
+                <span class="label">Status:</span>
+                <span class="status-available">{{ entry.content.status }}</span>
+              </p>
+            </div>
+          </template>
+
+          <template v-else-if="entry.format === 'projects'">
+            <div class="projects-output">
+              <div v-for="repo in entry.content" :key="repo.name" class="project-item">
+                <div class="project-header">
+                  <span class="project-name" data-cursor-hover>{{ repo.name }}</span>
+                  <span class="project-lang" v-if="repo.language">{{ repo.language }}</span>
+                </div>
+                <p class="project-desc">{{ repo.description || 'No description' }}</p>
+                <div class="project-stats">
+                  <span class="stat">★ {{ repo.stars || 0 }}</span>
+                  <span class="stat">⑂ {{ repo.forks || 0 }}</span>
+                </div>
+                <span class="project-hint">Type: open {{ repo.name }}</span>
+              </div>
+            </div>
+          </template>
+
+          <template v-else-if="entry.format === 'skills'">
+            <div class="skills-output">
+              <div v-for="(skills, category) in entry.content" :key="category" class="skill-category">
+                <span class="category-name">{{ category.toUpperCase() }}</span>
+                <div class="skill-list">
+                  <span v-for="skill in skills" :key="skill" class="skill-tag">{{ skill }}</span>
+                </div>
+              </div>
+            </div>
+          </template>
+
+          <template v-else-if="entry.format === 'contact'">
+            <div class="contact-output">
+              <div v-for="(value, key) in entry.content" :key="key" class="contact-item">
+                <span class="contact-label">{{ key }}:</span>
+                <span class="contact-value">{{ value }}</span>
+              </div>
+            </div>
+          </template>
+
+          <template v-else-if="entry.format === 'experience'">
+            <div class="experience-output">
+              <div v-for="exp in entry.content" :key="exp.title + exp.company" class="exp-item">
+                <div class="exp-header">
+                  <span class="exp-title">{{ exp.title }}</span>
+                  <span class="exp-period">{{ exp.period }}</span>
+                </div>
+                <span class="exp-company">@ {{ exp.company }}</span>
+                <p class="exp-desc">{{ exp.description }}</p>
+              </div>
+            </div>
+          </template>
+
+          <template v-else-if="entry.format === 'social'">
+            <div class="social-output">
+              <a 
+                v-for="link in entry.content" 
+                :key="link.name" 
+                :href="link.url" 
+                target="_blank" 
+                rel="noopener"
+                class="social-link" 
+                data-cursor-hover
+                @click="handleSocialLinkClick(link, $event)"
+              >
+                <span class="social-icon">{{ link.icon }}</span>
+                {{ link.name }}
+              </a>
+            </div>
+          </template>
+
+          <template v-else-if="entry.format === 'whoami'">
+            <div class="whoami-output">
+              <div class="whoami-header">
+                <span class="whoami-title">=== WHOAMI OUTPUT ===</span>
+              </div>
+
+              <div class="whoami-section">
+                <div class="section-title">[Browser Info]</div>
+                <div class="whoami-grid">
+                  <div class="whoami-item">
+                    <span class="whoami-label">Browser:</span>
+                    <span class="whoami-value">{{ entry.content.browser }} {{ entry.content.browserVersion }}</span>
+                  </div>
+                  <div class="whoami-item">
+                    <span class="whoami-label">Engine:</span>
+                    <span class="whoami-value">{{ entry.content.engine }}</span>
+                  </div>
+                  <div class="whoami-item">
+                    <span class="whoami-label">Cookies:</span>
+                    <span class="whoami-value">{{ entry.content.cookiesEnabled }}</span>
+                  </div>
+                  <div class="whoami-item">
+                    <span class="whoami-label">Do Not Track:</span>
+                    <span class="whoami-value">{{ entry.content.doNotTrack }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="whoami-section">
+                <div class="section-title">[System Info]</div>
+                <div class="whoami-grid">
+                  <div class="whoami-item">
+                    <span class="whoami-label">Platform:</span>
+                    <span class="whoami-value">{{ entry.content.platform }}</span>
+                  </div>
+                  <div class="whoami-item">
+                    <span class="whoami-label">Device Type:</span>
+                    <span class="whoami-value">{{ entry.content.deviceType }}</span>
+                  </div>
+                  <div class="whoami-item">
+                    <span class="whoami-label">CPU Cores:</span>
+                    <span class="whoami-value">{{ entry.content.cpuCores }}</span>
+                  </div>
+                  <div class="whoami-item">
+                    <span class="whoami-label">Memory:</span>
+                    <span class="whoami-value">{{ entry.content.deviceMemory }}</span>
+                  </div>
+                  <div class="whoami-item">
+                    <span class="whoami-label">Touch Support:</span>
+                    <span class="whoami-value">{{ entry.content.touchSupport }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="whoami-section">
+                <div class="section-title">[Display Info]</div>
+                <div class="whoami-grid">
+                  <div class="whoami-item">
+                    <span class="whoami-label">Screen:</span>
+                    <span class="whoami-value">{{ entry.content.screen }}</span>
+                  </div>
+                  <div class="whoami-item">
+                    <span class="whoami-label">Viewport:</span>
+                    <span class="whoami-value">{{ entry.content.viewport }}</span>
+                  </div>
+                  <div class="whoami-item">
+                    <span class="whoami-label">Color Depth:</span>
+                    <span class="whoami-value">{{ entry.content.colorDepth }}</span>
+                  </div>
+                  <div class="whoami-item">
+                    <span class="whoami-label">Pixel Ratio:</span>
+                    <span class="whoami-value">{{ entry.content.pixelRatio }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="whoami-section">
+                <div class="section-title">[Network Info]</div>
+                <div class="whoami-grid">
+                  <div class="whoami-item">
+                    <span class="whoami-label">Status:</span>
+                    <span class="whoami-value">{{ entry.content.online }}</span>
+                  </div>
+                  <div class="whoami-item">
+                    <span class="whoami-label">Type:</span>
+                    <span class="whoami-value">{{ entry.content.connectionType }}</span>
+                  </div>
+                  <div class="whoami-item">
+                    <span class="whoami-label">Speed:</span>
+                    <span class="whoami-value">{{ entry.content.connectionSpeed }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="whoami-section">
+                <div class="section-title">[Location Info]</div>
+                <div class="whoami-grid">
+                  <div class="whoami-item">
+                    <span class="whoami-label">Timezone:</span>
+                    <span class="whoami-value">{{ entry.content.timezone }}</span>
+                  </div>
+                  <div class="whoami-item">
+                    <span class="whoami-label">Language:</span>
+                    <span class="whoami-value">{{ entry.content.language }}</span>
+                  </div>
+                  <div class="whoami-item wide">
+                    <span class="whoami-label">Languages:</span>
+                    <span class="whoami-value">{{ entry.content.languages }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="whoami-section">
+                <div class="section-title">[Privacy Settings]</div>
+                <div class="whoami-grid">
+                  <div class="whoami-item wide">
+                    <span class="whoami-label">Referrer:</span>
+                    <span class="whoami-value">{{ entry.content.referrer }}</span>
+                  </div>
+                  <div class="whoami-item wide">
+                    <span class="whoami-label">User Agent:</span>
+                    <span class="whoami-value small">{{ entry.content.userAgent }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="whoami-footer">
+                <small>Your privacy is important. This information is only displayed to you.</small>
+              </div>
+            </div>
+          </template>
+
+          <template v-else-if="entry.type === 'error'">
+            <span class="error-text">{{ entry.content }}</span>
+          </template>
+
+          <template v-else>
+            <span class="output-text">{{ entry.content }}</span>
+          </template>
+        </div>
+      </div>
+
+      <div class="terminal__input-line">
+        <span class="prompt">{{ prompt }} $</span>
+        <input 
+          ref="inputRef" 
+          v-model="localInput" 
+          type="text" 
+          class="terminal__input"
+          :disabled="terminalStore.isProcessing || demoMode"
+          autocomplete="off" 
+          autocorrect="off" 
+          autocapitalize="off"
+          spellcheck="false" 
+          @keydown="handleKeyDown"
+          @input="handleUserInput"
+        />
+        <span class="cursor cursor-blink">█</span>
       </div>
     </div>
 
-    <div ref="outputRef" class="terminal__output">
-      <div v-for="entry in terminalStore.formattedHistory" :key="entry.id" class="output-entry"
-        :class="`output-entry--${entry.type}`">
-        <!-- Input echo -->
-        <template v-if="entry.type === 'input'">
-          <span class="prompt">{{ prompt }} $</span>
-          <span class="command">{{ entry.content }}</span>
-        </template>
+    <!-- Quick commands cards -->
+    <!-- <div class="quick-commands">
+      <h3>Quick Access</h3>
+      <div class="command-cards">
+        <button 
+          @click="executeQuickCommand('about')" 
+          class="cmd-card"
+          data-cursor-hover
+          :disabled="demoMode"
+        >
+          <span class="cmd-icon">👤</span>
+          <span class="cmd-label">About Me</span>
+          <span class="cmd-hint">View bio & background</span>
+        </button>
+        
+        <button 
+          @click="executeQuickCommand('projects')" 
+          class="cmd-card"
+          data-cursor-hover
+          :disabled="demoMode"
+        >
+          <span class="cmd-icon">💼</span>
+          <span class="cmd-label">Projects</span>
+          <span class="cmd-hint">Browse GitHub repos</span>
+        </button>
+        
+        <button 
+          @click="executeQuickCommand('skills')" 
+          class="cmd-card"
+          data-cursor-hover
+          :disabled="demoMode"
+        >
+          <span class="cmd-icon">🛠️</span>
+          <span class="cmd-label">Skills</span>
+          <span class="cmd-hint">Tech stack & expertise</span>
+        </button>
+        
+        <button 
+          @click="executeQuickCommand('contact')" 
+          class="cmd-card"
+          data-cursor-hover
+          :disabled="demoMode"
+        >
+          <span class="cmd-icon">📧</span>
+          <span class="cmd-label">Contact</span>
+          <span class="cmd-hint">Get in touch</span>
+        </button>
 
-        <!-- ASCII art -->
-        <template v-else-if="entry.format === 'ascii'">
-          <pre class="ascii-art">{{ entry.content }}</pre>
-        </template>
+        <button 
+          @click="executeQuickCommand('experience')" 
+          class="cmd-card"
+          data-cursor-hover
+          :disabled="demoMode"
+        >
+          <span class="cmd-icon">💻</span>
+          <span class="cmd-label">Experience</span>
+          <span class="cmd-hint">Work history</span>
+        </button>
 
-        <!-- Help output -->
-        <template v-else-if="entry.format === 'help'">
-          <div class="help-output">
-            <p class="help-title">Available Commands:</p>
-            <div class="help-list">
-              <div v-for="cmd in entry.content" :key="cmd.name" class="help-item">
-                <span class="cmd-name">{{ cmd.name }}</span>
-                <span class="cmd-desc">{{ cmd.description }}</span>
-              </div>
-            </div>
-          </div>
-        </template>
+        <button 
+          @click="executeQuickCommand('social')" 
+          class="cmd-card"
+          data-cursor-hover
+          :disabled="demoMode"
+        >
+          <span class="cmd-icon">🔗</span>
+          <span class="cmd-label">Social</span>
+          <span class="cmd-hint">Find me online</span>
+        </button>
+      </div>
+    </div> -->
 
-        <!-- About output -->
-        <template v-else-if="entry.format === 'about'">
-          <div class="about-output">
-            <p class="about-name">{{ entry.content.name }}</p>
-            <p class="about-title">{{ entry.content.title }}</p>
-            <p class="about-bio">{{ entry.content.bio }}</p>
-            <p class="about-meta">
-              <span class="label">Location:</span> {{ entry.content.location }}
-            </p>
-            <p class="about-meta">
-              <span class="label">Status:</span>
-              <span class="status-available">{{ entry.content.status }}</span>
-            </p>
-          </div>
-        </template>
-
-        <!-- Projects output -->
-        <template v-else-if="entry.format === 'projects'">
-          <div class="projects-output">
-            <div v-for="repo in entry.content" :key="repo.name" class="project-item">
-              <div class="project-header">
-                <span class="project-name" data-cursor-hover>{{ repo.name }}</span>
-                <span class="project-lang" v-if="repo.language">{{ repo.language }}</span>
-              </div>
-              <p class="project-desc">{{ repo.description || 'No description' }}</p>
-              <div class="project-stats">
-                <span class="stat">★ {{ repo.stars || 0 }}</span>
-                <span class="stat">⑂ {{ repo.forks || 0 }}</span>
-              </div>
-              <span class="project-hint">Type: open {{ repo.name }}</span>
-            </div>
-          </div>
-        </template>
-
-        <!-- Skills output -->
-        <template v-else-if="entry.format === 'skills'">
-          <div class="skills-output">
-            <div v-for="(skills, category) in entry.content" :key="category" class="skill-category">
-              <span class="category-name">{{ category.toUpperCase() }}</span>
-              <div class="skill-list">
-                <span v-for="skill in skills" :key="skill" class="skill-tag">{{ skill }}</span>
-              </div>
-            </div>
-          </div>
-        </template>
-
-        <!-- Contact output -->
-        <template v-else-if="entry.format === 'contact'">
-          <div class="contact-output">
-            <div v-for="(value, key) in entry.content" :key="key" class="contact-item">
-              <span class="contact-label">{{ key }}:</span>
-              <span class="contact-value">{{ value }}</span>
-            </div>
-          </div>
-        </template>
-
-        <!-- Experience output -->
-        <template v-else-if="entry.format === 'experience'">
-          <div class="experience-output">
-            <div v-for="exp in entry.content" :key="exp.title + exp.company" class="exp-item">
-              <div class="exp-header">
-                <span class="exp-title">{{ exp.title }}</span>
-                <span class="exp-period">{{ exp.period }}</span>
-              </div>
-              <span class="exp-company">@ {{ exp.company }}</span>
-              <p class="exp-desc">{{ exp.description }}</p>
-            </div>
-          </div>
-        </template>
-
-        <!-- Social output -->
-<template v-else-if="entry.format === 'social'">
-  <div class="social-output">
-    <a 
-      v-for="link in entry.content" 
-      :key="link.name" 
-      :href="link.url" 
-      target="_blank" 
-      rel="noopener"
-      class="social-link" 
-      data-cursor-hover
-      @click="handleSocialLinkClick(link, $event)"
-    >
-      <span class="social-icon">{{ link.icon }}</span>
-      {{ link.name }}
-    </a>
+    <!-- Konami Code Animation -->
+    <KonamiAnimation :show="showKonamiAnimation" />
   </div>
-</template>
-
-        <template v-else-if="entry.format === 'whoami'">
-          <div class="whoami-output">
-            <div class="whoami-header">
-              <span class="whoami-title">=== WHOAMI OUTPUT ===</span>
-            </div>
-
-            <!-- Browser Info Section -->
-            <div class="whoami-section">
-              <div class="section-title">[Browser Info]</div>
-              <div class="whoami-grid">
-                <div class="whoami-item">
-                  <span class="whoami-label">Browser:</span>
-                  <span class="whoami-value">{{ entry.content.browser }} {{ entry.content.browserVersion }}</span>
-                </div>
-                <div class="whoami-item">
-                  <span class="whoami-label">Engine:</span>
-                  <span class="whoami-value">{{ entry.content.engine }}</span>
-                </div>
-                <div class="whoami-item">
-                  <span class="whoami-label">Cookies:</span>
-                  <span class="whoami-value">{{ entry.content.cookiesEnabled }}</span>
-                </div>
-                <div class="whoami-item">
-                  <span class="whoami-label">Do Not Track:</span>
-                  <span class="whoami-value">{{ entry.content.doNotTrack }}</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- System Info Section -->
-            <div class="whoami-section">
-              <div class="section-title">[System Info]</div>
-              <div class="whoami-grid">
-                <div class="whoami-item">
-                  <span class="whoami-label">Platform:</span>
-                  <span class="whoami-value">{{ entry.content.platform }}</span>
-                </div>
-                <div class="whoami-item">
-                  <span class="whoami-label">Device Type:</span>
-                  <span class="whoami-value">{{ entry.content.deviceType }}</span>
-                </div>
-                <div class="whoami-item">
-                  <span class="whoami-label">CPU Cores:</span>
-                  <span class="whoami-value">{{ entry.content.cpuCores }}</span>
-                </div>
-                <div class="whoami-item">
-                  <span class="whoami-label">Memory:</span>
-                  <span class="whoami-value">{{ entry.content.deviceMemory }}</span>
-                </div>
-                <div class="whoami-item">
-                  <span class="whoami-label">Touch Support:</span>
-                  <span class="whoami-value">{{ entry.content.touchSupport }}</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Display Info Section -->
-            <div class="whoami-section">
-              <div class="section-title">[Display Info]</div>
-              <div class="whoami-grid">
-                <div class="whoami-item">
-                  <span class="whoami-label">Screen:</span>
-                  <span class="whoami-value">{{ entry.content.screen }}</span>
-                </div>
-                <div class="whoami-item">
-                  <span class="whoami-label">Viewport:</span>
-                  <span class="whoami-value">{{ entry.content.viewport }}</span>
-                </div>
-                <div class="whoami-item">
-                  <span class="whoami-label">Color Depth:</span>
-                  <span class="whoami-value">{{ entry.content.colorDepth }}</span>
-                </div>
-                <div class="whoami-item">
-                  <span class="whoami-label">Pixel Ratio:</span>
-                  <span class="whoami-value">{{ entry.content.pixelRatio }}</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Network Info Section -->
-            <div class="whoami-section">
-              <div class="section-title">[Network Info]</div>
-              <div class="whoami-grid">
-                <div class="whoami-item">
-                  <span class="whoami-label">Status:</span>
-                  <span class="whoami-value">{{ entry.content.online }}</span>
-                </div>
-                <div class="whoami-item">
-                  <span class="whoami-label">Type:</span>
-                  <span class="whoami-value">{{ entry.content.connectionType }}</span>
-                </div>
-                <div class="whoami-item">
-                  <span class="whoami-label">Speed:</span>
-                  <span class="whoami-value">{{ entry.content.connectionSpeed }}</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Location Info Section -->
-            <div class="whoami-section">
-              <div class="section-title">[Location Info]</div>
-              <div class="whoami-grid">
-                <div class="whoami-item">
-                  <span class="whoami-label">Timezone:</span>
-                  <span class="whoami-value">{{ entry.content.timezone }}</span>
-                </div>
-                <div class="whoami-item">
-                  <span class="whoami-label">Language:</span>
-                  <span class="whoami-value">{{ entry.content.language }}</span>
-                </div>
-                <div class="whoami-item wide">
-                  <span class="whoami-label">Languages:</span>
-                  <span class="whoami-value">{{ entry.content.languages }}</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Privacy Section -->
-            <div class="whoami-section">
-              <div class="section-title">[Privacy Settings]</div>
-              <div class="whoami-grid">
-                <div class="whoami-item wide">
-                  <span class="whoami-label">Referrer:</span>
-                  <span class="whoami-value">{{ entry.content.referrer }}</span>
-                </div>
-                <div class="whoami-item wide">
-                  <span class="whoami-label">User Agent:</span>
-                  <span class="whoami-value small">{{ entry.content.userAgent }}</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="whoami-footer">
-              <small>Your privacy is important. This information is only displayed to you.</small>
-            </div>
-          </div>
-        </template>
-
-        <!-- Error output -->
-        <template v-else-if="entry.type === 'error'">
-          <span class="error-text">{{ entry.content }}</span>
-        </template>
-
-        <!-- Default output -->
-        <template v-else>
-          <span class="output-text">{{ entry.content }}</span>
-        </template>
-      </div>
-    </div>
-
-    <div class="terminal__input-line">
-      <span class="prompt">{{ prompt }} $</span>
-      <input ref="inputRef" v-model="localInput" type="text" class="terminal__input"
-        :disabled="terminalStore.isProcessing" autocomplete="off" autocorrect="off" autocapitalize="off"
-        spellcheck="false" @keydown="handleKeyDown" />
-      <span class="cursor cursor-blink">█</span>
-    </div>
-  </div>
-
-  <!-- Konami Code Animation -->
-  <KonamiAnimation :show="showKonamiAnimation" />
 </template>
 
 <script setup>
@@ -301,17 +415,7 @@ import { useKonamiCode } from '@/composables/useKonamiCode'
 import KonamiAnimation from './KonamiAnimationGradius.vue'
 import { useEasterEggs } from '@/composables/useEasterEggs'
 
-const { discoverEgg, EASTER_EGGS } = useEasterEggs() 
-
-const handleSocialLinkClick = (link, event) => {
-  if (link.name === 'X') {
-    event.preventDefault()
-    discoverEgg(EASTER_EGGS.RICKROLL)
-    console.log('%c Rick Roll from Terminal! ', 'color: #c9a227; font-size: 16px; font-weight: bold;')
-    window.open(link.url, '_blank')
-  }
-}
-
+const { discoverEgg, EASTER_EGGS } = useEasterEggs()
 const emit = defineEmits(['openProject'])
 
 const terminalStore = useTerminalStore()
@@ -323,48 +427,21 @@ const outputRef = ref(null)
 const localInput = ref('')
 const showKonamiAnimation = ref(false)
 
-// Konami Code activation
-const handleKonamiActivation = () => {
+// UI State
+const showQuickNav = ref(true)
+const showTerminalInfo = ref(true)
 
-  const { discoverEgg, EASTER_EGGS } = useEasterEggs()
-  discoverEgg(EASTER_EGGS.KONAMI_CODE)
+// Demo Mode State
+const demoMode = ref(false)
+const demoCommands = ['help', 'about', 'skills', 'projects']
+let demoTimeout = null
+let currentDemoCommandIndex = 0
+let currentDemoCharIndex = 0
 
-  showKonamiAnimation.value = true
-  terminalStore.addToHistory({
-    type: 'output',
-    format: 'ascii',
-    content: `
-  ╔═══════════════════════════════════════════════════════════╗
-  ║                                                           ║
-  ║              ▲                                            ║
-  ║             ▲▲▲         GRADIUS POWER UP!                 ║
-  ║            ▲▲ ▲▲                                          ║
-  ║           ▲▲   ▲▲       KONAMI CODE ACTIVATED             ║
-  ║          ▲▲▲▲▲▲▲▲▲                                        ║
-  ║                                                           ║
-  ║    ┌──────────────────────────────────────────┐           ║
-  ║    │ SPEED UP │ MISSILE │ DOUBLE │ LASER │   │            ║
-  ║    │          │         │        │       │   │            ║
-  ║    │  OPTION  │  SHIELD │                    │            ║
-  ║    └──────────────────────────────────────────┘           ║
-  ║                                                           ║
-  ║                  ◢◣  VIC VIPER                           ║
-  ║                ▬▬◢◣▬▬                                    ║
-  ║                                                           ║
-  ║                   ⚡ 30 LIVES ⚡                         ║
-  ║                                                           ║
-  ║              ↑ ↑ ↓ ↓ ← → ← → B A                          ║
-  ║                                                           ║
-  ╚═══════════════════════════════════════════════════════════╝
-      `
-  })
-
-  setTimeout(() => {
-    showKonamiAnimation.value = false
-  }, 5000)
-}
-
-useKonamiCode(handleKonamiActivation)
+// Storage keys
+const QUICK_NAV_KEY = 'hide_quick_nav'
+const TERMINAL_INFO_KEY = 'hide_terminal_info'
+const DEMO_TIMEOUT_MS = 5000
 
 const isMobileTerminal = ref(false)
 
@@ -385,7 +462,9 @@ const prompt = computed(() => {
 })
 
 const focusInput = () => {
-  inputRef.value?.focus()
+  if (!demoMode.value) {
+    inputRef.value?.focus()
+  }
 }
 
 const scrollToBottom = () => {
@@ -396,10 +475,116 @@ const scrollToBottom = () => {
   })
 }
 
+// === NAVIGATION UI ===
+
+const dismissQuickNav = () => {
+  showQuickNav.value = false
+  try {
+    localStorage.setItem(QUICK_NAV_KEY, 'true')
+  } catch (e) {
+    console.error('localStorage error:', e)
+  }
+}
+
+const dismissTerminalInfo = () => {
+  showTerminalInfo.value = false
+  try {
+    localStorage.setItem(TERMINAL_INFO_KEY, 'true')
+  } catch (e) {
+    console.error('localStorage error:', e)
+  }
+}
+
+const executeQuickCommand = (cmd) => {
+  if (demoMode.value) return
+  
+  stopDemoMode()
+  localInput.value = cmd
+  terminalStore.processCommand(cmd, executeCommand)
+  localInput.value = ''
+  focusInput()
+}
+
+// === DEMO MODE ===
+
+const startDemoMode = () => {
+  if (demoMode.value) return
+  
+  demoMode.value = true
+  currentDemoCommandIndex = 0
+  currentDemoCharIndex = 0
+  localInput.value = ''
+  
+  typeNextCharacter()
+}
+
+const typeNextCharacter = () => {
+  if (!demoMode.value) return
+  
+  const currentCommand = demoCommands[currentDemoCommandIndex]
+  
+  if (currentDemoCharIndex < currentCommand.length) {
+    localInput.value += currentCommand[currentDemoCharIndex]
+    currentDemoCharIndex++
+    demoTimeout = setTimeout(typeNextCharacter, 100)
+  } else {
+    demoTimeout = setTimeout(() => {
+      executeCommand(localInput.value)
+      localInput.value = ''
+      currentDemoCharIndex = 0
+      currentDemoCommandIndex++
+      
+      if (currentDemoCommandIndex < demoCommands.length) {
+        demoTimeout = setTimeout(typeNextCharacter, 1500)
+      } else {
+        stopDemoMode()
+      }
+    }, 500)
+  }
+}
+
+const stopDemoMode = () => {
+  demoMode.value = false
+  clearTimeout(demoTimeout)
+  localInput.value = ''
+  currentDemoCommandIndex = 0
+  currentDemoCharIndex = 0
+}
+
+const resetDemoTimer = () => {
+  clearTimeout(demoTimeout)
+  
+  if (!demoMode.value) {
+    demoTimeout = setTimeout(() => {
+      startDemoMode()
+    }, DEMO_TIMEOUT_MS)
+  }
+}
+
+const handleUserInput = () => {
+  if (demoMode.value) {
+    stopDemoMode()
+  }
+  resetDemoTimer()
+}
+
+// === TON CODE EXISTANT (executeCommand, outputHelp, etc.) ===
+
+const handleSocialLinkClick = (link, event) => {
+  if (link.name === 'X') {
+    event.preventDefault()
+    discoverEgg(EASTER_EGGS.RICKROLL)
+    console.log('%c Rick Roll from Terminal! ', 'color: #c9a227; font-size: 16px; font-weight: bold;')
+    window.open(link.url, '_blank')
+  }
+}
+
 const executeCommand = async (input) => {
   const parts = input.trim().split(/\s+/)
   const command = parts[0].toLowerCase()
   const args = parts.slice(1)
+
+  resetDemoTimer()
 
   switch (command) {
     case 'help':
@@ -484,7 +669,7 @@ const executeCommand = async (input) => {
 
     case 'x_project_dj_fresh_2005':
       await developerHeaderMessage()
-      break  
+      break
 
     default:
       terminalStore.addToHistory({
@@ -495,7 +680,6 @@ const executeCommand = async (input) => {
 }
 
 const developerHeaderMessage = async () => {
-  const { discoverEgg, EASTER_EGGS } = useEasterEggs()
   discoverEgg(EASTER_EGGS.X_CODE)
 
   terminalStore.addToHistory({
@@ -536,19 +720,14 @@ const resetEasterEggsCommand = async () => {
 }
 
 const outputEnhancedWhoami = async () => {
-  const { discoverEgg, EASTER_EGGS } = useEasterEggs()
-
-  // Browser Info
   const userAgent = navigator.userAgent
   const browserInfo = getBrowserInfo(userAgent)
 
-  // System Info
   const platform = navigator.platform
   const cpuCores = navigator.hardwareConcurrency || 'Unknown'
   const deviceMemory = navigator.deviceMemory ? `${navigator.deviceMemory} GB` : 'Unknown'
   const touchSupport = 'ontouchstart' in window || navigator.maxTouchPoints > 0 ? 'Yes' : 'No'
 
-  // Display Info
   const screenWidth = window.screen.width
   const screenHeight = window.screen.height
   const viewportWidth = window.innerWidth
@@ -556,7 +735,6 @@ const outputEnhancedWhoami = async () => {
   const colorDepth = `${window.screen.colorDepth}-bit`
   const pixelRatio = window.devicePixelRatio || 1
 
-  // Network Info
   const isOnline = navigator.onLine ? 'Online' : 'Offline'
   let connectionType = 'Unknown'
   let connectionSpeed = 'Unknown'
@@ -569,17 +747,14 @@ const outputEnhancedWhoami = async () => {
     }
   }
 
-  // Privacy Settings
   const cookiesEnabled = navigator.cookieEnabled ? 'Enabled' : 'Disabled'
   const doNotTrack = navigator.doNotTrack || 'Not Set'
   const referrer = document.referrer || 'Direct'
 
-  // Location Info
   const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
   const language = navigator.language
   const languages = navigator.languages ? navigator.languages.join(', ') : language
 
-  // Device Type
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent)
   const isTablet = /(tablet|ipad|playbook|silk)|(android(?!.*mobi))/i.test(userAgent)
   let deviceType = 'Desktop'
@@ -590,36 +765,25 @@ const outputEnhancedWhoami = async () => {
     type: 'output',
     format: 'whoami',
     content: {
-      // Browser Info
       userAgent,
       browser: browserInfo.name,
       browserVersion: browserInfo.version,
       engine: browserInfo.engine,
-
-      // System Info
       platform,
       deviceType,
       cpuCores,
       deviceMemory,
       touchSupport,
-
-      // Display Info
       screen: `${screenWidth}x${screenHeight}`,
       viewport: `${viewportWidth}x${viewportHeight}`,
       colorDepth,
       pixelRatio,
-
-      // Network Info
       online: isOnline,
       connectionType,
       connectionSpeed,
-
-      // Privacy Settings
       cookiesEnabled,
       doNotTrack,
       referrer: referrer.substring(0, 50) + (referrer.length > 50 ? '...' : ''),
-
-      // Location Info
       timezone,
       language,
       languages
@@ -629,13 +793,11 @@ const outputEnhancedWhoami = async () => {
   discoverEgg(EASTER_EGGS.ENHANCED_WHOAMI)
 }
 
-// FIX: Helper function to parse browser info
 const getBrowserInfo = (ua) => {
   let name = 'Unknown'
   let version = 'Unknown'
   let engine = 'Unknown'
 
-  // Detect browser
   if (ua.indexOf('Firefox') > -1) {
     name = 'Firefox'
     version = ua.match(/Firefox\/(\d+\.\d+)/)?.[1] || 'Unknown'
@@ -692,8 +854,8 @@ const outputAbout = () => {
     content: {
       name: 'Full Stack Developer',
       title: 'Cook and philosopher when I get the time',
-      bio: `I’m a passionate developer with over 3 years of experience.
-            I first studied at the Chambre de Commerce et d’Industrie (CCI) of Lyon, where I developed my skills (pun intended) in both frontend and backend development, where I first earned a degree in Web and Mobile Development (Developpeur Web et Web Mobile, DWWM - RNCP level 5) in 2024. I then continued my studies at the IT Academy (Concepteur Developpeur d'Applications CDA - RNCP level 6), completing a two-year work-study program in 2026.`,
+      bio: `I'm a passionate developer with over 3 years of experience.
+            I first studied at the Chambre de Commerce et d'Industrie (CCI) of Lyon, where I developed my skills (pun intended) in both frontend and backend development, where I first earned a degree in Web and Mobile Development (Developpeur Web et Web Mobile, DWWM - RNCP level 5) in 2024. I then continued my studies at the IT Academy (Concepteur Developpeur d'Applications CDA - RNCP level 6), completing a two-year work-study program in 2026.`,
       location: 'Lyon, France & Chichigneux, Groland',
       status: 'Open to opportunities'
     }
@@ -785,10 +947,9 @@ const outputSocial = () => {
       { name: 'LinkedIn', url: 'https://linkedin.com/in/françois-lisowski-39a88576', icon: '◆' },
       {
         name: 'X',
-        url: 'https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?autoplay=1&mute=1',
+        url: 'https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?autoplay=1&mute=0',
         icon: '◆'
       },
-      // { name: 'Blog', url: 'https://blog.example.com', icon: '◆' }
     ]
   })
 }
@@ -823,7 +984,18 @@ const outputExperience = () => {
 }
 
 const handleKeyDown = (e) => {
-  if (e.key === 'Enter' && !terminalStore.isProcessing) {
+  if (demoMode.value && e.key !== 'Escape') {
+    e.preventDefault()
+    return
+  }
+
+  if (e.key === 'Escape' && demoMode.value) {
+    e.preventDefault()
+    stopDemoMode()
+    return
+  }
+
+  if (e.key === 'Enter' && !terminalStore.isProcessing && !demoMode.value) {
     e.preventDefault()
     terminalStore.processCommand(localInput.value, executeCommand)
     localInput.value = ''
@@ -835,12 +1007,51 @@ const handleKeyDown = (e) => {
     localInput.value = terminalStore.getNextCommand()
   } else if (e.key === 'Tab') {
     e.preventDefault()
-    // Auto-complete could be implemented here
   } else if (e.key === 'l' && e.ctrlKey) {
     e.preventDefault()
     terminalStore.clearHistory()
   }
 }
+
+const handleKonamiActivation = () => {
+  discoverEgg(EASTER_EGGS.KONAMI_CODE)
+  showKonamiAnimation.value = true
+
+  terminalStore.addToHistory({
+    type: 'output',
+    format: 'ascii',
+    content: `
+  ╔═══════════════════════════════════════════════════════════╗
+  ║                                                           ║
+  ║              ▲                                            ║
+  ║             ▲▲▲         GRADIUS POWER UP!                 ║
+  ║            ▲▲ ▲▲                                          ║
+  ║           ▲▲   ▲▲       KONAMI CODE ACTIVATED             ║
+  ║          ▲▲▲▲▲▲▲▲▲                                        ║
+  ║                                                           ║
+  ║    ┌──────────────────────────────────────────┐           ║
+  ║    │ SPEED UP │ MISSILE │ DOUBLE │ LASER │   │            ║
+  ║    │          │         │        │       │   │            ║
+  ║    │  OPTION  │  SHIELD │                    │            ║
+  ║    └──────────────────────────────────────────┘           ║
+  ║                                                           ║
+  ║                  ◢◣  VIC VIPER                           ║
+  ║                ▬▬◢◣▬▬                                    ║
+  ║                                                           ║
+  ║                   ⚡ 30 LIVES ⚡                         ║
+  ║                                                           ║
+  ║              ↑ ↑ ↓ ↓ ← → ← → B A                          ║
+  ║                                                           ║
+  ╚═══════════════════════════════════════════════════════════╝
+      `
+  })
+
+  setTimeout(() => {
+    showKonamiAnimation.value = false
+  }, 5000)
+}
+
+useKonamiCode(handleKonamiActivation)
 
 watch(() => terminalStore.history.length, () => {
   scrollToBottom()
@@ -851,7 +1062,15 @@ onMounted(() => {
   checkMobile()
   window.addEventListener('resize', checkMobile)
 
-  // Welcome message
+  try {
+    const hideNav = localStorage.getItem(QUICK_NAV_KEY)
+    const hideInfo = localStorage.getItem(TERMINAL_INFO_KEY)
+    if (hideNav) showQuickNav.value = false
+    if (hideInfo) showTerminalInfo.value = false
+  } catch (e) {
+    console.error('localStorage error:', e)
+  }
+
   const mobileWelcome = `
   ╔══════════════════════════════╗
   ║                              ║
@@ -883,13 +1102,19 @@ onMounted(() => {
     format: 'ascii',
     content: isMobileTerminal.value ? mobileWelcome : desktopWelcome
   })
+
+  terminalStore.addToHistory({
+    type: 'output',
+    content: '💡 Tip: Wait 5 seconds to see a demo, or start typing commands!'
+  })
+
+  resetDemoTimer()
 })
 
 onUnmounted(() => {
   window.removeEventListener('resize', checkMobile)
+  stopDemoMode()
 })
 </script>
 
-<style src="@/assets/styles/componentsScss/main-terminal.scss" lang="scss" scoped>
-
-</style>
+<style src="@/assets/styles/componentsScss/main-terminal.scss" lang="scss" scoped></style>
