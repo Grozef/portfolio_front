@@ -432,3 +432,6 @@ icicicicicicicicicicic
 
 **Total estimé: 80-100 aria labels à ajouter**
 **Temps: 3-4h**
+
+
+analyse incomplete et non pro

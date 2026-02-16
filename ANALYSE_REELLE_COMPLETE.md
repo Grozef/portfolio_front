@@ -200,12 +200,12 @@ Devrait s'appeler `formIsInvalid`
 
 ### TIER 4 - ACCESSIBILITÉ (6h)
 
-9. **ARIA labels essentiels**
+<!-- 9. **ARIA labels essentiels**
    - Tous boutons interactifs
    - Navigation principale
    - Forms inputs
    - Modals
-   - **Effort:** 3h
+   - **Effort:** 3h -->
 
 10. **Keyboard navigation**
     - Tab order correct

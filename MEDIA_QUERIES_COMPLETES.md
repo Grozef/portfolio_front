@@ -814,3 +814,6 @@ $desktop: 1440px;
 - Testing complet: 1h
 
 **TOTAL: 5-6h**
+
+
+OK
