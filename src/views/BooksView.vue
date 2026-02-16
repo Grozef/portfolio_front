@@ -1,18 +1,18 @@
 <template>
   <div class="books-page">
     <header class="page-header">
-      <button class="back-btn" @click="goToTerminal" data-cursor-hover>
+      <button class="back-btn" @click="goToTerminal"  aria-label="Return to terminal" data-cursor-hover>
         <span class="back-icon">&larr;</span>
         <span class="back-text">Terminal</span>
       </button>
       <h1 class="page-title">Library</h1>
       <div class="header-actions">
         <template v-if="isAuthenticated">
-          <button class="add-btn" @click="openAddModal" data-cursor-hover>+ Add Book</button>
-          <button class="add-btn" @click="goToAdminCarousel" data-cursor-hover>Carousel</button>
-          <button class="logout-btn" @click="handleLogout" data-cursor-hover>Logout</button>
+          <button class="add-btn" @click="openAddModal" aria-label="Add new book to library" data-cursor-hover>+ Add Book</button>
+          <button class="add-btn" @click="goToAdminCarousel" aria-label="Manage carousel images" data-cursor-hover>Carousel</button>
+          <button class="logout-btn" @click="handleLogout" aria-label="Logout from admin" data-cursor-hover>Logout</button>
         </template>
-        <button v-else class="login-btn" @click="goToLogin" data-cursor-hover>Admin</button>
+        <button v-else class="login-btn" @click="goToLogin" aria-label="Admin login" data-cursor-hover>Admin</button>
       </div>
     </header>
 
@@ -80,7 +80,7 @@
     <div class="carousel-section" v-if="carouselImages.length > 0 && currentCarouselImage">
       <div class="carousel-container">
 
-        <button class="carousel-arrow carousel-prev" @click="prevCarouselImage" data-cursor-hover>
+        <button class="carousel-arrow carousel-prev" @click="prevCarouselImage" aria-label="Previous carousel image" data-cursor-hover>
           ←
         </button>
 
@@ -94,7 +94,7 @@
           </div>
         </div>
 
-        <button class="carousel-arrow carousel-next" @click="nextCarouselImage" data-cursor-hover>
+        <button class="carousel-arrow carousel-next" @click="nextCarouselImage" aria-label="Next carousel image" data-cursor-hover>
           →
         </button>
       </div>
@@ -117,7 +117,7 @@
 
     <div class="filters">
       <button v-for="filter in filters" :key="filter.key" class="filter-btn"
-        :class="{ active: activeFilter === filter.key }" @click="setFilter(filter.key)" data-cursor-hover>{{
+        :class="{ active: activeFilter === filter.key }" @click="setFilter(filter.key)" data-cursor-hover aria-label="Filter books by category">{{
           filter.label
         }}</button>
     </div>
@@ -129,7 +129,7 @@
 
     <main v-else class="books-main">
       <div class="books-grid">
-        <article v-for="book in books" :key="book.id" class="book-card" @click="openBookModal(book)" data-cursor-hover>
+        <article v-for="book in books" :key="book.id" class="book-card" @click="openBookModal(book)" :aria-label="`Book: ${book.display_title} by ${book.display_author}`" data-cursor-hover>
           <div class="book-cover">
             <img v-if="book.display_cover_url" :src="book.display_cover_url" :alt="book.display_title" loading="lazy" />
             <div v-else class="cover-placeholder"><span>{{ book.display_title?.charAt(0) || '?' }}</span></div>

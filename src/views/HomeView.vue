@@ -7,15 +7,16 @@
           <span class="logo-text">Lisowski François</span>
         </div>
 
-        <nav class="nav desktop-nav">
-          <router-link to="/" class="nav-link active" data-cursor-hover>terminal</router-link>
-          <router-link to="/projects" class="nav-link" data-cursor-hover>projects</router-link>
-          <router-link to="/books" class="nav-link" data-cursor-hover>books</router-link>
-          <router-link to="/about" class="nav-link" data-cursor-hover>about</router-link>
-          <router-link to="/contact" class="nav-link" data-cursor-hover>contact</router-link>
+        <nav class="nav desktop-nav" role="navigation" aria-label="Primary navigation">
+          <router-link to="/" class="nav-link active" aria-current="page">terminal</router-link>
+          <router-link to="/projects" class="nav-link">projects</router-link>
+          <router-link to="/books" class="nav-link">books</router-link>
+          <router-link to="/about" class="nav-link">about</router-link>
+          <router-link to="/contact" class="nav-link">contact</router-link>
         </nav>
 
-        <button class="mobile-menu-btn" @click="toggleMobileMenu" data-cursor-hover>
+        <button class="mobile-menu-btn" @click="toggleMobileMenu" aria-label="Toggle navigation menu"
+          :aria-expanded="isMobileMenuOpen" data-cursor-hover>
           <span v-if="!isMobileMenuOpen">☰</span>
           <span v-else>✕</span>
         </button>
@@ -26,7 +27,7 @@
         </div>
       </div>
 
-      <nav class="mobile-nav" :class="{ open: isMobileMenuOpen }">
+      <nav class="mobile-nav" :class="{ open: isMobileMenuOpen }" role="navigation" aria-label="Mobile navigation">
         <router-link to="/" class="nav-link" @click="closeMobileMenu">terminal</router-link>
         <router-link to="/projects" class="nav-link" @click="closeMobileMenu">projects</router-link>
         <router-link to="/books" class="nav-link" @click="closeMobileMenu">books</router-link>

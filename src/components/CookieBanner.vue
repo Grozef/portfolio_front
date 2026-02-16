@@ -135,8 +135,10 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
+
 .slide-up-enter-active,
 .slide-up-leave-active {
+    cursor: pointer !important;
   transition: transform 0.4s ease, opacity 0.4s ease;
 }
 
@@ -147,6 +149,7 @@ onMounted(() => {
 }
 
 .cookie-banner {
+    cursor: pointer !important;
   position: fixed;
   bottom: 0;
   left: 0;
@@ -164,11 +167,13 @@ onMounted(() => {
 }
 
 .cookie-container {
+    cursor: pointer !important;
   max-width: 1200px;
   margin: 0 auto;
 }
 
 .cookie-content {
+    cursor: pointer !important;
   display: flex;
   gap: 1.5rem;
   margin-bottom: 1rem;
@@ -181,6 +186,7 @@ onMounted(() => {
 }
 
 .cookie-icon {
+    cursor: pointer !important;
   font-size: 3rem;
   flex-shrink: 0;
   
@@ -190,9 +196,11 @@ onMounted(() => {
 }
 
 .cookie-text {
+    cursor: pointer !important;
   flex: 1;
   
   h3 {
+      cursor: pointer !important;
     color: #00ffff;
     font-size: 1.3rem;
     margin-bottom: 0.5rem;
@@ -203,6 +211,7 @@ onMounted(() => {
   }
   
   p {
+      cursor: pointer !important;
     color: rgba(255, 255, 255, 0.85);
     line-height: 1.6;
     margin: 0;
@@ -211,6 +220,7 @@ onMounted(() => {
 }
 
 .cookie-preferences {
+    cursor: pointer !important;
   margin-top: 1rem;
   display: flex;
   flex-direction: column;
@@ -218,6 +228,7 @@ onMounted(() => {
 }
 
 .preference-item {
+    cursor: pointer !important;
   background: rgba(0, 255, 255, 0.05);
   border: 1px solid rgba(0, 255, 255, 0.2);
   border-radius: 8px;
@@ -230,6 +241,7 @@ onMounted(() => {
 }
 
 .preference-label {
+    cursor: pointer !important;
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -250,6 +262,7 @@ onMounted(() => {
   }
   
   .checkbox-custom {
+      cursor: pointer !important;
     width: 24px;
     height: 24px;
     border: 2px solid #00ffff;
@@ -274,6 +287,7 @@ onMounted(() => {
 }
 
 .preference-info {
+    cursor: pointer !important;
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
@@ -290,6 +304,7 @@ onMounted(() => {
 }
 
 .cookie-actions {
+    cursor: pointer !important;
   display: flex;
   gap: 0.75rem;
   flex-wrap: wrap;
@@ -306,6 +321,7 @@ onMounted(() => {
 }
 
 .btn {
+    cursor: pointer !important;
   padding: 0.75rem 1.5rem;
   border: none;
   border-radius: 4px;
@@ -321,6 +337,7 @@ onMounted(() => {
   }
   
   &.btn-primary {
+      cursor: pointer !important;
     background: #00ffff;
     color: #0a0a0f;
     
@@ -332,22 +349,26 @@ onMounted(() => {
   }
   
   &.btn-secondary {
+      cursor: pointer !important;
     background: rgba(0, 255, 255, 0.1);
     color: #00ffff;
     border: 2px solid #00ffff;
     
     &:hover {
+        cursor: pointer !important;
       background: rgba(0, 255, 255, 0.2);
       transform: translateY(-2px);
     }
   }
   
   &:active {
+      cursor: pointer !important;
     transform: translateY(0);
   }
 }
 
 .cookie-link {
+    cursor: pointer !important;
   display: block;
   text-align: center;
   margin-top: 1rem;
@@ -357,6 +378,7 @@ onMounted(() => {
   transition: color 0.2s;
   
   &:hover {
+      cursor: pointer !important;
     color: #00ffff;
     text-decoration: underline;
   }

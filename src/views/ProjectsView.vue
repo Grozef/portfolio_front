@@ -1,7 +1,7 @@
 <template>
   <div class="projects-page">
     <header class="page-header">
-      <button class="back-btn" @click="goToTerminal" data-cursor-hover>
+      <button class="back-btn" @click="goToTerminal" aria-label="Return to terminal">
         <span class="back-icon">←</span>
         <span class="back-text">Terminal</span>
       </button>
@@ -22,20 +22,11 @@
 
     <main v-else class="projects-main">
       <div ref="scrollContainer" class="projects-scroll" @scroll="handleScroll">
-        <article 
-          v-for="(project, index) in projects" 
-          :key="project.id" 
-          class="project-card"
-          :class="{ active: activeIndex === index }" 
-          @click="handleOpenProject(project)" 
-          data-cursor-hover
-        >
-          <div 
-            v-if="project.image" 
-            class="card-bg-image" 
-            :style="{ backgroundImage: `url(${project.image})` }"
-          ></div>
-          
+        <article v-for="(project, index) in projects" :key="project.id" class="project-card"
+          :aria-label="`Project: ${project.name}`" role="article" :class="{ active: activeIndex === index }"
+          @click="handleOpenProject(project)" data-cursor-hover>
+          <div v-if="project.image" class="card-bg-image" :style="{ backgroundImage: `url(${project.image})` }"></div>
+
           <div class="card-number">{{ String(index + 1).padStart(2, '0') }}</div>
 
           <div class="card-content">
@@ -44,7 +35,7 @@
             </div>
 
             <h2 class="card-title">{{ project.name }}</h2>
-            
+
             <p class="card-description">
               {{ project.customDesc || project.description || 'No description available' }}
             </p>
@@ -89,37 +80,24 @@
       </div>
 
       <div class="scroll-nav">
-        <button 
-          class="nav-arrow nav-arrow-prev" 
-          :class="{ disabled: activeIndex === 0 }" 
-          @click="goToPrevProject"
-          :disabled="activeIndex === 0" 
-          data-cursor-hover
-        >
+        <button class="nav-arrow nav-arrow-prev" :class="{ disabled: activeIndex === 0 }" aria-label="Previous project"
+          @click="goToPrevProject" :disabled="activeIndex === 0" data-cursor-hover>
           <span>←</span>
         </button>
 
         <div class="nav-dots-container">
-          <button 
-            v-for="(project, index) in visibleDots" 
-            :key="project.id" 
-            class="nav-dot" 
-            :class="{ active: activeIndex === index }" 
-            @click="scrollToProject(index)"
-            data-cursor-hover
-          ></button>
+          <button v-for="(project, index) in visibleDots" :key="project.id" class="nav-dot"
+            :class="{ active: activeIndex === index }" :aria-label="`Go to project ${index + 1}`"
+            :aria-current="activeIndex === index ? 'true' : 'false'" @click="scrollToProject(index)"
+            data-cursor-hover></button>
           <span v-if="projects.length > maxDots" class="nav-more">
             +{{ projects.length - maxDots }}
           </span>
         </div>
 
-        <button 
-          class="nav-arrow nav-arrow-next" 
-          :class="{ disabled: activeIndex === projects.length - 1 }" 
-          @click="goToNextProject"
-          :disabled="activeIndex === projects.length - 1" 
-          data-cursor-hover
-        >
+        <button class="nav-arrow nav-arrow-next" :class="{ disabled: activeIndex === projects.length - 1 }"
+          aria-label="Next project" @click="goToNextProject" :disabled="activeIndex === projects.length - 1"
+          data-cursor-hover>
           <span>→</span>
         </button>
       </div>
@@ -136,11 +114,7 @@
       <SwordTrigger />
     </div>
 
-    <ProjectModal 
-      :project="selectedProject" 
-      :is-open="isModalOpen" 
-      @close="handleCloseModal" 
-    />
+    <ProjectModal :project="selectedProject" :is-open="isModalOpen" @close="handleCloseModal" />
   </div>
 </template>
 
@@ -188,19 +162,19 @@ const visibleDots = computed(() => {
 
 const handleScroll = () => {
   if (!scrollContainer.value) return
-  
+
   const container = scrollContainer.value
   const scrollPosition = container.scrollLeft
   const containerWidth = container.offsetWidth
-  
+
   // Get actual card element to measure
   const firstCard = container.querySelector('.project-card')
   if (!firstCard) return
-  
+
   const cardStyles = window.getComputedStyle(firstCard)
   const cardWidth = firstCard.offsetWidth
   const gap = parseFloat(cardStyles.marginRight) || 32 // 2rem default gap
-  
+
   const totalCardWidth = cardWidth + gap
   activeIndex.value = Math.round(scrollPosition / totalCardWidth)
 
@@ -214,17 +188,17 @@ const handleScroll = () => {
 
 const scrollToProject = (index) => {
   if (!scrollContainer.value) return
-  
+
   const container = scrollContainer.value
   const firstCard = container.querySelector('.project-card')
   if (!firstCard) return
-  
+
   const cardStyles = window.getComputedStyle(firstCard)
   const cardWidth = firstCard.offsetWidth
   const gap = parseFloat(cardStyles.marginRight) || 32
-  
+
   const totalCardWidth = cardWidth + gap
-  
+
   container.scrollTo({
     left: index * totalCardWidth,
     behavior: 'smooth'
@@ -263,7 +237,7 @@ const goToTerminal = () => {
 onMounted(async () => {
   await githubStore.fetchRepositories()
   isLoading.value = false
-  
+
   await nextTick()
   if (scrollContainer.value) {
     scrollToProject(0)

@@ -1,1139 +1,491 @@
-<!--
-  AdminBooksView.vue - Gestion des livres admin
-  
-  Fonctionnalites:
-  - Liste des livres avec filtres
-  - CRUD complet (add, edit, delete)
-  - Search
-  - Featured toggle
--->
-<script setup>
-    import { ref, onMounted, computed, watch } from 'vue'
-    import { useRouter, useRoute } from 'vue-router'
-    import { useBooksStore } from '@/stores/books'
-    import { useAuthStore } from '@/stores/auth'
-    import AdminLayout from '@/components/AdminLayout.vue'
-    
-    const router = useRouter()
-    const route = useRoute()
-    const booksStore = useBooksStore()
-    const authStore = useAuthStore()
-    
-    const isLoading = ref(true)
-    const searchQuery = ref('')
-    const selectedFilter = ref('all')
-    const isAddModalOpen = ref(false)
-    const isEditModalOpen = ref(false)
-    const isDeleteModalOpen = ref(false)
-    const selectedBook = ref(null)
-    const requireManualEntry = ref(false)
-    
-    const newBook = ref({
-      isbn: '',
-      title: '',
-      author: '',
-      cover_url: '',
-      status: 'to-read',
-      rating: null,
-      review: '',
-      is_featured: false
-    })
-    
-    const filters = [
-      { key: 'all', label: 'All' },
-      { key: 'read', label: 'Read' },
-      { key: 'reading', label: 'Reading' },
-      { key: 'to-read', label: 'To Read' },
-      { key: 'featured', label: 'Featured' },
-    ]
-    
-    const books = computed(() => {
-      let result = booksStore.books
-    
-      if (searchQuery.value) {
-        const query = searchQuery.value.toLowerCase()
-        result = result.filter(book =>
-          book.display_title?.toLowerCase().includes(query) ||
-          book.display_author?.toLowerCase().includes(query) ||
-          book.isbn?.includes(query)
-        )
-      }
-    
-      if (selectedFilter.value !== 'all') {
-        if (selectedFilter.value === 'featured') {
-          result = result.filter(book => book.is_featured)
-        } else {
-          result = result.filter(book => book.status === selectedFilter.value)
-        }
-      }
-    
-      return result
-    })
-    
-    const stats = computed(() => booksStore.stats)
-    
-    onMounted(async () => {
-      await authStore.checkAuth()
-      if (!authStore.isAuthenticated) {
-        router.push('/login')
-        return
-      }
-    
-      await booksStore.fetchBooks()
-      await booksStore.fetchStats()
-      isLoading.value = false
-    
-      if (route.query.action === 'add') {
-        openAddModal()
-      }
-    })
-    
-    watch(() => route.query.action, (action) => {
-      if (action === 'add') {
-        openAddModal()
-      }
-    })
-    
-    const openAddModal = () => {
-      newBook.value = {
-        isbn: '',
-        title: '',
-        author: '',
-        cover_url: '',
-        status: 'to-read',
-        rating: null,
-        review: '',
-        is_featured: false
-      }
-      requireManualEntry.value = false
-      booksStore.clearError()
-      isAddModalOpen.value = true
-    }
-    
-    const closeAddModal = () => {
-      isAddModalOpen.value = false
-      requireManualEntry.value = false
-      router.replace({ query: {} })
-    }
-    
-    const openEditModal = (book) => {
-      selectedBook.value = { ...book }
-      isEditModalOpen.value = true
-    }
-    
-    const closeEditModal = () => {
-      isEditModalOpen.value = false
-      selectedBook.value = null
-    }
-    
-    const openDeleteModal = (book) => {
-      selectedBook.value = book
-      isDeleteModalOpen.value = true
-    }
-    
-    const closeDeleteModal = () => {
-      isDeleteModalOpen.value = false
-      selectedBook.value = null
-    }
-    
-    const handleAddBook = async () => {
-      try {
-        await booksStore.createBook(newBook.value)
-        closeAddModal()
-        await booksStore.fetchStats()
-      } catch (e) {
-        if (e.response?.data?.require_manual) {
-          requireManualEntry.value = true
-        }
-      }
-    }
-    
-    const handleUpdateBook = async () => {
-      if (!selectedBook.value) return
-      try {
-        await booksStore.updateBook(selectedBook.value.id, {
-          title: selectedBook.value.title,
-          author: selectedBook.value.author,
-          cover_url: selectedBook.value.cover_url,
-          status: selectedBook.value.status,
-          rating: selectedBook.value.rating,
-          review: selectedBook.value.review,
-          is_featured: selectedBook.value.is_featured
-        })
-        closeEditModal()
-        await booksStore.fetchStats()
-      } catch (e) {
-        console.error('Update failed:', e)
-      }
-    }
-    
-    const handleDeleteBook = async () => {
-      if (!selectedBook.value) return
-      try {
-        await booksStore.deleteBook(selectedBook.value.id)
-        closeDeleteModal()
-        await booksStore.fetchStats()
-      } catch (e) {
-        console.error('Delete failed:', e)
-      }
-    }
-    
-    const toggleFeatured = async (book) => {
-      try {
-        await booksStore.updateBook(book.id, { is_featured: !book.is_featured })
-      } catch (e) {
-        console.error('Toggle featured failed:', e)
-      }
-    }
-    
-    const getStatusColor = (status) => {
-      const colors = {
-        'read': 'var(--terminal-success)',
-        'reading': 'var(--terminal-warning)',
-        'to-read': 'var(--terminal-accent)'
-      }
-      return colors[status] || 'var(--terminal-text-dim)'
-    }
-    
-    const formatDate = (date) => {
-      return new Date(date).toLocaleDateString('fr-FR', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric'
-      })
-    }
-    </script>
-    
-    <template>
-      <AdminLayout>
-        <template #header-title>Books Management</template>
-    
-        <div class="books-admin" v-if="!isLoading">
-          <!-- Stats Bar -->
-          <div class="stats-bar">
-            <div class="stat-item">
-              <span class="stat-value">{{ stats.total || 0 }}</span>
-              <span class="stat-label">Total</span>
+<template>
+  <AdminLayout>
+    <template #header-title>Books Management</template>
+
+    <div class="books-admin" v-if="!isLoading">
+      <!-- Stats Bar -->
+      <div class="stats-bar">
+        <div class="stat-item">
+          <span class="stat-value">{{ stats.total || 0 }}</span>
+          <span class="stat-label">Total</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value">{{ stats.read || 0 }}</span>
+          <span class="stat-label">Read</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value">{{ stats.reading || 0 }}</span>
+          <span class="stat-label">Reading</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value">{{ stats.to_read || 0 }}</span>
+          <span class="stat-label">To Read</span>
+        </div>
+      </div>
+
+      <!-- Toolbar -->
+      <div class="toolbar">
+        <div class="search-box">
+          <span class="search-icon">⌕</span>
+          <input v-model="searchQuery" type="text" placeholder="Search by title, author, or ISBN..."
+            aria-label="Search books by title, author or ISBN" />
+        </div>
+
+        <div class="filters">
+          <button v-for="filter in filters" :key="filter.key" class="filter-btn"
+            :class="{ active: selectedFilter === filter.key }" @click="selectedFilter = filter.key" data-cursor-hover
+            :aria-label="`Filter by ${filter.label}`" :aria-pressed="selectedFilter === filter.key">
+            {{ filter.label }}
+          </button>
+        </div>
+
+        <button class="add-btn" @click="openAddModal" data-cursor-hover>
+          + Add Book
+        </button>
+      </div>
+
+      <!-- Books Table -->
+      <div class="books-table" v-if="books.length">
+        <table>
+          <thead>
+            <tr>
+              <th class="col-cover">Cover</th>
+              <th class="col-title">Title / Author</th>
+              <th class="col-isbn">ISBN</th>
+              <th class="col-status">Status</th>
+              <th class="col-rating">Rating</th>
+              <th class="col-featured">Featured</th>
+              <th class="col-date">Added</th>
+              <th class="col-actions">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="book in books" :key="book.id">
+              <td class="col-cover">
+                <div class="cover-thumb">
+                  <img v-if="book.display_cover_url" :src="book.display_cover_url" :alt="book.display_title" />
+                  <span v-else class="cover-placeholder">{{ book.display_title?.charAt(0) || '?' }}</span>
+                </div>
+              </td>
+              <td class="col-title">
+                <span class="book-title">{{ book.display_title }}</span>
+                <span class="book-author">{{ book.display_author || 'Unknown' }}</span>
+              </td>
+              <td class="col-isbn">
+                <span class="isbn-text">{{ book.isbn || '-' }}</span>
+              </td>
+              <td class="col-status">
+                <span class="status-badge" :style="{ color: getStatusColor(book.status) }">
+                  {{ book.status }}
+                </span>
+              </td>
+              <td class="col-rating">
+                <span class="rating-stars">
+                  <span v-for="i in 5" :key="i" class="star" :class="{ filled: i <= (book.rating || 0) }">★</span>
+                </span>
+              </td>
+              <td class="col-featured">
+                <button class="featured-toggle" :class="{ active: book.is_featured }" @click="toggleFeatured(book)"
+                  data-cursor-hover>
+                  {{ book.is_featured ? '★' : '☆' }}
+                </button>
+              </td>
+              <td class="col-date">
+                <span class="date-text">{{ formatDate(book.created_at) }}</span>
+              </td>
+              <td class="col-actions">
+                <button class="action-btn edit" @click="openEditModal(book)" data-cursor-hover>Edit</button>
+                <button class="action-btn delete" @click="openDeleteModal(book)" data-cursor-hover>Delete</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Empty State -->
+      <div v-else class="empty-state">
+        <p v-if="searchQuery">No books found matching "{{ searchQuery }}"</p>
+        <p v-else>No books yet. Start by adding your first book!</p>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div v-else class="loading-state">
+      <div class="loader"></div>
+      <p>Loading books...</p>
+    </div>
+
+    <!-- Add Book Modal -->
+    <Teleport to="body">
+      <Transition name="modal">
+        <div v-if="isAddModalOpen" class="modal-overlay" @click.self="closeAddModal" aria-labelledby="modal-title" aria-modal="true" role="dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h2 id="modal-title">Add New Book</h2>
+              <button aria-label="Close modal" class="modal-close" @click="closeAddModal" data-cursor-hover>&times;</button>
             </div>
-            <div class="stat-item">
-              <span class="stat-value">{{ stats.read || 0 }}</span>
-              <span class="stat-label">Read</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-value">{{ stats.reading || 0 }}</span>
-              <span class="stat-label">Reading</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-value">{{ stats.to_read || 0 }}</span>
-              <span class="stat-label">To Read</span>
-            </div>
+            <form @submit.prevent="handleAddBook" class="modal-form">
+              <div class="form-group">
+                <label>ISBN</label>
+                <input v-model="newBook.isbn" type="text" placeholder="9780132350884" :disabled="requireManualEntry" />
+                <span class="form-hint">
+                  {{ requireManualEntry ? 'ISBN not found - enter details manually' : 'Book data will be fetched from' }}
+                  Open
+                  Library' 
+                </span>
+              </div>
+
+              <template v-if="requireManualEntry || !newBook.isbn">
+                <div class="form-group">
+                  <label>Title *</label>
+                  <input v-model="newBook.title" type="text" placeholder="Clean Code"
+                    :required="requireManualEntry || !newBook.isbn" />
+                </div>
+                <div class="form-group">
+                  <label>Author</label>
+                  <input v-model="newBook.author" type="text" placeholder="Robert C. Martin" />
+                </div>
+                <div class="form-group">
+                  <label>Cover URL</label>
+                  <input v-model="newBook.cover_url" type="url" placeholder="https://..." />
+                </div>
+              </template>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Status</label>
+                  <select v-model="newBook.status">
+                    <option value="to-read">To Read</option>
+                    <option value="reading">Reading</option>
+                    <option value="read">Read</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Rating</label>
+                  <div class="rating-input">
+                    <button v-for="i in 5" :key="i" type="button" class="star-btn"
+                      :class="{ filled: i <= (newBook.rating || 0) }"
+                      @click="newBook.rating = newBook.rating === i ? null : i">★</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Review</label>
+                <textarea v-model="newBook.review" rows="3" placeholder="Your thoughts..."></textarea>
+              </div>
+
+              <div class="form-group checkbox">
+                <label>
+                  <input type="checkbox" v-model="newBook.is_featured" />
+                  Featured on homepage
+                </label>
+              </div>
+
+              <div v-if="booksStore.error" class="error-message">{{ booksStore.error }}</div>
+
+              <div class="modal-actions">
+                <button type="button" class="btn-cancel" @click="closeAddModal" data-cursor-hover>Cancel</button>
+                <button type="submit" class="btn-submit" :disabled="booksStore.isLoading" data-cursor-hover>
+                  {{ booksStore.isLoading ? 'Adding...' : 'Add Book' }}
+                </button>
+              </div>
+            </form>
           </div>
-    
-          <!-- Toolbar -->
-          <div class="toolbar">
-            <div class="search-box">
-              <span class="search-icon">⌕</span>
-              <input
-                v-model="searchQuery"
-                type="text"
-                placeholder="Search by title, author, or ISBN..."
-              />
+        </div>
+      </Transition>
+    </Teleport>
+
+    <!-- Edit Book Modal -->
+    <Teleport to="body">
+      <Transition name="modal">
+        <div v-if="isEditModalOpen && selectedBook" class="modal-overlay" @click.self="closeEditModal">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h2>Edit Book</h2>
+              <button class="modal-close" @click="closeEditModal" data-cursor-hover>&times;</button>
             </div>
-    
-            <div class="filters">
-              <button
-                v-for="filter in filters"
-                :key="filter.key"
-                class="filter-btn"
-                :class="{ active: selectedFilter === filter.key }"
-                @click="selectedFilter = filter.key"
-                data-cursor-hover
-              >
-                {{ filter.label }}
+            <form @submit.prevent="handleUpdateBook" class="modal-form">
+              <div class="form-group">
+                <label>Title</label>
+                <input v-model="selectedBook.title" type="text" />
+              </div>
+              <div class="form-group">
+                <label>Author</label>
+                <input v-model="selectedBook.author" type="text" />
+              </div>
+              <div class="form-group">
+                <label>Cover URL</label>
+                <input v-model="selectedBook.cover_url" type="url" />
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Status</label>
+                  <select v-model="selectedBook.status">
+                    <option value="to-read">To Read</option>
+                    <option value="reading">Reading</option>
+                    <option value="read">Read</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Rating</label>
+                  <div class="rating-input">
+                    <button v-for="i in 5" :key="i" type="button" class="star-btn"
+                      :class="{ filled: i <= (selectedBook.rating || 0) }"
+                      @click="selectedBook.rating = selectedBook.rating === i ? null : i">★</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Review</label>
+                <textarea v-model="selectedBook.review" rows="3"></textarea>
+              </div>
+
+              <div class="form-group checkbox">
+                <label>
+                  <input type="checkbox" v-model="selectedBook.is_featured" />
+                  Featured on homepage
+                </label>
+              </div>
+
+              <div v-if="booksStore.error" class="error-message">{{ booksStore.error }}</div>
+
+              <div class="modal-actions">
+                <button type="button" class="btn-cancel" @click="closeEditModal" data-cursor-hover>Cancel</button>
+                <button type="submit" class="btn-submit" :disabled="booksStore.isLoading" data-cursor-hover>
+                  {{ booksStore.isLoading ? 'Saving...' : 'Save Changes' }}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
+
+    <!-- Delete Confirmation Modal -->
+    <Teleport to="body">
+      <Transition name="modal">
+        <div v-if="isDeleteModalOpen && selectedBook" class="modal-overlay" @click.self="closeDeleteModal">
+          <div class="modal-content modal-small">
+            <div class="modal-header">
+              <h2>Delete Book</h2>
+              <button class="modal-close" @click="closeDeleteModal" data-cursor-hover>&times;</button>
+            </div>
+            <div class="modal-body">
+              <p>Are you sure you want to delete <strong>{{ selectedBook.display_title }}</strong>?</p>
+              <p class="warning-text">This action cannot be undone.</p>
+            </div>
+            <div class="modal-actions">
+              <button type="button" class="btn-cancel" @click="closeDeleteModal" data-cursor-hover>Cancel</button>
+              <button type="button" class="btn-delete" @click="handleDeleteBook" :disabled="booksStore.isLoading"
+                data-cursor-hover>
+                {{ booksStore.isLoading ? 'Deleting...' : 'Delete' }}
               </button>
             </div>
-    
-            <button class="add-btn" @click="openAddModal" data-cursor-hover>
-              + Add Book
-            </button>
-          </div>
-    
-          <!-- Books Table -->
-          <div class="books-table" v-if="books.length">
-            <table>
-              <thead>
-                <tr>
-                  <th class="col-cover">Cover</th>
-                  <th class="col-title">Title / Author</th>
-                  <th class="col-isbn">ISBN</th>
-                  <th class="col-status">Status</th>
-                  <th class="col-rating">Rating</th>
-                  <th class="col-featured">Featured</th>
-                  <th class="col-date">Added</th>
-                  <th class="col-actions">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="book in books" :key="book.id">
-                  <td class="col-cover">
-                    <div class="cover-thumb">
-                      <img v-if="book.display_cover_url" :src="book.display_cover_url" :alt="book.display_title" />
-                      <span v-else class="cover-placeholder">{{ book.display_title?.charAt(0) || '?' }}</span>
-                    </div>
-                  </td>
-                  <td class="col-title">
-                    <span class="book-title">{{ book.display_title }}</span>
-                    <span class="book-author">{{ book.display_author || 'Unknown' }}</span>
-                  </td>
-                  <td class="col-isbn">
-                    <span class="isbn-text">{{ book.isbn || '-' }}</span>
-                  </td>
-                  <td class="col-status">
-                    <span class="status-badge" :style="{ color: getStatusColor(book.status) }">
-                      {{ book.status }}
-                    </span>
-                  </td>
-                  <td class="col-rating">
-                    <span class="rating-stars">
-                      <span v-for="i in 5" :key="i" class="star" :class="{ filled: i <= (book.rating || 0) }">★</span>
-                    </span>
-                  </td>
-                  <td class="col-featured">
-                    <button
-                      class="featured-toggle"
-                      :class="{ active: book.is_featured }"
-                      @click="toggleFeatured(book)"
-                      data-cursor-hover
-                    >
-                      {{ book.is_featured ? '★' : '☆' }}
-                    </button>
-                  </td>
-                  <td class="col-date">
-                    <span class="date-text">{{ formatDate(book.created_at) }}</span>
-                  </td>
-                  <td class="col-actions">
-                    <button class="action-btn edit" @click="openEditModal(book)" data-cursor-hover>Edit</button>
-                    <button class="action-btn delete" @click="openDeleteModal(book)" data-cursor-hover>Delete</button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-    
-          <!-- Empty State -->
-          <div v-else class="empty-state">
-            <p v-if="searchQuery">No books found matching "{{ searchQuery }}"</p>
-            <p v-else>No books yet. Start by adding your first book!</p>
           </div>
         </div>
-    
-        <!-- Loading State -->
-        <div v-else class="loading-state">
-          <div class="loader"></div>
-          <p>Loading books...</p>
-        </div>
-    
-        <!-- Add Book Modal -->
-        <Teleport to="body">
-          <Transition name="modal">
-            <div v-if="isAddModalOpen" class="modal-overlay" @click.self="closeAddModal">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h2>Add New Book</h2>
-                  <button class="modal-close" @click="closeAddModal" data-cursor-hover>&times;</button>
-                </div>
-                <form @submit.prevent="handleAddBook" class="modal-form">
-                  <div class="form-group">
-                    <label>ISBN</label>
-                    <input
-                      v-model="newBook.isbn"
-                      type="text"
-                      placeholder="9780132350884"
-                      :disabled="requireManualEntry"
-                    />
-                    <span class="form-hint">
-                      {{ requireManualEntry ? 'ISBN not found - enter details manually' : 'Book data will be fetched from Open Library' }}
-                    </span>
-                  </div>
-    
-                  <template v-if="requireManualEntry || !newBook.isbn">
-                    <div class="form-group">
-                      <label>Title *</label>
-                      <input
-                        v-model="newBook.title"
-                        type="text"
-                        placeholder="Clean Code"
-                        :required="requireManualEntry || !newBook.isbn"
-                      />
-                    </div>
-                    <div class="form-group">
-                      <label>Author</label>
-                      <input v-model="newBook.author" type="text" placeholder="Robert C. Martin" />
-                    </div>
-                    <div class="form-group">
-                      <label>Cover URL</label>
-                      <input v-model="newBook.cover_url" type="url" placeholder="https://..." />
-                    </div>
-                  </template>
-    
-                  <div class="form-row">
-                    <div class="form-group">
-                      <label>Status</label>
-                      <select v-model="newBook.status">
-                        <option value="to-read">To Read</option>
-                        <option value="reading">Reading</option>
-                        <option value="read">Read</option>
-                      </select>
-                    </div>
-                    <div class="form-group">
-                      <label>Rating</label>
-                      <div class="rating-input">
-                        <button
-                          v-for="i in 5"
-                          :key="i"
-                          type="button"
-                          class="star-btn"
-                          :class="{ filled: i <= (newBook.rating || 0) }"
-                          @click="newBook.rating = newBook.rating === i ? null : i"
-                        >★</button>
-                      </div>
-                    </div>
-                  </div>
-    
-                  <div class="form-group">
-                    <label>Review</label>
-                    <textarea v-model="newBook.review" rows="3" placeholder="Your thoughts..."></textarea>
-                  </div>
-    
-                  <div class="form-group checkbox">
-                    <label>
-                      <input type="checkbox" v-model="newBook.is_featured" />
-                      Featured on homepage
-                    </label>
-                  </div>
-    
-                  <div v-if="booksStore.error" class="error-message">{{ booksStore.error }}</div>
-    
-                  <div class="modal-actions">
-                    <button type="button" class="btn-cancel" @click="closeAddModal" data-cursor-hover>Cancel</button>
-                    <button type="submit" class="btn-submit" :disabled="booksStore.isLoading" data-cursor-hover>
-                      {{ booksStore.isLoading ? 'Adding...' : 'Add Book' }}
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          </Transition>
-        </Teleport>
-    
-        <!-- Edit Book Modal -->
-        <Teleport to="body">
-          <Transition name="modal">
-            <div v-if="isEditModalOpen && selectedBook" class="modal-overlay" @click.self="closeEditModal">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h2>Edit Book</h2>
-                  <button class="modal-close" @click="closeEditModal" data-cursor-hover>&times;</button>
-                </div>
-                <form @submit.prevent="handleUpdateBook" class="modal-form">
-                  <div class="form-group">
-                    <label>Title</label>
-                    <input v-model="selectedBook.title" type="text" />
-                  </div>
-                  <div class="form-group">
-                    <label>Author</label>
-                    <input v-model="selectedBook.author" type="text" />
-                  </div>
-                  <div class="form-group">
-                    <label>Cover URL</label>
-                    <input v-model="selectedBook.cover_url" type="url" />
-                  </div>
-    
-                  <div class="form-row">
-                    <div class="form-group">
-                      <label>Status</label>
-                      <select v-model="selectedBook.status">
-                        <option value="to-read">To Read</option>
-                        <option value="reading">Reading</option>
-                        <option value="read">Read</option>
-                      </select>
-                    </div>
-                    <div class="form-group">
-                      <label>Rating</label>
-                      <div class="rating-input">
-                        <button
-                          v-for="i in 5"
-                          :key="i"
-                          type="button"
-                          class="star-btn"
-                          :class="{ filled: i <= (selectedBook.rating || 0) }"
-                          @click="selectedBook.rating = selectedBook.rating === i ? null : i"
-                        >★</button>
-                      </div>
-                    </div>
-                  </div>
-    
-                  <div class="form-group">
-                    <label>Review</label>
-                    <textarea v-model="selectedBook.review" rows="3"></textarea>
-                  </div>
-    
-                  <div class="form-group checkbox">
-                    <label>
-                      <input type="checkbox" v-model="selectedBook.is_featured" />
-                      Featured on homepage
-                    </label>
-                  </div>
-    
-                  <div v-if="booksStore.error" class="error-message">{{ booksStore.error }}</div>
-    
-                  <div class="modal-actions">
-                    <button type="button" class="btn-cancel" @click="closeEditModal" data-cursor-hover>Cancel</button>
-                    <button type="submit" class="btn-submit" :disabled="booksStore.isLoading" data-cursor-hover>
-                      {{ booksStore.isLoading ? 'Saving...' : 'Save Changes' }}
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          </Transition>
-        </Teleport>
-    
-        <!-- Delete Confirmation Modal -->
-        <Teleport to="body">
-          <Transition name="modal">
-            <div v-if="isDeleteModalOpen && selectedBook" class="modal-overlay" @click.self="closeDeleteModal">
-              <div class="modal-content modal-small">
-                <div class="modal-header">
-                  <h2>Delete Book</h2>
-                  <button class="modal-close" @click="closeDeleteModal" data-cursor-hover>&times;</button>
-                </div>
-                <div class="modal-body">
-                  <p>Are you sure you want to delete <strong>{{ selectedBook.display_title }}</strong>?</p>
-                  <p class="warning-text">This action cannot be undone.</p>
-                </div>
-                <div class="modal-actions">
-                  <button type="button" class="btn-cancel" @click="closeDeleteModal" data-cursor-hover>Cancel</button>
-                  <button type="button" class="btn-delete" @click="handleDeleteBook" :disabled="booksStore.isLoading" data-cursor-hover>
-                    {{ booksStore.isLoading ? 'Deleting...' : 'Delete' }}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </Transition>
-        </Teleport>
-      </AdminLayout>
-    </template>
-    
-    <style lang="scss" scoped>
-    .books-admin {
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
+      </Transition>
+    </Teleport>
+  </AdminLayout>
+</template>
+
+<script setup>
+import { ref, onMounted, computed, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import { useBooksStore } from '@/stores/books'
+import { useAuthStore } from '@/stores/auth'
+import AdminLayout from '@/components/AdminLayout.vue'
+
+const router = useRouter()
+const route = useRoute()
+const booksStore = useBooksStore()
+const authStore = useAuthStore()
+
+const isLoading = ref(true)
+const searchQuery = ref('')
+const selectedFilter = ref('all')
+const isAddModalOpen = ref(false)
+const isEditModalOpen = ref(false)
+const isDeleteModalOpen = ref(false)
+const selectedBook = ref(null)
+const requireManualEntry = ref(false)
+
+const newBook = ref({
+  isbn: '',
+  title: '',
+  author: '',
+  cover_url: '',
+  status: 'to-read',
+  rating: null,
+  review: '',
+  is_featured: false
+})
+
+const filters = [
+  { key: 'all', label: 'All' },
+  { key: 'read', label: 'Read' },
+  { key: 'reading', label: 'Reading' },
+  { key: 'to-read', label: 'To Read' },
+  { key: 'featured', label: 'Featured' },
+]
+
+const books = computed(() => {
+  let result = booksStore.books
+
+  if (searchQuery.value) {
+    const query = searchQuery.value.toLowerCase()
+    result = result.filter(book =>
+      book.display_title?.toLowerCase().includes(query) ||
+      book.display_author?.toLowerCase().includes(query) ||
+      book.isbn?.includes(query)
+    )
+  }
+
+  if (selectedFilter.value !== 'all') {
+    if (selectedFilter.value === 'featured') {
+      result = result.filter(book => book.is_featured)
+    } else {
+      result = result.filter(book => book.status === selectedFilter.value)
     }
-    
-    .stats-bar {
-      display: flex;
-      gap: 2rem;
-      padding: 1rem 1.5rem;
-      background: var(--terminal-bg-secondary);
-      border: 1px solid var(--terminal-border);
-      border-radius: 8px;
+  }
+
+  return result
+})
+
+const stats = computed(() => booksStore.stats)
+
+onMounted(async () => {
+  await authStore.checkAuth()
+  if (!authStore.isAuthenticated) {
+    router.push('/login')
+    return
+  }
+
+  await booksStore.fetchBooks()
+  await booksStore.fetchStats()
+  isLoading.value = false
+
+  if (route.query.action === 'add') {
+    openAddModal()
+  }
+})
+
+watch(() => route.query.action, (action) => {
+  if (action === 'add') {
+    openAddModal()
+  }
+})
+
+const openAddModal = () => {
+  newBook.value = {
+    isbn: '',
+    title: '',
+    author: '',
+    cover_url: '',
+    status: 'to-read',
+    rating: null,
+    review: '',
+    is_featured: false
+  }
+  requireManualEntry.value = false
+  booksStore.clearError()
+  isAddModalOpen.value = true
+}
+
+const closeAddModal = () => {
+  isAddModalOpen.value = false
+  requireManualEntry.value = false
+  router.replace({ query: {} })
+}
+
+const openEditModal = (book) => {
+  selectedBook.value = { ...book }
+  isEditModalOpen.value = true
+}
+
+const closeEditModal = () => {
+  isEditModalOpen.value = false
+  selectedBook.value = null
+}
+
+const openDeleteModal = (book) => {
+  selectedBook.value = book
+  isDeleteModalOpen.value = true
+}
+
+const closeDeleteModal = () => {
+  isDeleteModalOpen.value = false
+  selectedBook.value = null
+}
+
+const handleAddBook = async () => {
+  try {
+    await booksStore.createBook(newBook.value)
+    closeAddModal()
+    await booksStore.fetchStats()
+  } catch (e) {
+    if (e.response?.data?.require_manual) {
+      requireManualEntry.value = true
     }
-    
-    .stat-item {
-      display: flex;
-      align-items: baseline;
-      gap: 0.5rem;
-    
-      .stat-value {
-        font-family: var(--font-display);
-        font-size: 1.5rem;
-        font-weight: 500;
-        color: var(--terminal-accent);
-      }
-    
-      .stat-label {
-        font-family: var(--font-mono);
-        font-size: 0.75rem;
-        color: var(--terminal-text-dim);
-        text-transform: uppercase;
-      }
-    }
-    
-    .toolbar {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      flex-wrap: wrap;
-    }
-    
-    .search-box {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.5rem 1rem;
-      background: var(--terminal-bg-secondary);
-      border: 1px solid var(--terminal-border);
-      border-radius: 6px;
-      flex: 1;
-      min-width: 200px;
-    
-      .search-icon {
-        color: var(--terminal-text-dim);
-      }
-    
-      input {
-        flex: 1;
-        background: transparent;
-        border: none;
-        outline: none;
-        color: var(--terminal-text);
-        font-family: var(--font-mono);
-        font-size: 0.875rem;
-    
-        &::placeholder {
-          color: var(--terminal-text-dim);
-        }
-      }
-    }
-    
-    .filters {
-      display: flex;
-      gap: 0.25rem;
-    }
-    
-    .filter-btn {
-      padding: 0.5rem 0.75rem;
-      background: transparent;
-      border: 1px solid var(--terminal-border);
-      color: var(--terminal-text-dim);
-      font-family: var(--font-mono);
-      font-size: 0.75rem;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    
-      &:hover {
-        border-color: var(--terminal-accent);
-        color: var(--terminal-text);
-      }
-    
-      &.active {
-        background: var(--terminal-accent);
-        border-color: var(--terminal-accent);
-        color: var(--terminal-bg);
-      }
-    }
-    
-    .add-btn {
-      padding: 0.5rem 1rem;
-      background: var(--terminal-accent);
-      border: none;
-      border-radius: 6px;
-      color: var(--terminal-bg);
-      font-family: var(--font-mono);
-      font-size: 0.8rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: opacity 0.2s ease;
-    
-      &:hover {
-        opacity: 0.9;
-      }
-    }
-    
-    .books-table {
-      background: var(--terminal-bg-secondary);
-      border: 1px solid var(--terminal-border);
-      border-radius: 8px;
-      overflow: hidden;
-    
-      table {
-        width: 100%;
-        border-collapse: collapse;
-      }
-    
-      th, td {
-        padding: 0.875rem 1rem;
-        text-align: left;
-        border-bottom: 1px solid var(--terminal-border);
-      }
-    
-      th {
-        font-family: var(--font-mono);
-        font-size: 0.7rem;
-        font-weight: 500;
-        color: var(--terminal-text-dim);
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        background: var(--terminal-bg);
-      }
-    
-      tbody tr {
-        transition: background 0.2s ease;
-    
-        &:hover {
-          background: rgba(255, 255, 255, 0.02);
-        }
-    
-        &:last-child td {
-          border-bottom: none;
-        }
-      }
-    }
-    
-    .cover-thumb {
-      width: 36px;
-      height: 50px;
-      border-radius: 4px;
-      overflow: hidden;
-      background: var(--terminal-bg);
-    
-      img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-      }
-    
-      .cover-placeholder {
-        width: 100%;
-        height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-family: var(--font-serif);
-        font-size: 1rem;
-        color: var(--terminal-border);
-      }
-    }
-    
-    .col-title {
-      .book-title {
-        display: block;
-        font-family: var(--font-display);
-        font-size: 0.9rem;
-        color: var(--terminal-text);
-      }
-    
-      .book-author {
-        display: block;
-        font-family: var(--font-mono);
-        font-size: 0.75rem;
-        color: var(--terminal-text-dim);
-      }
-    }
-    
-    .isbn-text {
-      font-family: var(--font-mono);
-      font-size: 0.8rem;
-      color: var(--terminal-text-dim);
-    }
-    
-    .status-badge {
-      font-family: var(--font-mono);
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-    
-    .rating-stars .star {
-      color: var(--terminal-border);
-      font-size: 0.875rem;
-    
-      &.filled {
-        color: var(--terminal-accent);
-      }
-    }
-    
-    .featured-toggle {
-      width: 32px;
-      height: 32px;
-      background: transparent;
-      border: 1px solid var(--terminal-border);
-      border-radius: 4px;
-      color: var(--terminal-text-dim);
-      font-size: 1rem;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    
-      &:hover {
-        border-color: gold;
-        color: gold;
-      }
-    
-      &.active {
-        background: rgba(255, 215, 0, 0.1);
-        border-color: gold;
-        color: gold;
-      }
-    }
-    
-    .date-text {
-      font-family: var(--font-mono);
-      font-size: 0.75rem;
-      color: var(--terminal-text-dim);
-    }
-    
-    .col-actions {
-      white-space: nowrap;
-    }
-    
-    .action-btn {
-      padding: 0.375rem 0.75rem;
-      background: transparent;
-      border: 1px solid var(--terminal-border);
-      color: var(--terminal-text-dim);
-      font-family: var(--font-mono);
-      font-size: 0.7rem;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      margin-right: 0.25rem;
-    
-      &:hover {
-        border-color: var(--terminal-accent);
-        color: var(--terminal-accent);
-      }
-    
-      &.delete:hover {
-        border-color: #ff6464;
-        color: #ff6464;
-      }
-    }
-    
-    .empty-state {
-      text-align: center;
-      padding: 4rem 2rem;
-      background: var(--terminal-bg-secondary);
-      border: 1px dashed var(--terminal-border);
-      border-radius: 8px;
-    
-      p {
-        font-family: var(--font-mono);
-        font-size: 0.9rem;
-        color: var(--terminal-text-dim);
-      }
-    }
-    
-    .loading-state {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 400px;
-      gap: 1rem;
-      color: var(--terminal-text-dim);
-    
-      .loader {
-        width: 40px;
-        height: 40px;
-        border: 2px solid var(--terminal-border);
-        border-top-color: var(--terminal-accent);
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-      }
-    }
-    
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-    
-    /* Modal Styles */
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.85);
-      backdrop-filter: blur(4px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 2rem;
-      z-index: 1000;
-    }
-    
-    .modal-content {
-      background: var(--terminal-bg);
-      border: 1px solid var(--terminal-border);
-      border-radius: 12px;
-      width: 100%;
-      max-width: 500px;
-      max-height: 90vh;
-      overflow-y: auto;
-    
-      &.modal-small {
-        max-width: 400px;
-      }
-    }
-    
-    .modal-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 1.5rem;
-      border-bottom: 1px solid var(--terminal-border);
-    
-      h2 {
-        font-family: var(--font-display);
-        font-size: 1.25rem;
-        font-weight: 500;
-        color: var(--terminal-text);
-      }
-    }
-    
-    .modal-close {
-      width: 32px;
-      height: 32px;
-      background: transparent;
-      border: 1px solid var(--terminal-border);
-      border-radius: 50%;
-      color: var(--terminal-text-dim);
-      font-size: 1.25rem;
-      line-height: 1;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    
-      &:hover {
-        border-color: var(--terminal-accent);
-        color: var(--terminal-accent);
-      }
-    }
-    
-    .modal-form {
-      padding: 1.5rem;
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-    
-    .modal-body {
-      padding: 1.5rem;
-    
-      p {
-        font-family: var(--font-mono);
-        font-size: 0.9rem;
-        color: var(--terminal-text);
-        margin-bottom: 0.5rem;
-      }
-    
-      .warning-text {
-        color: #ff6464;
-        font-size: 0.8rem;
-      }
-    }
-    
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    
-      label {
-        font-family: var(--font-mono);
-        font-size: 0.75rem;
-        color: var(--terminal-text-dim);
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-      }
-    
-      input, select, textarea {
-        background: var(--terminal-bg-secondary);
-        border: 1px solid var(--terminal-border);
-        color: var(--terminal-text);
-        padding: 0.75rem 1rem;
-        font-family: var(--font-mono);
-        font-size: 0.875rem;
-        border-radius: 6px;
-        transition: border-color 0.2s ease;
-    
-        &:focus {
-          outline: none;
-          border-color: var(--terminal-accent);
-        }
-    
-        &:disabled {
-          opacity: 0.5;
-        }
-      }
-    
-      textarea {
-        resize: vertical;
-        min-height: 80px;
-      }
-    
-      &.checkbox {
-        flex-direction: row;
-        align-items: center;
-    
-        label {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          text-transform: none;
-          cursor: pointer;
-    
-          input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            padding: 0;
-          }
-        }
-      }
-    }
-    
-    .form-hint {
-      font-family: var(--font-mono);
-      font-size: 0.7rem;
-      color: var(--terminal-text-dim);
-      font-style: italic;
-    }
-    
-    .form-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
-    }
-    
-    .rating-input {
-      display: flex;
-      gap: 0.25rem;
-    }
-    
-    .star-btn {
-      width: 32px;
-      height: 32px;
-      background: transparent;
-      border: 1px solid var(--terminal-border);
-      border-radius: 4px;
-      color: var(--terminal-border);
-      font-size: 1rem;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    
-      &:hover {
-        border-color: var(--terminal-accent);
-        color: var(--terminal-accent);
-      }
-    
-      &.filled {
-        color: var(--terminal-accent);
-      }
-    }
-    
-    .error-message {
-      background: rgba(255, 100, 100, 0.1);
-      border: 1px solid rgba(255, 100, 100, 0.3);
-      color: #ff6464;
-      padding: 0.75rem 1rem;
-      border-radius: 6px;
-      font-family: var(--font-mono);
-      font-size: 0.8rem;
-    }
-    
-    .modal-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 0.75rem;
-      padding: 1.5rem;
-      border-top: 1px solid var(--terminal-border);
-    }
-    
-    .btn-cancel {
-      padding: 0.75rem 1.25rem;
-      background: transparent;
-      border: 1px solid var(--terminal-border);
-      color: var(--terminal-text-dim);
-      font-family: var(--font-mono);
-      font-size: 0.8rem;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    
-      &:hover {
-        border-color: var(--terminal-text);
-        color: var(--terminal-text);
-      }
-    }
-    
-    .btn-submit {
-      padding: 0.75rem 1.25rem;
-      background: var(--terminal-accent);
-      border: none;
-      border-radius: 6px;
-      color: var(--terminal-bg);
-      font-family: var(--font-mono);
-      font-size: 0.8rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: opacity 0.2s ease;
-    
-      &:hover:not(:disabled) {
-        opacity: 0.9;
-      }
-    
-      &:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-      }
-    }
-    
-    .btn-delete {
-      padding: 0.75rem 1.25rem;
-      background: #ff6464;
-      border: none;
-      border-radius: 6px;
-      color: white;
-      font-family: var(--font-mono);
-      font-size: 0.8rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: opacity 0.2s ease;
-    
-      &:hover:not(:disabled) {
-        opacity: 0.9;
-      }
-    
-      &:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-      }
-    }
-    
-    /* Modal Transitions */
-    .modal-enter-active,
-    .modal-leave-active {
-      transition: opacity 0.3s ease;
-    
-      .modal-content {
-        transition: transform 0.3s ease;
-      }
-    }
-    
-    .modal-enter-from,
-    .modal-leave-to {
-      opacity: 0;
-    
-      .modal-content {
-        transform: scale(0.95) translateY(20px);
-      }
-    }
-    
-    @media (max-width: 768px) {
-      .toolbar {
-        flex-direction: column;
-        align-items: stretch;
-      }
-    
-      .filters {
-        flex-wrap: wrap;
-      }
-    
-      .books-table {
-        overflow-x: auto;
-    
-        table {
-          min-width: 800px;
-        }
-      }
-    
-      .form-row {
-        grid-template-columns: 1fr;
-      }
-    }
-    </style>
+  }
+}
+
+const handleUpdateBook = async () => {
+  if (!selectedBook.value) return
+  try {
+    await booksStore.updateBook(selectedBook.value.id, {
+      title: selectedBook.value.title,
+      author: selectedBook.value.author,
+      cover_url: selectedBook.value.cover_url,
+      status: selectedBook.value.status,
+      rating: selectedBook.value.rating,
+      review: selectedBook.value.review,
+      is_featured: selectedBook.value.is_featured
+    })
+    closeEditModal()
+    await booksStore.fetchStats()
+  } catch (e) {
+    console.error('Update failed:', e)
+  }
+}
+
+const handleDeleteBook = async () => {
+  if (!selectedBook.value) return
+  try {
+    await booksStore.deleteBook(selectedBook.value.id)
+    closeDeleteModal()
+    await booksStore.fetchStats()
+  } catch (e) {
+    console.error('Delete failed:', e)
+  }
+}
+
+const toggleFeatured = async (book) => {
+  try {
+    await booksStore.updateBook(book.id, { is_featured: !book.is_featured })
+  } catch (e) {
+    console.error('Toggle featured failed:', e)
+  }
+}
+
+const getStatusColor = (status) => {
+  const colors = {
+    'read': 'var(--terminal-success)',
+    'reading': 'var(--terminal-warning)',
+    'to-read': 'var(--terminal-accent)'
+  }
+  return colors[status] || 'var(--terminal-text-dim)'
+}
+
+const formatDate = (date) => {
+  return new Date(date).toLocaleDateString('fr-FR', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric'
+  })
+}
+</script>
+
+<style src="@/assets/styles/pagesScss/admin-books.scss" lang="scss" scoped></style>

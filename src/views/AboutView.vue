@@ -1,7 +1,7 @@
 <template>
   <div class="about-page" :class="{ visible: isVisible }">
     <header class="page-header">
-      <router-link to="/" class="back-btn" data-cursor-hover>
+      <router-link to="/" class="back-btn" aria-label="Back to home" data-cursor-hover>
         <span class="back-icon">←</span>
         <span>Back</span>
       </router-link>
@@ -96,7 +96,7 @@
       <section class="cta-section">
         <h3 class="cta-title">Let's work together</h3>
         <p class="cta-text">I'm always interested in new opportunities and challenges.</p>
-        <router-link to="/contact" class="cta-button" data-cursor-hover>
+        <router-link to="/contact" class="cta-button" aria-label="Contact me" data-cursor-hover>
           Get in Touch
           <span class="btn-arrow">→</span>
         </router-link>

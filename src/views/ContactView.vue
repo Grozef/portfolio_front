@@ -135,7 +135,7 @@
             <button 
               type="submit" 
               class="submit-btn"
-              :disabled="isSubmitting || canSubmit"
+              :disabled="isSubmitting || formIsInvalid"
               data-cursor-hover
               aria-label="Send contact message"
             >
@@ -217,7 +217,7 @@ const postBsodClicks = ref(0)
 const bsodOccurred = ref(false)
 const showBSOD = ref(false)
 
-const canSubmit = computed(() => {
+const formIsInvalid = computed(() => {
   return !formData.value.name || 
          !formData.value.email || 
          !formData.value.subject || 

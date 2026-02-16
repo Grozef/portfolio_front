@@ -1,7 +1,7 @@
 <template>
   <div class="login-page">
     <header class="page-header">
-      <button class="back-btn" @click="goToTerminal" data-cursor-hover>
+      <button class="back-btn" @click="goToTerminal" aria-label="Back to site" data-cursor-hover>
         <span class="back-icon">&larr;</span>
         <span class="back-text">Back to Site</span>
       </button>
@@ -29,7 +29,7 @@
             <div class="password-input">
               <input id="password" v-model="password" :type="showPassword ? 'text' : 'password'" placeholder="••••••••"
                 required autocomplete="current-password" :disabled="countdown > 0" />
-              <button type="button" class="toggle-password" @click="showPassword = !showPassword" data-cursor-hover>
+              <button type="button" class="toggle-password" @click="showPassword = !showPassword" :aria-label="showPassword ? 'Hide password' : 'Show password'" data-cursor-hover>
                 {{ showPassword ? '◉' : '○' }}
               </button>
             </div>
@@ -42,7 +42,8 @@
             </div>
           </div>
 
-          <button type="submit" class="submit-btn" :disabled="authStore.isLoading || countdown > 0" data-cursor-hover>
+          <button type="submit" class="submit-btn" :disabled="authStore.isLoading || countdown > 0"   :aria-busy="authStore.isLoading"
+  aria-label="Login to admin panel" data-cursor-hover>
             <span v-if="authStore.isLoading">Authenticating...</span>
             <span v-else-if="countdown > 0">Locked ({{ formattedCountdown }})</span>
             <span v-else>Login</span>

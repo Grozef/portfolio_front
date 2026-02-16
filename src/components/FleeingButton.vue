@@ -8,6 +8,7 @@
       @touchstart="handleTouch"
       @click="handleClick"
       data-cursor-hover
+      aria-label="Fleeing Button (easter egg)"
     >
       {{ buttonText }}
     </button>
