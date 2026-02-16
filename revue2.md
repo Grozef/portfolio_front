@@ -19,7 +19,7 @@ tests/
 
 **Couverture: 0%**
 
-**Tests manquants critiques:**
+<!-- **Tests manquants critiques:**
 
 #### Auth (AuthController)
 ```php
@@ -76,7 +76,7 @@ tests/
 - test_by_status_scope_filters()
 ```
 
-**Temps estimé création tests backend:** 8-10h
+**Temps estimé création tests backend:** 8-10h -->
 
 ---
 
@@ -173,9 +173,18 @@ describe('Admin', () => {
 
 ---
 
+<!-- en cours -->
+
+
+
+
+
+
+
+
 ## 2. API RESOURCES & FORM REQUESTS
 
-### MANQUE: Form Requests
+<!-- ### MANQUE: Form Requests
 
 **Actuellement:** Validation inline dans controllers (verbose, non réutilisable)
 
@@ -212,9 +221,9 @@ class StoreBookRequest extends FormRequest
 - Messages d'erreur centralisés
 - Autorisation intégrée
 
----
+--- -->
 
-### MANQUE: API Resources
+<!-- ### MANQUE: API Resources
 
 **Actuellement:** Arrays construits manuellement dans controllers
 
@@ -267,9 +276,9 @@ class BookCollection extends ResourceCollection
 - Relations chargées conditionnellement
 - Versioning API facilité
 
----
+--- -->
 
-## 3. SÉCURITÉ - MANQUES CRITIQUES
+<!-- ## 3. SÉCURITÉ - MANQUES CRITIQUES
 
 ### MessageController - Pas de pagination
 
@@ -377,8 +386,24 @@ User::create([
 ```
 
 ---
+ -->
 
-### CORS - Configuration à vérifier
+
+ 
+
+
+
+
+
+<!-- en cours -->
+
+
+
+
+
+
+
+<!-- ### CORS - Configuration à vérifier
 
 **Fichier:** `config/cors.php`
 
@@ -392,7 +417,7 @@ User::create([
 ],
 ```
 
----
+--- -->
 
 ### Headers sécurité manquants
 
@@ -548,6 +573,32 @@ Book::onlyTrashed()->get();
 ```
 
 ---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ## RÉCAPITULATIF MANQUES
 

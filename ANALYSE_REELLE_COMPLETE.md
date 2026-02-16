@@ -188,7 +188,7 @@ Devrait s'appeler `formIsInvalid`
 
 ### TIER 3 - RESPONSIVE (4h)
 
-7. **Ajouter media queries manquantes**
+<!-- 7. **Ajouter media queries manquantes**
    - AdminCarouselView: 3 breakpoints min
    - AdminDashboard: 3 breakpoints min
    - ContactView (dans contact.scss): passer de 3 à 8+
@@ -196,7 +196,7 @@ Devrait s'appeler `formIsInvalid`
 
 8. **Tester tous breakpoints**
    - 320px, 375px, 768px, 1024px, 1440px
-   - **Effort:** 1h
+   - **Effort:** 1h -->
 
 ### TIER 4 - ACCESSIBILITÉ (6h)
 
