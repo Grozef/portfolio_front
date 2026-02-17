@@ -7,10 +7,10 @@
 import api from './api'
 
 export const booksService = {
-  async getBooks(params = {}) {
-    const response = await api.get('/books', { params })
-    return response.data.data
-  },
+  // async getBooks(params = {}) {
+  //   const response = await api.get('/books', { params })
+  //   return response.data.data
+  // },
   
   async getFeaturedBooks() {
     const response = await api.get('/books/featured')
@@ -24,7 +24,10 @@ getBooks: async (params = {}) => {
       per_page: 50
     } 
   })
-  return response.data.data
+  return {
+    data: response.data.data,
+    meta: response.data.meta
+  }
 },
   
   async getStats() {

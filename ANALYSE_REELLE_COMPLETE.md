@@ -56,7 +56,7 @@ const customProjectData = {
 
 ---
 
-### 4. RESPONSIVE INCOMPLET
+<!-- ### 4. RESPONSIVE INCOMPLET
 
 **Views sans media queries (styles inline):**
 - `ContactView.vue`: 0 (utilise contact.scss - 3 media queries seulement)
@@ -70,11 +70,11 @@ const customProjectData = {
 **Impact:** Cassé sur mobile pour plusieurs pages
 **Fix:** Ajouter media queries pour chaque breakpoint
 
----
+--- -->
 
-### 5. ACCESSIBILITÉ MINIMALE
+<!-- ### 5. ACCESSIBILITÉ MINIMALE -->
 
-**ARIA labels dans tout le code:** 26 total
+<!-- **ARIA labels dans tout le code:** 26 total
 
 **Manque:**
 - Skip to content
@@ -84,12 +84,13 @@ const customProjectData = {
 - Screen reader support
 - `cursor: none` bloque accessibilité
 
----
+--- -->
 
-### 6. PROBLÈMES MINEURS
+<!-- ### 6. PROBLÈMES MINEURS
 
 **BooksView.vue lignes 30-60:**
 ```vue
+c'est fait expres putain
 <p class="https://www.croissantage.com/">Pinia state management...</p>
 <p class="https://www.youtube.com/playlist?list=PLj...">Cascading...</p>
 ```
@@ -104,7 +105,7 @@ const canSubmit = computed(() => {
 Variable nommée `canSubmit` mais retourne TRUE quand formulaire INVALIDE
 Devrait s'appeler `formIsInvalid`
 
----
+--- -->
 
 ## POINTS FORTS CONFIRMÉS
 

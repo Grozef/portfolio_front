@@ -24,7 +24,9 @@ export const useBooksStore = defineStore('books', () => {
     isLoading.value = true
     error.value = null
     try {
-      books.value = await booksService.getBooks(params)
+    const result = await booksService.getBooks(params)
+    books.value = result.data      //  Les livres
+    pagination.value = result.meta  //  Les métadonnées
     } catch (e) {
       error.value = e.message
     } finally {

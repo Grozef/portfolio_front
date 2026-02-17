@@ -1,0 +1,22 @@
+[
+  {
+    "id": 1,
+    "display_title": "Clean Code",
+    "display_author": "Robert C. Martin",
+    "status": "read",
+    "rating": 5,
+    "isbn": "9780132350884",
+    "is_featured": true,
+    "created_at": "2023-01-01"
+  },
+  {
+    "id": 2,
+    "display_title": "The Pragmatic Programmer",
+    "display_author": "Andrew Hunt",
+    "status": "reading",
+    "rating": 4,
+    "isbn": "9780135957059",
+    "is_featured": false,
+    "created_at": "2023-02-01"
+  }
+]

@@ -208,15 +208,15 @@
             <form @submit.prevent="handleUpdateBook" class="modal-form">
               <div class="form-group">
                 <label>Title</label>
-                <input v-model="selectedBook.title" type="text" />
+                <input v-model="selectedBook.display_title" type="text" />
               </div>
               <div class="form-group">
                 <label>Author</label>
-                <input v-model="selectedBook.author" type="text" />
+                <input v-model="selectedBook.display_author" type="text" />
               </div>
               <div class="form-group">
                 <label>Cover URL</label>
-                <input v-model="selectedBook.cover_url" type="url" />
+                <input v-model="selectedBook.display_cover_url" type="url" />
               </div>
 
               <div class="form-row">
