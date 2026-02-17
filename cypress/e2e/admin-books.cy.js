@@ -1,89 +1,121 @@
-// describe('Admin Books Management', () => {
-// describe('Admin Books Management', () => {
-// beforeEach(() => {
-//   // Simule le token
-//   window.localStorage.setItem('auth_token', 'fake-token');
+const setupAdminBooks = () => {
+  cy.intercept('GET', '/api/v1/auth/me', { fixture: 'user.json' }).as('getMe')
+  cy.intercept('GET', '/api/v1/books/stats', {
+    body: { data: { total: 2, read: 1, reading: 1, to_read: 0 } },
+  }).as('getStats')
+  cy.intercept('GET', '/api/v1/books*', { fixture: 'books-list.json' }).as('getBooks')
 
-//   // Mocks
-//   cy.intercept('GET', '**/api/me', { body: { id: 1, name: 'Francois' } }).as('getMe');
-  
-//   // Utilise le fichier que tu viens de créer
-//   cy.intercept('GET', '**/api/books', { fixture: 'books-list.json' }).as('getBooks');
-  
-//   cy.intercept('GET', '**/api/books/stats', {
-//     body: { total: 2, read: 1, reading: 1, to_read: 0 }
-//   }).as('getStats');
+  cy.visit('/Moi/books', {
+    onBeforeLoad(win) {
+      win.localStorage.setItem('auth_token', 'fake-jwt-token')
+    },
+  })
 
-//   cy.visit('/admin/books');
+  cy.wait('@getMe')
+  cy.get('.loading-state', { timeout: 5000 }).should('not.exist')
+}
 
-//   // ATTENDRE que le chargement soit fini
-//   cy.wait(['@getMe', '@getBooks', '@getStats']);
-  
-//   // Optionnel : s'assurer que le loader a disparu
-//   cy.get('.loading-state').should('not.exist');
-// });
+describe('Admin - Books Management', () => {
+  beforeEach(setupAdminBooks)
 
-//   it('devrait afficher les stats...', () => {
-//     cy.get('.stat-item').should('contain', '2')
-//   })
-// })
+  it('renders the admin sidebar', () => {
+    cy.get('.sidebar').should('be.visible')
+  })
 
-//   it('devrait afficher les stats et la liste des livres', () => {
-//     cy.get('.stat-item').contains('2').should('be.visible') // Total
-//     cy.get('table tbody tr').should('have.length', 2)
-//     cy.get('.book-title').first().should('contain', 'Clean Code')
-//   })
+  it('displays correct stats in the stats bar', () => {
+    cy.get('.stat-item').contains('2').should('be.visible')
+    cy.get('.stat-item').contains('Total').should('be.visible')
+    cy.get('.stat-item').contains('Read').should('be.visible')
+    cy.get('.stat-item').contains('Reading').should('be.visible')
+    cy.get('.stat-item').contains('To Read').should('be.visible')
+  })
 
-//   it('devrait filtrer les livres via la barre de recherche', () => {
-//     cy.get('.search-box input').type('Pragmatic')
-//     cy.get('table tbody tr').should('have.length', 1)
-//     cy.get('.book-title').should('contain', 'The Pragmatic Programmer')
-//     cy.get('.book-title').should('not.contain', 'Clean Code')
-//   })
+  it('renders the books table', () => {
+    cy.get('.books-table table').should('be.visible')
+    cy.get('table thead th').should('have.length.gte', 6)
+  })
 
-//   it('devrait ouvrir la modale et ajouter un livre', () => {
-//     // Intercepter le POST de création
-//     cy.intercept('POST', '**/api/books', {
-//       statusCode: 201,
-//       body: { id: 3, title: 'Refactoring', author: 'Martin Fowler', status: 'to-read' }
-//     }).as('addBook')
+  it('renders a row per book from fixture', () => {
+    cy.get('table tbody tr').should('have.length', 2)
+  })
 
-//     cy.get('.add-btn').click()
-//     cy.get('.modal-overlay').should('be.visible')
-    
-//     cy.get('input[placeholder="9780132350884"]').type('9780134757599')
-//     // Si ton app fetch auto les infos via ISBN, tu peux mocker l'API OpenLibrary ici aussi
-    
-//     cy.get('input[placeholder="Clean Code"]').clear().type('Refactoring')
-//     cy.get('select').select('to-read')
-    
-//     cy.get('.btn-submit').click()
-//     cy.wait('@addBook')
-//     cy.get('.modal-overlay').should('not.exist')
-//   })
+  it('displays book title and author in first row', () => {
+    cy.get('.book-title').first().should('contain', 'Clean Code')
+    cy.get('.book-author').first().should('contain', 'Robert C. Martin')
+  })
 
-//   it('devrait gérer la suppression avec confirmation', () => {
-//     cy.intercept('DELETE', '**/api/books/1', { statusCode: 200 }).as('deleteBook')
-    
-//     cy.get('.action-btn.delete').first().click()
-//     cy.get('.modal-small').should('be.visible')
-//     cy.get('.modal-small strong').should('contain', 'Clean Code')
-    
-//     cy.get('.btn-delete').click()
-//     cy.wait('@deleteBook')
-//     cy.get('.modal-small').should('not.exist')
-//   })
+  it('displays status badge per row', () => {
+    cy.get('.status-badge').should('have.length.gte', 1)
+  })
 
-//   it('devrait switcher le statut "featured" directement depuis le tableau', () => {
-//     cy.intercept('PUT', '**/api/books/2', { 
-//       body: { id: 2, is_featured: true } 
-//     }).as('updateFeatured')
+  it('search box filters the books table', () => {
+    cy.get('.search-box input').type('Pragmatic')
+    cy.get('table tbody tr').should('have.length', 1)
+    cy.get('.book-title').should('contain', 'The Pragmatic Programmer')
+    cy.get('.book-title').should('not.contain', 'Clean Code')
+  })
 
-//     // Le livre 2 n'est pas "featured" (☆)
-//     cy.get('tr').last().find('.featured-toggle').should('contain', '☆').click()
-    
-//     cy.wait('@updateFeatured')
-//     // Vérification visuelle (attention au rendu du bouton après update)
-//     cy.get('tr').last().find('.featured-toggle').should('contain', '★')
-//   })
-// })
+  it('clearing search restores all books', () => {
+    cy.get('.search-box input').type('Pragmatic').clear()
+    cy.get('table tbody tr').should('have.length', 2)
+  })
+
+  it('renders filter buttons', () => {
+    cy.get('.filters .filter-btn').should('have.length.gte', 2)
+  })
+
+  it('clicking a filter marks it as active', () => {
+    cy.get('.filter-btn').contains('read').click()
+    cy.get('.filter-btn').contains('read').should('have.class', 'active')
+  })
+
+  it('opens Add Book modal on toolbar button click', () => {
+    cy.get('.toolbar .add-btn').click()
+    cy.get('.modal-overlay').should('be.visible')
+    cy.get('#modal-title').should('contain', 'Add New Book')
+  })
+
+  it('closes modal via close button', () => {
+    cy.get('.toolbar .add-btn').click()
+    cy.get('.modal-close').first().click()
+    cy.get('.modal-overlay').should('not.exist')
+  })
+
+  it('closes modal by clicking overlay backdrop', () => {
+    cy.get('.toolbar .add-btn').click()
+    cy.get('.modal-overlay').click({ force: true })
+    cy.get('.modal-overlay').should('not.exist')
+  })
+
+  it('opens edit modal when edit action is triggered', () => {
+    cy.get('table tbody tr').first().find('[aria-label*="Edit"], .btn-edit, [class*="edit"]').first().click()
+    cy.get('.modal-overlay').should('be.visible')
+  })
+
+  it('opens delete confirmation modal when delete action is triggered', () => {
+    cy.get('table tbody tr').first().find('[aria-label*="Delete"], .btn-delete, [class*="delete"]').first().click()
+    cy.get('.modal-overlay').should('be.visible')
+    cy.get('.modal-overlay').should('contain.text', 'Delete')
+  })
+
+  it('submits new book via modal form', () => {
+    cy.intercept('POST', '/api/v1/books', {
+      statusCode: 201,
+      body: {
+        data: { id: 3, display_title: 'Refactoring', display_author: 'Martin Fowler', status: 'to_read' },
+      },
+    }).as('createBook')
+
+    cy.get('.toolbar .add-btn').click()
+    cy.get('.modal-form').within(() => {
+      cy.get('input').first().type('Refactoring')
+    })
+    cy.get('.modal-form button[type="submit"]').click()
+    cy.wait('@createBook')
+  })
+
+  it('redirects to login when accessing without token', () => {
+    cy.visit('/Moi/books')
+    cy.url().should('include', '/login')
+  })
+})

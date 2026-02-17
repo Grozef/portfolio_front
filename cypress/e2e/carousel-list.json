@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "title": "Image One",
+    "image_url": "https://example.com/image1.jpg",
+    "sort_order": 1,
+    "is_active": true
+  },
+  {
+    "id": 2,
+    "title": "Image Two",
+    "image_url": "https://example.com/image2.jpg",
+    "sort_order": 2,
+    "is_active": false
+  }
+]

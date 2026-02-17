@@ -1,0 +1,22 @@
+[
+  {
+    "id": 101,
+    "name": "portfolio-frontend",
+    "description": "My personal portfolio built with Vue 3",
+    "language": "JavaScript",
+    "stars": 12,
+    "forks": 3,
+    "html_url": "https://github.com/user/portfolio-frontend",
+    "tags": ["Vue", "Vite"]
+  },
+  {
+    "id": 102,
+    "name": "api-backend",
+    "description": "Laravel REST API",
+    "language": "PHP",
+    "stars": 5,
+    "forks": 1,
+    "html_url": "https://github.com/user/api-backend",
+    "tags": ["Laravel", "PHP"]
+  }
+]
