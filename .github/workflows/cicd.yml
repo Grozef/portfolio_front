@@ -1,0 +1,45 @@
+name: CI/CD Portfolio Front
+
+on:
+  push:
+    branches: [ main, dev ]
+  pull_request:
+    branches: [ main, dev ]
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build project
+        run: npm run build
+        env:
+          VITE_BACKEND_URL: ${{ secrets.VITE_BACKEND_URL }}
+
+      # Étape cruciale : Tests Cypress
+      - name: Cypress run
+        uses: cypress-io/github-action@v6
+        with:
+          # On lance le serveur de dev pour que Cypress puisse tester
+          start: npm run dev
+          wait-on: 'http://localhost:5173' # Attend que Vite soit prêt
+          # On peut aussi lancer sur le build si tu as un script "preview"
+          # start: npm run preview
+          # wait-on: 'http://localhost:4173'
+
+      # Optionnel : Déploiement (si les tests passent)
+      # - name: Deploy to Vercel/Netlify/S3
+      #   if: success()
+      #   run: ... ton script de déploiement ...

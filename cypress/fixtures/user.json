@@ -1,6 +1,8 @@
 {
-  "id": 1,
-  "name": "Charles Bukowski",
-  "email": "contact@alcooliquesanonymes.com",
-  "role": "admin"
+  "data": {
+    "id": 1,
+    "name": "Charles Bukowski",
+    "email": "contact@alcooliquesanonymes.com",
+    "role": "admin"
+  }
 }

@@ -11,6 +11,7 @@ export const useBooksStore = defineStore('books', () => {
   const featuredBooks = ref([])
   const selectedBook = ref(null)
   const stats = ref(null)
+  const pagination = ref(null)
   const isLoading = ref(false)
   const error = ref(null)
   const activeFilter = ref('all')
@@ -104,7 +105,7 @@ export const useBooksStore = defineStore('books', () => {
   const clearError = () => { error.value = null }
 
   return {
-    books, featuredBooks, selectedBook, stats, isLoading, error, activeFilter,
+    books, featuredBooks, selectedBook, stats, pagination, isLoading, error, activeFilter,
     filteredBooks,
     fetchBooks, fetchStats, createBook, updateBook, deleteBook, refreshBookCache,
     setFilter, clearSelectedBook, clearError

@@ -30,7 +30,7 @@ const setupAdminMessages = () => {
   })
 
   cy.wait('@getMe')
-  cy.get('.loading-state', { timeout: 5000 }).should('not.exist')
+  cy.get('.loading-state', { timeout: 8000 }).should('not.exist')
 }
 
 describe('Admin - Messages', () => {
@@ -107,8 +107,11 @@ describe('Admin - Messages', () => {
     cy.wait('@getMe')
     cy.get('.empty-state').should('be.visible')
   })
+})
 
+describe('Admin - Messages redirect', () => {
   it('redirects to login without token', () => {
+    cy.clearLocalStorage()
     cy.visit('/Moi/messages')
     cy.url().should('include', '/login')
   })

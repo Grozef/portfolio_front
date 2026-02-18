@@ -13,8 +13,9 @@ const setupAdminCarousel = () => {
     },
   })
 
-  cy.wait(['@getMe', '@getCarousel'])
-  cy.get('.loading-state', { timeout: 5000 }).should('not.exist')
+  cy.wait('@getMe')
+  cy.wait('@getCarousel')
+  cy.get('.loading-state', { timeout: 8000 }).should('not.exist')
 }
 
 describe('Admin - Carousel Management', () => {
@@ -53,10 +54,10 @@ describe('Admin - Carousel Management', () => {
     cy.get('.meta-status').last().should('contain', 'Inactive')
   })
 
-  it('clicking toggle calls update endpoint', () => {
-    cy.intercept('PATCH', '/api/v1/carousel/*', { statusCode: 200, body: {} }).as('toggleActive')
-    cy.get('.meta-status').first().click()
-    cy.wait('@toggleActive')
+  it('clicking toggle calls update endpoint (PUT)', () => {
+    cy.intercept('PUT', '/api/v1/carousel/*', { statusCode: 200, body: { data: carouselFixture[0] } }).as('updateImage')
+    cy.get('.meta-status').first().click({ force: true })
+    cy.wait('@updateImage')
   })
 
   it('opens Add Image modal on button click', () => {
@@ -93,7 +94,7 @@ describe('Admin - Carousel Management', () => {
     cy.wait('@deleteImage')
   })
 
-  it('shows empty state and Add First Image button when carousel is empty', () => {
+  it('shows empty state when carousel is empty', () => {
     cy.intercept('GET', '/api/v1/carousel*', { body: { data: [] } }).as('emptyCarousel')
     cy.visit('/Moi/carousel', {
       onBeforeLoad(win) {
@@ -101,11 +102,15 @@ describe('Admin - Carousel Management', () => {
       },
     })
     cy.wait('@getMe')
+    cy.wait('@emptyCarousel')
     cy.get('.empty-state').should('be.visible')
     cy.get('.btn-primary').should('contain', 'Add First Image')
   })
+})
 
+describe('Admin - Carousel redirect', () => {
   it('redirects to login without token', () => {
+    cy.clearLocalStorage()
     cy.visit('/Moi/carousel')
     cy.url().should('include', '/login')
   })

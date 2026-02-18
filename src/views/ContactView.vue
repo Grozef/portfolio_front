@@ -59,7 +59,8 @@
                 aria-required="true"
                 aria-invalid="fieldErrors.name ? 'true' : 'false'"
                 aria-describedby="name-error"
-                @blur="validateField('name')"
+                @blur="validateField('name', formData.name)"
+                @input="fieldErrors.name && validateField('name', formData.name)"
               />
               <span v-if="fieldErrors.name" id="name-error" class="error-message" role="alert">
                 {{ fieldErrors.name }}
@@ -81,7 +82,8 @@
                 aria-required="true"
                 aria-invalid="fieldErrors.email ? 'true' : 'false'"
                 aria-describedby="email-error"
-                @blur="validateField('email')"
+                @blur="validateField('email', formData.email)"
+                @input="fieldErrors.email && validateField('email', formData.email)"
               />
               <span v-if="fieldErrors.email" id="email-error" class="error-message" role="alert">
                 {{ fieldErrors.email }}
@@ -103,7 +105,8 @@
                 aria-required="true"
                 aria-invalid="fieldErrors.subject ? 'true' : 'false'"
                 aria-describedby="subject-error"
-                @blur="validateField('subject')"
+                @blur="validateField('subject', formData.subject)"
+                @input="fieldErrors.subject && validateField('subject', formData.subject)"
               />
               <span v-if="fieldErrors.subject" id="subject-error" class="error-message" role="alert">
                 {{ fieldErrors.subject }}
@@ -125,7 +128,8 @@
                 aria-required="true"
                 aria-invalid="fieldErrors.message ? 'true' : 'false'"
                 aria-describedby="message-error"
-                @blur="validateField('message')"
+                @blur="validateField('message', formData.message)"
+                @input="fieldErrors.message && validateField('message', formData.message)"
               ></textarea>
               <span v-if="fieldErrors.message" id="message-error" class="error-message" role="alert">
                 {{ fieldErrors.message }}

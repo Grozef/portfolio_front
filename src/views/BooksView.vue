@@ -87,7 +87,12 @@
         <div class="carousel-content">
           <div class="carousel-image">
             <img :src="getImageUrl(currentCarouselImage.image_url)"
-              :alt="currentCarouselImage.title || 'Carousel image'" />
+              :alt="currentCarouselImage.title || 'Carousel image'" 
+              @contextmenu.prevent="logSecurityAttempt"
+    @dragstart.prevent
+  />
+  <div class="protection-overlay" @contextmenu.prevent="logSecurityAttempt">
+  </div>
           </div>
           <div class="carousel-info" v-if="currentCarouselImage.title">
             <h3>{{ currentCarouselImage.title }}</h3>
@@ -565,6 +570,12 @@ const topGenre = computed(() => {
     ? { name: sorted[0][0], count: sorted[0][1] } 
     : null
 })
+
+const logSecurityAttempt = () => {
+  console.log(
+    "Bien tenté XD / Nice try Champ."
+  );
+};
 
 const goToTerminal = () => router.push('/')
 const goToLogin = () => router.push('/login')
