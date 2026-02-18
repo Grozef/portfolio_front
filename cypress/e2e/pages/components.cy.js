@@ -92,24 +92,36 @@ describe('FooterComponent', () => {
 
 describe('ProjectModal component', () => {
   beforeEach(() => {
-    cy.intercept('GET', '/api/v1/github*', { body: { data: [sampleProject] } }).as('getProjects')
-    cy.intercept('GET', '/api/v1/github/repositories/*', { body: { data: sampleProject } }).as('getRepo')
+    cy.intercept('GET', '**/api/v1/github/repositories*', {
+      body: { data: [sampleProject] },
+    }).as('getProjects')
+    cy.intercept('GET', '**/api/v1/github/repositories/pinned*', {
+      body: { data: [sampleProject] },
+    }).as('getPinned')
+    cy.intercept('GET', '**/api/v1/github/repositories/*', {
+      body: { data: sampleProject },
+    }).as('getRepo')
+
     cy.visit('/projects', {
       onBeforeLoad(win) {
         win.localStorage.setItem('cookie_consent', JSON.stringify({ accepted: true }))
       },
     })
-    cy.get('.project-card', { timeout: 5000 }).should('exist')
+    cy.wait('@getProjects', { timeout: 8000 })
+    cy.get('.loading-state', { timeout: 6000 }).should('not.exist')
+    cy.get('.project-card', { timeout: 6000 }).should('exist')
   })
 
   it('renders the modal with project title', () => {
     cy.get('.project-card').first().click()
+    cy.wait('@getRepo', { timeout: 6000 })
     cy.get('.project-modal', { timeout: 8000 }).should('be.visible')
     cy.get('.project-modal .project-title').should('be.visible')
   })
 
   it('modal close button closes the modal', () => {
     cy.get('.project-card').first().click()
+    cy.wait('@getRepo', { timeout: 6000 })
     cy.get('.project-modal', { timeout: 8000 }).should('be.visible')
     cy.get('.modal-close').click()
     cy.get('.project-modal').should('not.exist')
@@ -117,6 +129,7 @@ describe('ProjectModal component', () => {
 
   it('pressing Escape closes the modal', () => {
     cy.get('.project-card').first().click()
+    cy.wait('@getRepo', { timeout: 6000 })
     cy.get('.project-modal', { timeout: 8000 }).should('be.visible')
     cy.get('body').type('{esc}')
     cy.get('.project-modal').should('not.exist')
@@ -124,32 +137,36 @@ describe('ProjectModal component', () => {
 
   it('clicking the modal backdrop closes the modal', () => {
     cy.get('.project-card').first().click()
+    cy.wait('@getRepo', { timeout: 6000 })
     cy.get('.project-modal', { timeout: 8000 }).should('be.visible')
-    // ProjectModal uses @click.self on .project-modal — click the edge outside the inner content
     cy.get('.project-modal').click(10, 10, { force: true })
     cy.get('.project-modal').should('not.exist')
   })
 
   it('renders navigation dots', () => {
     cy.get('.project-card').first().click()
+    cy.wait('@getRepo', { timeout: 6000 })
     cy.get('.project-modal', { timeout: 8000 }).should('be.visible')
     cy.get('.modal-nav .nav-dot').should('have.length.gte', 1)
   })
 
   it('first nav dot has active class', () => {
     cy.get('.project-card').first().click()
+    cy.wait('@getRepo', { timeout: 6000 })
     cy.get('.project-modal', { timeout: 8000 }).should('be.visible')
     cy.get('.modal-nav .nav-dot').first().should('have.class', 'active')
   })
 
   it('first nav dot has aria-current true', () => {
     cy.get('.project-card').first().click()
+    cy.wait('@getRepo', { timeout: 6000 })
     cy.get('.project-modal', { timeout: 8000 }).should('be.visible')
     cy.get('.modal-nav .nav-dot').first().should('have.attr', 'aria-current', 'true')
   })
 
   it('inactive nav dots have aria-current false', () => {
     cy.get('.project-card').first().click()
+    cy.wait('@getRepo', { timeout: 6000 })
     cy.get('.project-modal', { timeout: 8000 }).should('be.visible')
     cy.get('.modal-nav .nav-dot').not('.active').each(($dot) => {
       cy.wrap($dot).should('have.attr', 'aria-current', 'false')
@@ -158,18 +175,21 @@ describe('ProjectModal component', () => {
 
   it('section 01 overview is present', () => {
     cy.get('.project-card').first().click()
+    cy.wait('@getRepo', { timeout: 6000 })
     cy.get('.project-modal', { timeout: 8000 }).should('be.visible')
     cy.get('.modal-section').should('exist')
   })
 
   it('shows metadata items with stars, forks, and language', () => {
     cy.get('.project-card').first().click()
+    cy.wait('@getRepo', { timeout: 6000 })
     cy.get('.project-modal', { timeout: 8000 }).should('be.visible')
     cy.get('.meta-item').should('have.length.gte', 1)
   })
 
   it('shows scroll hint with arrow', () => {
     cy.get('.project-card').first().click()
+    cy.wait('@getRepo', { timeout: 6000 })
     cy.get('.project-modal', { timeout: 8000 }).should('be.visible')
     cy.get('.scroll-hint').should('exist')
   })

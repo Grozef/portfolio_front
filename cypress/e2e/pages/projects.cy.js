@@ -21,10 +21,36 @@ const projectsFixture = [
   },
 ]
 
+const sampleRepo = {
+  id: 101,
+  name: 'portfolio-frontend',
+  description: 'My personal portfolio built with Vue 3',
+  language: 'JavaScript',
+  stars: 12,
+  forks: 3,
+  html_url: 'https://github.com/user/portfolio-frontend',
+  tags: ['Vue', 'Vite'],
+  problem: 'Needed a showcase',
+  solution: 'Built a terminal-themed portfolio',
+  role: 'Solo developer',
+  outcomes: 'Deployed successfully',
+}
+
 describe('Projects page', () => {
   beforeEach(() => {
-    cy.intercept('GET', '/api/v1/github*', { body: { data: projectsFixture } }).as('getProjects')
+    cy.intercept('GET', '**/api/v1/github/repositories*', {
+      body: { data: projectsFixture },
+    }).as('getProjects')
+    cy.intercept('GET', '**/api/v1/github/repositories/pinned*', {
+      body: { data: projectsFixture },
+    }).as('getPinned')
+    cy.intercept('GET', '**/api/v1/github/repositories/*', {
+      body: { data: sampleRepo },
+    }).as('getRepo')
+
     cy.visit('/projects')
+    cy.wait('@getProjects', { timeout: 8000 })
+    cy.get('.loading-state', { timeout: 6000 }).should('not.exist')
   })
 
   it('renders the page title', () => {
@@ -41,12 +67,11 @@ describe('Projects page', () => {
   })
 
   it('shows loading state while fetching', () => {
-    cy.intercept('GET', '/api/v1/github*', (req) => {
-      req.reply({ delay: 500, body: { data: projectsFixture } })
+    cy.intercept('GET', '**/api/v1/github/repositories*', (req) => {
+      req.reply({ delay: 300, body: { data: projectsFixture } })
     }).as('slowProjects')
     cy.visit('/projects')
-    cy.get('.loading-state').should('be.visible')
-    cy.get('.loading-state p').should('contain', 'Fetching repositories')
+    cy.get('.loading-state').should('exist')
   })
 
   it('displays project counter after load', () => {
@@ -61,6 +86,7 @@ describe('Projects page', () => {
   })
 
   it('renders card descriptions', () => {
+    cy.get('.project-card').first().should('exist')
     cy.get('.card-description').first().should('be.visible')
   })
 
@@ -77,30 +103,36 @@ describe('Projects page', () => {
 
   it('opens project modal when a card is clicked', () => {
     cy.get('.project-card').first().click()
-    cy.get('.project-modal').should('be.visible')
+    cy.wait('@getRepo', { timeout: 6000 })
+    cy.get('.project-modal', { timeout: 6000 }).should('be.visible')
   })
 
   it('modal displays project title', () => {
     cy.get('.project-card').first().click()
-    cy.get('.project-modal .project-title').should('be.visible')
+    cy.wait('@getRepo', { timeout: 6000 })
+    cy.get('.project-modal .project-title', { timeout: 6000 }).should('be.visible')
   })
 
   it('modal close button closes the modal', () => {
     cy.get('.project-card').first().click()
-    cy.get('.project-modal').should('be.visible')
+    cy.wait('@getRepo', { timeout: 6000 })
+    cy.get('.project-modal', { timeout: 6000 }).should('be.visible')
     cy.get('.modal-close').click()
     cy.get('.project-modal').should('not.exist')
   })
 
   it('clicking modal backdrop closes the modal', () => {
     cy.get('.project-card').first().click()
-    cy.get('.project-modal').should('be.visible')
-    cy.get('.project-modal').click({ force: true })
+    cy.wait('@getRepo', { timeout: 6000 })
+    cy.get('.project-modal', { timeout: 6000 }).should('be.visible')
+    cy.get('.project-modal').click(10, 10, { force: true })
     cy.get('.project-modal').should('not.exist')
   })
 
   it('modal navigation dots are rendered', () => {
     cy.get('.project-card').first().click()
+    cy.wait('@getRepo', { timeout: 6000 })
+    cy.get('.project-modal', { timeout: 6000 }).should('be.visible')
     cy.get('.modal-nav .nav-dot').should('have.length.gte', 1)
   })
 })

@@ -17,10 +17,20 @@ const sampleProject = {
 
 describe('ProjectModal (E2E)', () => {
   beforeEach(() => {
-    cy.intercept('GET', '/api/v1/github*', { body: { data: [sampleProject] } }).as('getProjects')
-    cy.intercept('GET', '/api/v1/github/repositories/*', { body: { data: sampleProject } }).as('getRepo')
+    cy.intercept('GET', '**/api/v1/github/repositories*', {
+      body: { data: [sampleProject] },
+    }).as('getProjects')
+    cy.intercept('GET', '**/api/v1/github/repositories/pinned*', {
+      body: { data: [sampleProject] },
+    }).as('getPinned')
+    cy.intercept('GET', '**/api/v1/github/repositories/*', {
+      body: { data: sampleProject },
+    }).as('getRepo')
+
     cy.visit('/projects')
-    cy.get('.project-card', { timeout: 5000 }).should('exist')
+    cy.wait('@getProjects', { timeout: 8000 })
+    cy.get('.loading-state', { timeout: 6000 }).should('not.exist')
+    cy.get('.project-card', { timeout: 6000 }).should('exist')
   })
 
   it('modal is not visible before clicking a card', () => {
@@ -29,17 +39,19 @@ describe('ProjectModal (E2E)', () => {
 
   it('opens modal when a project card is clicked', () => {
     cy.get('.project-card').first().click()
+    cy.wait('@getRepo', { timeout: 6000 })
     cy.get('.project-modal', { timeout: 8000 }).should('be.visible')
   })
 
   it('modal displays project title', () => {
     cy.get('.project-card').first().click()
-    cy.get('.project-modal', { timeout: 8000 }).should('be.visible')
-    cy.get('.project-modal .project-title').should('be.visible')
+    cy.wait('@getRepo', { timeout: 6000 })
+    cy.get('.project-modal .project-title', { timeout: 8000 }).should('be.visible')
   })
 
   it('modal close button closes the modal', () => {
     cy.get('.project-card').first().click()
+    cy.wait('@getRepo', { timeout: 6000 })
     cy.get('.project-modal', { timeout: 8000 }).should('be.visible')
     cy.get('.modal-close').click()
     cy.get('.project-modal').should('not.exist')
@@ -47,6 +59,7 @@ describe('ProjectModal (E2E)', () => {
 
   it('pressing Escape closes the modal', () => {
     cy.get('.project-card').first().click()
+    cy.wait('@getRepo', { timeout: 6000 })
     cy.get('.project-modal', { timeout: 8000 }).should('be.visible')
     cy.get('body').type('{esc}')
     cy.get('.project-modal').should('not.exist')
@@ -54,12 +67,14 @@ describe('ProjectModal (E2E)', () => {
 
   it('nav dots are rendered in the open modal', () => {
     cy.get('.project-card').first().click()
+    cy.wait('@getRepo', { timeout: 6000 })
     cy.get('.project-modal', { timeout: 8000 }).should('be.visible')
     cy.get('.modal-nav .nav-dot').should('have.length.gte', 1)
   })
 
   it('first nav dot has active class', () => {
     cy.get('.project-card').first().click()
+    cy.wait('@getRepo', { timeout: 6000 })
     cy.get('.project-modal', { timeout: 8000 }).should('be.visible')
     cy.get('.modal-nav .nav-dot').first().should('have.class', 'active')
   })
