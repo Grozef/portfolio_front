@@ -216,8 +216,32 @@ const getLanguageColor = (lang) => {
   return languageColors[lang] || '#8b8b8b'
 }
 
-const handleClose = () => {
-  emit('close')
+const previousFocus = ref(null)
+
+const getFocusableElements = () => {
+  if (!modalRef.value) return []
+  return Array.from(modalRef.value.querySelectorAll(
+    'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+  ))
+}
+
+const trapFocus = (e) => {
+  if (e.key !== 'Tab') return
+  const focusable = getFocusableElements()
+  if (!focusable.length) return
+  const first = focusable[0]
+  const last = focusable[focusable.length - 1]
+  if (e.shiftKey) {
+    if (document.activeElement === first) {
+      e.preventDefault()
+      last.focus()
+    }
+  } else {
+    if (document.activeElement === last) {
+      e.preventDefault()
+      first.focus()
+    }
+  }
 }
 
 const handleKeydown = (e) => {
@@ -227,6 +251,14 @@ const handleKeydown = (e) => {
     scrollToSection(currentSection.value + 1)
   } else if (e.key === 'ArrowLeft') {
     scrollToSection(currentSection.value - 1)
+  }
+}
+
+const handleClose = () => {
+  emit('close')
+  if (previousFocus.value) {
+    previousFocus.value.focus()
+    previousFocus.value = null
   }
 }
 
@@ -280,23 +312,29 @@ const handleScroll = () => {
 
 watch(() => props.isOpen, (isOpen) => {
   if (isOpen) {
+    previousFocus.value = document.activeElement
     document.body.style.overflow = 'hidden'
     document.addEventListener('keydown', handleKeydown)
+    document.addEventListener('keydown', trapFocus)
     nextTick(() => {
       currentSection.value = 0
       if (scrollContainerRef.value) {
         scrollContainerRef.value.scrollLeft = 0
       }
+      const focusable = getFocusableElements()
+      if (focusable.length) focusable[0].focus()
     })
   } else {
     document.body.style.overflow = ''
     document.removeEventListener('keydown', handleKeydown)
+    document.removeEventListener('keydown', trapFocus)
   }
 })
 
 onUnmounted(() => {
   document.body.style.overflow = ''
   document.removeEventListener('keydown', handleKeydown)
+  document.removeEventListener('keydown', trapFocus)
 })
 </script>
 

@@ -292,3 +292,42 @@ img {
     color: var(--modal-text-secondary);
   }
 }
+
+// ─── Keyboard Navigation / Accessibility ─────────────────────────────────────
+
+// Show native cursor and focus outline when navigating by keyboard
+body.keyboard-nav {
+  cursor: auto !important;
+
+  *:focus-visible {
+    outline: 2px solid var(--terminal-accent);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+}
+
+// Remove mouse-click outline everywhere
+*:focus:not(:focus-visible) {
+  outline: none;
+}
+
+// Skip to content
+.skip-link {
+  position: absolute;
+  top: -60px;
+  left: 1rem;
+  z-index: 99999;
+  padding: 0.5rem 1rem;
+  background: var(--terminal-accent);
+  color: var(--terminal-bg);
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 0 0 4px 4px;
+  transition: top 0.15s ease;
+
+  &:focus {
+    top: 0;
+  }
+}

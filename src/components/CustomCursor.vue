@@ -17,9 +17,24 @@ const isMobile = ref(true)
 const isSleeping = ref(false)
 const wasSleeping = ref(false)
 
+const isKeyboardUser = ref(false)
+
+const handleTabKey = (e) => {
+  if (e.key === 'Tab') {
+    isKeyboardUser.value = true
+    document.body.style.cursor = 'auto'
+  }
+}
+
+const handleMouseActivity = () => {
+  if (isKeyboardUser.value) {
+    isKeyboardUser.value = false
+    document.body.style.cursor = 'none'
+  }
+}
+
 const lastCursorX = ref(0)
 const lastCursorY = ref(0)
-
 let rafId = null
 let inactivityTimeout = null
 const INACTIVITY_DELAY = 30000
@@ -90,7 +105,10 @@ onMounted(() => {
     window.addEventListener('mouseleave', handleMouseLeave)
     window.addEventListener('mousedown', handleMouseDown)
     window.addEventListener('mouseup', handleMouseUp)
-    
+    window.addEventListener('mousemove', handleMouseActivity)
+
+    document.addEventListener('keydown', handleTabKey)
+
     resetInactivityTimer()
     animateDot()
   }
@@ -105,7 +123,10 @@ onUnmounted(() => {
     window.removeEventListener('mouseleave', handleMouseLeave)
     window.removeEventListener('mousedown', handleMouseDown)
     window.removeEventListener('mouseup', handleMouseUp)
-    
+    window.removeEventListener('mousemove', handleMouseActivity)
+
+    document.removeEventListener('keydown', handleTabKey)
+
     if (rafId) cancelAnimationFrame(rafId)
     if (inactivityTimeout) clearTimeout(inactivityTimeout)
   }
@@ -113,7 +134,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div v-if="!isMobile && isCustomCursorEnabled" class="custom-cursor" :class="{ visible: isVisible }">
+  <div v-if="!isMobile && isCustomCursorEnabled && !isKeyboardUser" class="custom-cursor" :class="{ visible: isVisible }">
     <div v-if="!isSleeping"
       class="cursor-ring"
       :class="{ hovering: isHovering, clicking: isClicking }"

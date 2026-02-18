@@ -93,9 +93,7 @@ onUnmounted(() => {
 
 <style lang="scss" scoped>
 .home {
-  // flex: 1 so #app (min-height: 100vh, flex col) stretches home to fill
-  // the viewport WITHOUT overflowing it. Footer lands below naturally.
-  flex: 1;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
   background: var(--terminal-bg);
@@ -119,9 +117,12 @@ onUnmounted(() => {
   &__main {
     flex: 1;
     display: flex;
-    flex-direction: column;
     align-items: center;
+    justify-content: center;
     padding: 6rem 2rem 4rem;
+
+    // temporary fix to not go under footer, will need to be reworked when more content is added
+    padding-bottom: 40rem;
 
     @media (max-width: 768px) {
       padding: 5rem 1rem 2rem;
@@ -314,18 +315,16 @@ onUnmounted(() => {
 .terminal-wrapper {
   width: 100%;
   max-width: 1000px;
-  // Flex: grow to fill home__main so the terminal fills available viewport
-  // without using a hard vh calculation that would push past the footer.
-  flex: 1;
-  display: flex;
-  flex-direction: column;
+  height: 70vh;
   min-height: 400px;
 
   @media (max-width: 768px) {
+    height: calc(100vh - 8rem);
     min-height: 300px;
   }
 
   @media (max-width: 480px) {
+    height: calc(100vh - 6rem);
     min-height: 250px;
   }
 }

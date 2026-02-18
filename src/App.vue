@@ -1,5 +1,6 @@
 <template>
   <div id="app">
+    <a href="#main-content" class="skip-link">Skip to main content</a>
     <CustomCursor v-if="!isMobile" />
     <GrainOverlay />
     <ExtremeDarkMode />
@@ -147,6 +148,14 @@ onMounted(() => {
   isMobile.value = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
     navigator.userAgent
   )
+
+  // Add .keyboard-nav class on Tab, remove on mouse
+  const onKeyTab = (e) => {
+    if (e.key === 'Tab') document.body.classList.add('keyboard-nav')
+  }
+  const onMouse = () => document.body.classList.remove('keyboard-nav')
+  document.addEventListener('keydown', onKeyTab)
+  document.addEventListener('mousedown', onMouse)
 
   if (route.path === '/' || route.path === '/home') {
     nextTick(() => {

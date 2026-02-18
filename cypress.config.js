@@ -2,16 +2,23 @@ import { defineConfig } from "cypress";
 
 export default defineConfig({
   e2e: {
-    baseUrl: 'http://localhost:5173', // Ajuste le port si nécessaire
+    baseUrl: 'http://localhost:5173',
+    // Le pattern des fichiers à inclure
     specPattern: 'cypress/e2e/**/*.{cy,spec}.{js,jsx,ts,tsx}',
+    // Le pattern des fichiers à exclure
+    excludeSpecPattern: [
+      "**/_*", 
+      "**/old_tests/*.js"
+    ],
+    
     screenshotOnRunFailure: true,
     video: false,
+
     setupNodeEvents(on, config) {
-      // C'est ici que tu mettras tes plugins (ex: preprocessors)
+      // Tes plugins ici
     },
   },
   
-  // Si tu décides de faire du Component Testing plus tard
   component: {
     devServer: {
       framework: 'vue',

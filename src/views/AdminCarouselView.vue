@@ -1,4 +1,4 @@
-    <template>
+<template>
       <AdminLayout>
         <div class="admin-carousel">
           <header class="page-header">
@@ -176,7 +176,7 @@
     </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCarouselStore } from '@/stores/carousel'
 import { useAuthStore } from '@/stores/auth'
@@ -207,17 +207,6 @@ const getImageUrl = (url) => {
   return BACKEND_URL + url
 }
 
-onMounted(async () => {
-  await authStore.checkAuth()
-  if (!authStore.isAuthenticated) {
-    router.push('/login')
-    return
-  }
-
-  await carouselStore.fetchImages()
-  isLoading.value = false
-})
-
 const openAddModal = () => {
   newImage.value = { title: '', image_url: '', is_active: true }
   uploadMode.value = 'url'
@@ -241,6 +230,28 @@ const closeEditModal = () => {
   selectedImage.value = null
 }
 
+const handleCarouselEsc = (e) => {
+  if (e.key !== 'Escape') return
+  if (isEditModalOpen.value) { closeEditModal(); return }
+  if (isAddModalOpen.value) { closeAddModal(); return }
+}
+
+onMounted(async () => {
+  await authStore.checkAuth()
+  if (!authStore.isAuthenticated) {
+    router.push('/login')
+    return
+  }
+
+  await carouselStore.fetchImages()
+  isLoading.value = false
+
+  document.addEventListener('keydown', handleCarouselEsc)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('keydown', handleCarouselEsc)
+});
 const handleFileSelect = (event) => {
   console.log(' handleFileSelect - Event:', event)
   console.log(' Files:', event.target.files)

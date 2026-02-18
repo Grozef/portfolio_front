@@ -2,7 +2,7 @@
 
 ## CE QUI N'A PAS ÉTÉ ANALYSÉ (ET DEVRAIT)
 
----
+<!-- ---
 
 ## 1. TESTS - ABSENCE TOTALE
 
@@ -17,7 +17,7 @@ tests/
     └── ExampleTest.php (EXAMPLE INUTILE)
 ```
 
-**Couverture: 0%**
+**Couverture: 0%** -->
 
 <!-- **Tests manquants critiques:**
 
@@ -80,7 +80,7 @@ tests/
 
 ---
 
-### FRONTEND (Vue 3)
+<!-- ### FRONTEND (Vue 3)
 
 **Actuellement:** AUCUN FICHIER TEST
 
@@ -99,9 +99,9 @@ tests/
     "@playwright/test": "^1.40.0"
   }
 }
-```
+``` -->
 
-**Tests composants manquants:**
+<!-- **Tests composants manquants:**
 
 #### TerminalInterface.vue
 ```javascript
@@ -173,7 +173,7 @@ describe('Admin', () => {
 
 ---
 
-<!-- en cours -->
+en cours -->
 
 
 
@@ -419,7 +419,7 @@ User::create([
 
 --- -->
 
-### Headers sécurité manquants
+<!-- ### Headers sécurité manquants
 
 **Middleware:** `app/Http/Middleware/AddCustomHeaders.php`
 
@@ -433,9 +433,9 @@ User::create([
 'Permissions-Policy' => 'geolocation=(), microphone=()',
 ```
 
----
+--- -->
 
-### SQL Injection - Vérification Eloquent
+<!-- ### SQL Injection - Vérification Eloquent
 
 **Status:** ✅ Protégé par Eloquent ORM
 
@@ -466,7 +466,7 @@ Book::where('title', $request->title)->get();
 <div v-html="sanitize(userInput)"></div>
 ```
 
----
+--- -->
 
 ## 4. PERFORMANCE & OPTIMISATION
 
@@ -522,7 +522,7 @@ $image = Image::make($request->file('image'))
 
 ---
 
-## 5. COLLECTIONS API
+<!-- ## 5. COLLECTIONS API
 
 ### Manque: API Versioning
 
@@ -534,7 +534,7 @@ $image = Image::make($request->file('image'))
 
 **OK** - Versioning présent mais pas de v2 strategy
 
----
+--- -->
 
 ### Manque: Rate Limiting granulaire
 

@@ -20,7 +20,7 @@
       <p>Fetching repositories...</p>
     </div>
 
-    <main v-else class="projects-main">
+    <main v-else id="main-content" class="projects-main" tabindex="-1">
       <div ref="scrollContainer" class="projects-scroll" @scroll="handleScroll">
         <article v-for="(project, index) in projects" :key="project.id" class="project-card"
           :aria-label="`Project: ${project.name}`" role="article" :class="{ active: activeIndex === index }"
@@ -119,7 +119,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, nextTick } from 'vue'
+import { ref, onMounted, onUnmounted, computed, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { useGitHubStore } from '@/stores/github'
 import ProjectModal from '@/components/ProjectModal.vue'
@@ -234,6 +234,24 @@ const goToTerminal = () => {
   router.push('/')
 }
 
+const handleCarouselKeydown = (e) => {
+  // Only fire when modal is not open
+  if (isModalOpen.value) return
+  if (e.key === 'ArrowLeft') {
+    e.preventDefault()
+    goToPrevProject()
+  } else if (e.key === 'ArrowRight') {
+    e.preventDefault()
+    goToNextProject()
+  } else if (e.key === 'Home') {
+    e.preventDefault()
+    scrollToProject(0)
+  } else if (e.key === 'End') {
+    e.preventDefault()
+    scrollToProject(projects.value.length - 1)
+  }
+}
+
 onMounted(async () => {
   await githubStore.fetchRepositories()
   isLoading.value = false
@@ -242,6 +260,12 @@ onMounted(async () => {
   if (scrollContainer.value) {
     scrollToProject(0)
   }
+
+  document.addEventListener('keydown', handleCarouselKeydown)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('keydown', handleCarouselKeydown)
 })
 </script>
 

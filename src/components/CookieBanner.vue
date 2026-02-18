@@ -91,7 +91,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useCookieConsentStore } from '@/stores/cookieConsent'
 
 const cookieStore = useCookieConsentStore()
@@ -123,14 +123,30 @@ const savePreferences = () => {
   showDetails.value = false
 }
 
+const handleBannerEsc = (e) => {
+  if (e.key === 'Escape' && cookieStore.showBanner) {
+    if (showDetails.value) {
+      showDetails.value = false
+    } else {
+      acceptEssential()
+    }
+  }
+}
+
 onMounted(() => {
   cookieStore.loadConsent()
   localPreferences.value = { ...cookieStore.preferences }
-  
+
   const savedLang = localStorage.getItem('language')
   if (savedLang) {
     currentLang.value = savedLang
   }
+
+  document.addEventListener('keydown', handleBannerEsc)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('keydown', handleBannerEsc)
 })
 </script>
 

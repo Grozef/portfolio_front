@@ -292,7 +292,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useBooksStore } from '@/stores/books'
 import { useAuthStore } from '@/stores/auth'
@@ -356,22 +356,6 @@ const books = computed(() => {
 
 const stats = computed(() => booksStore.stats)
 
-onMounted(async () => {
-  await authStore.checkAuth()
-  if (!authStore.isAuthenticated) {
-    router.push('/login')
-    return
-  }
-
-  await booksStore.fetchBooks()
-  await booksStore.fetchStats()
-  isLoading.value = false
-
-  if (route.query.action === 'add') {
-    openAddModal()
-  }
-})
-
 watch(() => route.query.action, (action) => {
   if (action === 'add') {
     openAddModal()
@@ -419,6 +403,35 @@ const closeDeleteModal = () => {
   isDeleteModalOpen.value = false
   selectedBook.value = null
 }
+
+const handleAdminEsc = (e) => {
+  if (e.key !== 'Escape') return
+  if (isDeleteModalOpen.value) { closeDeleteModal(); return }
+  if (isEditModalOpen.value) { closeEditModal(); return }
+  if (isAddModalOpen.value) { closeAddModal(); return }
+}
+
+onMounted(async () => {
+  await authStore.checkAuth()
+  if (!authStore.isAuthenticated) {
+    router.push('/login')
+    return
+  }
+
+  await booksStore.fetchBooks()
+  await booksStore.fetchStats()
+  isLoading.value = false
+
+  if (route.query.action === 'add') {
+    openAddModal()
+  }
+
+  document.addEventListener('keydown', handleAdminEsc)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('keydown', handleAdminEsc)
+})
 
 const handleAddBook = async () => {
   try {

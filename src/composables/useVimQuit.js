@@ -52,9 +52,8 @@ export function useVimQuit() {
     
     const messages = [
       "Nice try, but you can't quit this portfolio that easily! ",
-      "I see you're a Vim user! But :q won't work here... Try 'help' instead!",
-      "vim: command not found. This is a web portfolio, not your favorite editor!",
-      "Error: Cannot quit awesome portfolio. Try CTRL+W to close the tab instead!",
+      "I see you're a Vim user! But :q won't work here... ",
+      "vim: command not found. This is not your favorite editor!",
       "vim is not installed. Try 'nano' instead."
     ]
     

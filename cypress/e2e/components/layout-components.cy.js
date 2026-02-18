@@ -68,8 +68,9 @@ describe('AdminLayout (E2E)', () => {
 
 describe('EyeTrackingPortrait (E2E)', () => {
   beforeEach(() => {
-    cy.intercept('GET', '/api/v1/github*', { body: { data: [] } }).as('getGithub')
+    cy.intercept('GET', '**/api/v1/github/repositories*', { body: { data: [] } }).as('getGithub')
     cy.visit('/projects')
+    cy.wait('@getGithub', { timeout: 8000 })
   })
 
   it('projects page loads correctly', () => {
@@ -85,8 +86,9 @@ describe('EyeTrackingPortrait (E2E)', () => {
   })
 
   it('back button is present and navigates home', () => {
+    cy.get('.loading-state').should('not.exist')
     cy.get('.back-btn').should('exist')
     cy.get('.back-btn').click()
-    cy.url().should('eq', Cypress.config('baseUrl') + '/')
+    cy.location('pathname').should('eq', '/')
   })
 })
