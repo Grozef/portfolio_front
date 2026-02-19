@@ -26,7 +26,14 @@ const setupAdminMessages = () => {
   cy.visit('/Moi/messages', {
     onBeforeLoad(win) {
       win.localStorage.setItem('auth_token', 'fake-jwt-token')
+        win.localStorage.setItem('cookie_consent', JSON.stringify({ accepted: true }))
+            cy.get('body').then(($body) => {
+      if ($body.find('button:contains("Tout accepter")').length > 0) {
+        cy.contains('Tout accepter').click();
+      }
+    });
     },
+    
   })
 
   cy.wait('@getMe')

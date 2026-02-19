@@ -1,6 +1,11 @@
 describe('Login page', () => {
   beforeEach(() => {
     cy.visit('/login')
+        cy.get('body').then(($body) => {
+      if ($body.find('button:contains("Tout accepter")').length > 0) {
+        cy.contains('Tout accepter').click();
+      }
+    });
   })
 
   it('renders the Admin Login heading', () => {

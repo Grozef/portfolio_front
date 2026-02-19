@@ -3,7 +3,7 @@
     <div v-if="visible" class="quick-nav">
       <div class="quick-nav__content">
         <p class="quick-nav__hint">
-          <span class="quick-nav__icon">💡</span>
+          <span class="quick-nav__icon"></span>
           Not comfortable with terminal commands?
           <button @click="router.push('/projects')" class="quick-nav__btn" data-cursor-hover>
             Switch to GUI Mode →

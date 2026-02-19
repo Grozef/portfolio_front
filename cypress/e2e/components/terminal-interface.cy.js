@@ -3,6 +3,11 @@ describe('TerminalInterface (E2E)', () => {
     cy.intercept('GET', '**/api/v1/github**', { body: { data: [] } }).as('getGithub')
     cy.clearLocalStorage()
     cy.visit('/')
+        cy.get('body').then(($body) => {
+      if ($body.find('button:contains("Tout accepter")').length > 0) {
+        cy.contains('Tout accepter').click();
+      }
+    });
   })
 
   // ─── Layout ──────────────────────────────────────────────────────────────────
@@ -134,48 +139,87 @@ describe('TerminalInterface (E2E)', () => {
   })
 })
 
-// ─── Demo mode (requires cy.clock() BEFORE cy.visit()) ───────────────────────
+// ─── Demo mode ────────────────────────────────────────────────────────────────
+// cy.clock()+cy.tick() cannot reliably intercept setTimeout fired in onMounted
+// after a cy.visit() navigation. __triggerDemo / __stopDemo are injected on
+// window when window.Cypress is truthy (see TerminalInterface.vue onMounted).
 
-// describe('TerminalInterface demo mode (E2E)', () => {
-//   beforeEach(() => {
-//     cy.clock()
-//     cy.intercept('GET', '**/api/v1/github**', { body: { data: [] } }).as('getGithub')
-//     cy.clearLocalStorage()
-//     cy.visit('/')
-//   })
+describe('TerminalInterface demo mode (E2E)', () => {
+  beforeEach(() => {
+    cy.visit('/');
+    // On s'assure que le stockage est propre
+    cy.clearLocalStorage();
+    
+    // CAS PARTICULIER : Si ton bandeau de cookies bloque l'UI, 
+    // on simule le clic sur "Tout accepter" pour libérer la vue.
+    cy.get('body').then(($body) => {
+      if ($body.find('button:contains("Tout accepter")').length > 0) {
+        cy.contains('Tout accepter').click();
+      }
+    });
+  });
 
-//   afterEach(() => {
-//     cy.clock().then((clock) => clock.restore())
-//   })
+  it('demo mode starts after manual trigger', () => {
+    // On appelle le hook exposé dans ton script setup
+    cy.window().then((win) => {
+      win.__triggerDemo();
+    });
 
-//   it('demo mode starts after 2 minutes of inactivity', () => {
-//     cy.tick(120000)
-//     cy.get('.demo-indicator').should('be.visible')
-//   })
+    // L'indicateur doit maintenant être présent
+    cy.get('.demo-indicator', { timeout: 10000 }).should('be.visible');
+  });
 
-//   it('demo mode shows Stop Demo button', () => {
-//     cy.tick(120000)
-//     cy.get('.demo-stop').should('contain', 'Stop Demo')
-//   })
+  it('demo mode shows Stop Demo button', () => {
+    cy.window().then((win) => {
+      win.__triggerDemo();
+    });
 
-//   it('clicking Stop Demo exits demo mode', () => {
-//     cy.tick(120000)
-//     cy.get('.demo-stop').click()
-//     cy.get('.demo-indicator').should('not.exist')
-//   })
+    // On vérifie la présence du bouton stop
+    cy.get('.demo-stop').should('be.visible').and('contain', 'Stop Demo');
+  });
 
-//   it('cmd-cards are disabled during demo mode', () => {
-//     cy.tick(120000)
-//     cy.get('.demo-indicator').should('be.visible')
-//     cy.get('.cmd-card').each(($btn) => {
-//       cy.wrap($btn).should('be.disabled')
-//     })
-//   })
+  it('clicking Stop Demo exits demo mode', () => {
+    cy.window().then((win) => {
+      win.__triggerDemo();
+    });
 
-//   it('typing resets the demo timer before it fires', () => {
-//     cy.tick(60000)
-//     cy.get('.terminal__input').type('a', { force: true })
-//     cy.tick(60000)
-//     cy.get('.demo-indicator').should('not.exist')
-//   })
-// })
+    // On clique sur le bouton stop
+    cy.get('.demo-stop').click();
+
+    // L'indicateur doit disparaître
+    cy.get('.demo-indicator').should('not.exist');
+  });
+
+  it('cmd-cards are disabled during demo mode', () => {
+    cy.window().then((win) => {
+      win.__triggerDemo();
+    });
+
+    // On vérifie que tous les boutons de commandes rapides sont désactivés
+    cy.get('.cmd-card').each(($btn) => {
+      cy.wrap($btn).should('be.disabled');
+    });
+  });
+
+  // it('typing resets the demo timer before it fires', () => {
+  //   // Ici on utilise les horloges de Cypress pour simuler le passage du temps
+  //   cy.clock();
+    
+  //   cy.get('input').type('help');
+    
+  //   // On avance de 1 minute (inférieur aux 2 mins du timeout)
+  //   cy.tick(60000);
+  //   cy.get('.demo-indicator').should('not.exist');
+
+  //   // On tape encore quelque chose
+  //   cy.get('input').type('{enter}');
+    
+  //   // On avance encore de 1 minute
+  //   cy.tick(60000);
+  //   cy.get('.demo-indicator').should('not.exist');
+    
+  //   // Si on attend 121 secondes de plus sans rien faire
+  //   cy.tick(121000);
+  //   cy.get('.demo-indicator').should('exist');
+  // });
+})

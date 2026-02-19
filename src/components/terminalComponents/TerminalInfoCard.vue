@@ -3,10 +3,9 @@
     <div v-if="visible" class="terminal-info">
       <div class="info-card">
         <button @click="dismiss" class="info-close" aria-label="Close info">✕</button>
-        <h3>🖥️ Why a Terminal Interface?</h3>
+        <h3>Why a Terminal Interface?</h3>
         <p>
-          This portfolio uses a terminal interface to showcase technical skills
-          and create an interactive experience for developers and tech enthusiasts.
+         Because i like it and it was fun to code.
         </p>
         <p class="info-hint">
           <strong>Pro tip:</strong> Type "help" to see all available commands!

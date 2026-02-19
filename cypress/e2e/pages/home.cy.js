@@ -2,6 +2,11 @@ describe('Home page - Terminal Interface', () => {
   beforeEach(() => {
     cy.intercept('GET', '/api/v1/github*', { body: { data: [] } }).as('getGithub')
     cy.visit('/')
+        cy.get('body').then(($body) => {
+      if ($body.find('button:contains("Tout accepter")').length > 0) {
+        cy.contains('Tout accepter').click();
+      }
+    });
   })
 
   it('renders the logo and author name', () => {

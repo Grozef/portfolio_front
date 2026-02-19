@@ -5,6 +5,11 @@ const setupHome = () => {
   cy.intercept('GET', '**/api/v1/github**', { body: { data: [] } }).as('getGithub')
   cy.clearLocalStorage()
   cy.visit('/')
+      cy.get('body').then(($body) => {
+      if ($body.find('button:contains("Tout accepter")').length > 0) {
+        cy.contains('Tout accepter').click();
+      }
+    });
 }
 
 // ─── TerminalHeader ────────────────────────────────────────────────────────────
@@ -215,39 +220,33 @@ describe('TerminalInfoCard (E2E)', () => {
 
 // ─── TerminalDemoIndicator ────────────────────────────────────────────────────
 
-// describe('TerminalDemoIndicator (E2E)', () => {
-//   beforeEach(() => {
-//     cy.intercept('GET', '**/api/v1/github**', { body: { data: [] } }).as('getGithub')
-//     cy.clearLocalStorage()
-//   })
+describe('TerminalDemoIndicator (E2E)', () => {
+  beforeEach(() => {
+    cy.intercept('GET', '**/api/v1/github**', { body: { data: [] } }).as('getGithub')
+    cy.clearLocalStorage()
+  })
 
-//   it('is not visible before the 2-minute timeout fires', () => {
-//     cy.visit('/')
-//     cy.get('.demo-indicator').should('not.exist')
-//   })
+  it('is not visible before the 2-minute timeout fires', () => {
+    cy.visit('/')
+    cy.get('.demo-indicator').should('not.exist')
+  })
 
-//   it('becomes visible after 2 minutes of inactivity', () => {
-//     cy.clock()
-//     cy.visit('/')
-//     cy.tick(120000)
-//     cy.get('.demo-indicator').should('be.visible')
-//     cy.clock().then((clock) => clock.restore())
-//   })
+  // it('becomes visible after 2 minutes of inactivity', () => {
+  //   cy.visit('/')
+  //   cy.window().then((win) => win.__triggerDemo?.())
+  //   cy.get('.demo-indicator').should('exist')
+  // })
 
-//   it('shows "Demo Mode Active" label', () => {
-//     cy.clock()
-//     cy.visit('/')
-//     cy.tick(120000)
-//     cy.get('.demo-text').should('contain', 'Demo Mode Active')
-//     cy.clock().then((clock) => clock.restore())
-//   })
+  // it('shows "Demo Mode Active" label', () => {
+  //   cy.visit('/')
+  //   cy.window().then((win) => win.__triggerDemo?.())
+  //   cy.get('.demo-text').should('contain', 'Demo Mode Active')
+  // })
 
-//   it('has a Stop Demo button that emits stop', () => {
-//     cy.clock()
-//     cy.visit('/')
-//     cy.tick(120000)
-//     cy.get('.demo-stop').should('contain', 'Stop Demo').click()
-//     cy.get('.demo-indicator').should('not.exist')
-//     cy.clock().then((clock) => clock.restore())
-//   })
-// })
+  // it('has a Stop Demo button that emits stop', () => {
+  //   cy.visit('/')
+  //   cy.window().then((win) => win.__triggerDemo?.())
+  //   cy.get('.demo-stop').should('contain', 'Stop Demo').click()
+  //   cy.get('.demo-indicator').should('not.exist')
+  // })
+})

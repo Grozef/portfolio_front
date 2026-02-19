@@ -5,6 +5,11 @@ describe('Contact page', () => {
       body: { data: { temp: 12, city: 'Lyon', condition: 'clouds' } },
     }).as('getWeather')
     cy.visit('/contact')
+        cy.get('body').then(($body) => {
+      if ($body.find('button:contains("Tout accepter")').length > 0) {
+        cy.contains('Tout accepter').click();
+      }
+    });
   })
 
   // ─── Layout ───────────────────────────────────────────────────────────────────

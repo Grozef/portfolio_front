@@ -47,12 +47,12 @@ const customProjectData = {
 **Fichiers > 1000 lignes:**
 <!-- - `AdminBooksView.vue`: 1138 lignes, 1 media query / NON ANALYSE / mauvais nombre de lignes claude espece de fils de pute -->
 <!-- - `KonamiAnimationGradius.vue`: 1124 lignes -->
-- `TerminalInterface.vue`: 1119 lignes, 4 media queries
+<!-- - `TerminalInterface.vue`: 1119 lignes, 4 media queries -->
 <!-- - `ProjectModal.vue`: 900 lignes -->
 <!-- - `AdminCarouselView.vue`: 803 lignes, 0 media queries -->
 
-**Impact:** Maintenabilité impossible
-**Fix:** Splitter en sous-composants
+<!-- **Impact:** Maintenabilité impossible
+**Fix:** Splitter en sous-composants -->
 
 ---
 
@@ -164,12 +164,12 @@ Devrait s'appeler `formIsInvalid`
 
 ### TIER 2 - QUALITÉ CODE (6h)
 
-3. **Splitter TerminalInterface.vue**
+<!-- 3. **Splitter TerminalInterface.vue**
    - CommandInput.vue
    - OutputRenderer.vue  
    - CommandParser.vue
    - WelcomeBanner.vue
-   - **Effort:** 3h
+   - **Effort:** 3h -->
 
 4. **Splitter AdminBooksView.vue**
    - BookCard.vue
@@ -207,25 +207,25 @@ Devrait s'appeler `formIsInvalid`
    - Forms inputs
    - Modals
    - **Effort:** 3h -->
-
+<!-- 
 10. **Keyboard navigation**
     - Tab order correct
     - Focus visible
     - Esc pour fermer modals
-    - **Effort:** 2h
+    - **Effort:** 2h -->
 
 11. **Alternative à cursor: none**
     - Garder custom cursor desktop
     - Auto fallback mobile
     - **Effort:** 30min
 
-12. **Alt text images**
+<!-- 12. **Alt text images**
     - GitHub avatars
     - Book covers
     - Carousel images
     - **Effort:** 30min
 
----
+--- -->
 
 ## SCORES PAR CRITÈRE
 

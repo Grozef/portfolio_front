@@ -28,6 +28,11 @@ describe('ProjectModal (E2E)', () => {
     }).as('getRepo')
 
     cy.visit('/projects')
+        cy.get('body').then(($body) => {
+      if ($body.find('button:contains("Tout accepter")').length > 0) {
+        cy.contains('Tout accepter').click();
+      }
+    });
     cy.wait('@getProjects', { timeout: 8000 })
     cy.get('.loading-state', { timeout: 6000 }).should('not.exist')
     cy.get('.project-card', { timeout: 6000 }).should('exist')

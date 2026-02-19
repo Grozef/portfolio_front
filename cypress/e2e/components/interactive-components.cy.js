@@ -8,6 +8,11 @@ describe('FleeingButton (E2E)', () => {
     }).as('getBooks')
     cy.intercept('GET', '/api/v1/carousel*', { body: { data: [] } }).as('getCarousel')
     cy.visit('/books')
+        cy.get('body').then(($body) => {
+      if ($body.find('button:contains("Tout accepter")').length > 0) {
+        cy.contains('Tout accepter').click();
+      }
+    });
   })
 
   it('renders the fleeing button', () => {

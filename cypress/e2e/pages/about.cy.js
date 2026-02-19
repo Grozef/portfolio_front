@@ -2,6 +2,11 @@ describe('Page About - François Lisowski', () => {
   beforeEach(() => {
     // Cypress utilisera la baseUrl de ton cypress.config.js
     cy.visit('/about') 
+        cy.get('body').then(($body) => {
+      if ($body.find('button:contains("Tout accepter")').length > 0) {
+        cy.contains('Tout accepter').click();
+      }
+    });
   })
 
   it('devrait charger la page avec l’animation d’entrée', () => {

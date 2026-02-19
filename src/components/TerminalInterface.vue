@@ -3,7 +3,7 @@
     <!-- Dismissible overlays -->
     <TerminalQuickNav />
     <TerminalInfoCard />
-    <TerminalDemoIndicator :active="demoMode" @stop="stopDemoMode" />
+    <TerminalDemoIndicator :active="demoMode" @stop="stopDemoMode()" />
 
     <!-- Terminal box -->
     <div class="terminal">
@@ -50,7 +50,7 @@
 </template>
 
 <script setup>
-import { ref, computed, nextTick, onMounted, onUnmounted, watch } from 'vue'
+import { ref, computed, nextTick, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useTerminalStore } from '@/stores/terminal'
 import { useGitHubStore } from '@/stores/github'
@@ -82,36 +82,62 @@ const localInput          = ref('')
 const showKonamiAnimation = ref(false)
 const isMobile            = ref(false)
 
+// Number of "pinned" entries (welcome messages) — set in onMounted.
+// Every executeCommand call trims history back to these entries + the input echo.
+const historyCheckpoint   = ref(0)
+
 // ─── Demo mode ────────────────────────────────────────────────────────────────
 
 const demoMode        = ref(false)
-const demoCommands    = ['help', 'about', 'skills', 'projects']
 const DEMO_TIMEOUT_MS = 120000
-let demoTimeout       = null
-let demoCommandIndex  = 0
-let demoCharIndex     = 0
+
+// Each step: cmd = text to type; execute = whether to run it on Enter.
+// When execute is false, the command stays in the input field as a hint.
+const demoCommands = [
+  { cmd: 'about',   execute: true  },
+  { cmd: 'contact', execute: true  },
+  { cmd: 'skills',  execute: true  },
+  { cmd: 'social',  execute: true  },
+  { cmd: 'vim',     execute: false },
+]
+
+let demoTimeout      = null
+let demoCommandIndex = 0
+let demoCharIndex    = 0
 
 const typeNextCharacter = () => {
   if (!demoMode.value) return
 
-  const cmd = demoCommands[demoCommandIndex]
+  const step = demoCommands[demoCommandIndex]
+  const cmd  = step.cmd
 
   if (demoCharIndex < cmd.length) {
     localInput.value += cmd[demoCharIndex++]
     demoTimeout = setTimeout(typeNextCharacter, 100)
   } else {
-    demoTimeout = setTimeout(() => {
-      executeCommand(localInput.value)
-      localInput.value = ''
-      demoCharIndex = 0
-      demoCommandIndex++
+    // Finished typing the full command text
+    if (step.execute) {
+      // Pause, execute, then move to next command
+      demoTimeout = setTimeout(() => {
+        // Add input echo manually so the replace-mode truncation keeps it
+        terminalStore.addToHistory({ type: 'input', content: cmd })
+        executeCommand(cmd)
+        localInput.value = ''
+        demoCharIndex    = 0
+        demoCommandIndex++
 
-      if (demoCommandIndex < demoCommands.length) {
-        demoTimeout = setTimeout(typeNextCharacter, 1500)
-      } else {
-        stopDemoMode()
-      }
-    }, 500)
+        if (demoCommandIndex < demoCommands.length) {
+          demoTimeout = setTimeout(typeNextCharacter, 1500)
+        } else {
+          stopDemoMode()
+        }
+      }, 500)
+    } else {
+      // Type-only step: leave the command in the input as a hint, end demo
+      demoTimeout = setTimeout(() => {
+        stopDemoMode(false) // false = don't clear localInput, 'vim' stays as hint
+      }, 2000)
+    }
   }
 }
 
@@ -124,9 +150,10 @@ const startDemoMode = () => {
   typeNextCharacter()
 }
 
-const stopDemoMode = () => {
-  demoMode.value   = false
-  localInput.value = ''
+// keepInput=true (default) clears localInput. keepInput=false leaves it intact (vim hint).
+const stopDemoMode = (keepInput = true) => {
+  demoMode.value = false
+  if (keepInput) localInput.value = ''
   demoCommandIndex = 0
   demoCharIndex    = 0
   clearTimeout(demoTimeout)
@@ -160,9 +187,7 @@ const scrollToBottom = () => {
 
 // ─── Input handling ───────────────────────────────────────────────────────────
 
-// Handles real user typing via update:modelValue emitted from TerminalInput.
-// Programmatic writes to localInput.value (demo typing) do NOT go through
-// this handler, so the demo cannot accidentally kill itself.
+// Only called on real user keystrokes (not programmatic demo writes).
 const handleUserModelUpdate = (val) => {
   localInput.value = val
   if (!demoMode.value) resetDemoTimer()
@@ -205,9 +230,23 @@ const executeQuickCommand = (cmd) => {
 // ─── Commands ─────────────────────────────────────────────────────────────────
 
 const executeCommand = async (input) => {
-  const parts   = input.trim().split(/\s+/)
+  const trimmed = input.trim()
+  const parts   = trimmed.split(/\s+/)
   const command = parts[0].toLowerCase()
   const args    = parts.slice(1)
+
+  // ── Replace-mode: keep only welcome entries, then re-add the current echo ──
+  // Truncate to checkpoint first (removes all previous command output).
+  // If an echo was already appended by processCommand or the demo path,
+  // re-add it so the current command always appears right above the output.
+  if (command !== 'clear') {
+    const last = terminalStore.history[terminalStore.history.length - 1]
+    const hadEcho = last?.type === 'input' && last?.content === trimmed
+    terminalStore.truncateTo(historyCheckpoint.value)
+    if (hadEcho) {
+      terminalStore.addToHistory({ type: 'input', content: trimmed })
+    }
+  }
 
   resetDemoTimer()
 
@@ -242,6 +281,8 @@ const executeCommand = async (input) => {
         content: `Command not found: ${command}. Type 'help' for available commands.`
       })
   }
+
+  scrollToBottom()
 }
 
 // ─── Output functions ─────────────────────────────────────────────────────────
@@ -326,7 +367,7 @@ const outputSocial = () => {
     content: [
       { name: 'GitHub',   url: 'https://github.com/Grozef',                                                     icon: '◆' },
       { name: 'LinkedIn', url: 'https://linkedin.com/in/francois-lisowski-39a88576',                            icon: '◆' },
-      { name: 'X',        url: 'https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?autoplay=1&mute=0',         icon: '◆' }
+      { name: 'X',        url: 'https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?autoplay=1&mute=1',         icon: '◆' }
     ]
   })
 }
@@ -471,9 +512,7 @@ useKonamiCode(() => {
   setTimeout(() => { showKonamiAnimation.value = false }, 5000)
 })
 
-// ─── Watchers / lifecycle ─────────────────────────────────────────────────────
-
-watch(() => terminalStore.history.length, scrollToBottom)
+// ─── Lifecycle ────────────────────────────────────────────────────────────────
 
 onMounted(() => {
   checkMobile()
@@ -508,9 +547,18 @@ onMounted(() => {
   ╚════════════════════════════════════════════════════════════════════════════╝`
 
   terminalStore.addToHistory({ type: 'output', format: 'ascii', content: isMobile.value ? mobileWelcome : desktopWelcome })
-  terminalStore.addToHistory({ type: 'output', content: '💡 Tip: Wait 2 minutes to see a demo, or start typing commands!' })
+  terminalStore.addToHistory({ type: 'output', content: 'Tip: Wait 2 minutes to see a demo, or start typing commands!' })
+
+  // Freeze the pinned-entries count — everything above this line is permanent header
+  historyCheckpoint.value = terminalStore.history.length
 
   resetDemoTimer()
+
+  // Cypress test hook — exposes demo controls without relying on clock faking
+  if (window.Cypress) {
+    window.__triggerDemo = startDemoMode
+    window.__stopDemo    = stopDemoMode
+  }
 })
 
 onUnmounted(() => {

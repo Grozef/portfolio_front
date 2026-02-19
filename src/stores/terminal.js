@@ -109,6 +109,11 @@ export const useTerminalStore = defineStore('terminal', () => {
     history.value = []
   }
 
+  // Keep only the first n entries — used for replace-mode display
+  const truncateTo = (n) => {
+    history.value.splice(n)
+  }
+
   const processCommand = async (command, executeCallback) => {
     const trimmed = command.trim()
     if (!trimmed) return
@@ -144,6 +149,7 @@ export const useTerminalStore = defineStore('terminal', () => {
     getPreviousCommand,
     getNextCommand,
     clearHistory,
+    truncateTo,
     processCommand,
     formattedHistory
   }

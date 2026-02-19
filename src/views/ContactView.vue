@@ -26,7 +26,7 @@
             </div>
             <div class="info-item">
               <span class="label">Response Time</span>
-              <span class="value">Within 48 hours</span>
+              <span class="value">Time is relative - Albert Einstein</span>
             </div>
           </div>
 

@@ -1,6 +1,11 @@
 describe('Privacy Policy page (/privacy-policy)', () => {
   beforeEach(() => {
     cy.visit('/privacy-policy')
+        cy.get('body').then(($body) => {
+      if ($body.find('button:contains("Tout accepter")').length > 0) {
+        cy.contains('Tout accepter').click();
+      }
+    });
   })
 
   it('renders the page heading', () => {
