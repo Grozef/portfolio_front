@@ -98,7 +98,7 @@ const demoCommands = [
   { cmd: 'contact', execute: true  },
   { cmd: 'skills',  execute: true  },
   { cmd: 'social',  execute: true  },
-  { cmd: 'vim',     execute: false },
+  { cmd: 'esc + : + q', execute: false },
 ]
 
 let demoTimeout      = null
@@ -335,10 +335,10 @@ const openProject = async (name) => {
 
 const outputSkills = (category) => {
   const skills = {
-    frontend: ['Vue.js', 'React', 'TypeScript', 'Tailwind CSS', 'SCSS', 'GSAP'],
-    backend:  ['Laravel', 'Node.js', 'PostgreSQL', 'Redis', 'GraphQL'],
-    devops:   ['Docker', 'AWS', 'CI/CD', 'Nginx', 'Linux'],
-    tools:    ['Git', 'Figma', 'VS Code', 'Postman', 'Webpack']
+    frontend: ['JavaScript', 'Vue.js', 'Quasar', 'TypeScript', 'Ionic', 'Pinia', 'Cypress'],
+    backend:  ['PHP', 'Laravel', 'Symfony', 'MySQL', 'REST APIs', 'Unit Testing' ],
+    devops:   ['Docker', 'AWS', 'CI/CD', 'Linux', 'GitHub Actions', 'Laragon'],
+    tools:    ['Git', 'Figma', 'VS Code', 'Postman', 'Webpack', 'Composer', 'npm', ]
   }
   const key = category?.toLowerCase()
   terminalStore.addToHistory({
