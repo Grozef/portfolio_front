@@ -96,6 +96,54 @@
   }
 }
 
+/* Ajoute ça dans la section HEADER SECTION */
+
+.header-titles {
+  display: flex;
+  flex-direction: column;
+  align-items: center; // Centre horizontalement le h1 et le h6
+  text-align: center;
+  gap: 0.25rem;
+  flex: 1; // Permet de prendre l'espace central
+}
+
+.page-title {
+  // Garde tes styles existants, on retire juste les marges si besoin
+  margin: 0;
+}
+
+.page-subtitle {
+  font-family: var(--font-mono); // Style terminal
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--terminal-text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.8;
+  margin: 0;
+
+  @media (max-width: 768px) {
+    font-size: 0.65rem;
+    max-width: 200px; // Évite qu'il ne s'étale trop sur petit écran
+    line-height: 1.2;
+  }
+}
+
+/* Ajustement pour que le bouton et le compteur ne poussent pas trop le titre */
+.page-header {
+  // Assure-toi que ces éléments ont une largeur fixe ou un flex-basis 
+  // pour que le titre reste parfaitement au centre
+  .back-btn, .project-count {
+    flex: 0 0 120px; 
+  }
+  
+  @media (max-width: 768px) {
+    .back-btn, .project-count {
+      flex: 0 0 auto;
+    }
+  }
+}
+
 /* ==========================================================================
    LOADING STATE
    ========================================================================== */

@@ -6,7 +6,10 @@
         <span class="back-text">Terminal</span>
       </button>
 
-      <h1 class="page-title">Projects</h1>
+<div class="header-titles">
+    <h1 class="page-title">Projects</h1>
+    <h6 class="page-subtitle">Some of these projects are still in development</h6>
+  </div>
 
       <div class="project-count">
         <span class="count-current">{{ activeIndex + 1 }}</span>
@@ -122,11 +125,13 @@
 import { ref, onMounted, onUnmounted, computed, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { useGitHubStore } from '@/stores/github'
+import { useProjectStore } from '@/stores/projects'
 import ProjectModal from '@/components/ProjectModal.vue'
 import SwordTrigger from '@/components/SwordTrigger.vue'
 
 const router = useRouter()
 const githubStore = useGitHubStore()
+const projectStore = useProjectStore()
 
 const isModalOpen = ref(false)
 const selectedProject = ref(null)
@@ -135,25 +140,33 @@ const scrollContainer = ref(null)
 const activeIndex = ref(0)
 const maxDots = 10
 
-// Curated project customizations
-// move into a store ?
-const customProjectData = {
-  // Example: "repository-name": { 
-  //   image: "/images/project-screenshot.jpg",
-  //   customDesc: "Custom description overriding GitHub description",
-  //   tags: ["Vue", "API", "Design"],
-  //   problem: "Users needed a faster way to visualize data",
-  //   solution: "Built real-time dashboard with WebSocket integration",
-  //   role: "Full-stack developer & UX designer",
-  //   outcomes: "50% faster data access, 10k+ daily users"
-  // }
-}
-
 const projects = computed(() => {
-  return githubStore.sortedRepositories.map(repo => ({
-    ...repo,
-    ...customProjectData[repo.name]
-  }))
+  const repos = githubStore.sortedRepositories || []
+
+  return [...repos]
+    .map(repo => {
+      // On récupère les données depuis Pinia via le getter 
+      const customData = projectStore.getCustomization(repo.name) || {}
+
+      return {
+        ...repo,
+        ...customData,
+        // On fusionne les tags GitHub (topics) avec les tags custom de Pinia
+        tags: customData.tags || (repo.topics?.length ? repo.topics : [repo.language])
+      }
+    })
+    .sort((a, b) => {
+      // On récupère l'ordre depuis le store aussi
+      const order = projectStore.featuredOrder
+      const indexA = order.indexOf(a.name)
+      const indexB = order.indexOf(b.name)
+
+      if (indexA !== -1 && indexB !== -1) return indexA - indexB
+      if (indexA !== -1) return -1
+      if (indexB !== -1) return 1
+
+      return new Date(b.pushed_at || b.updated_at) - new Date(a.pushed_at || a.updated_at)
+    })
 })
 
 const visibleDots = computed(() => {
