@@ -18,9 +18,16 @@
       </div>
     </header>
 
-    <div v-if="isLoading" class="loading-state">
-      <div class="loader"></div>
-      <p>Fetching repositories...</p>
+    <div v-if="isLoading" class="projects-skeleton" aria-label="Chargement des projets" aria-busy="true">
+      <div v-for="i in 3" :key="i" class="project-card-skeleton">
+        <div class="skeleton-number"></div>
+        <div class="skeleton-content">
+          <div class="skeleton-tag"></div>
+          <div class="skeleton-title"></div>
+          <div class="skeleton-desc"></div>
+          <div class="skeleton-desc short"></div>
+        </div>
+      </div>
     </div>
 
     <main v-else id="main-content" class="projects-main" tabindex="-1">

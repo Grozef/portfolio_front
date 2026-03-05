@@ -182,6 +182,7 @@ const focusInput = () => {
 const scrollToBottom = () => {
   nextTick(() => {
     if (outputRef.value) outputRef.value.scrollTop = outputRef.value.scrollHeight
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   })
 }
 
@@ -515,6 +516,7 @@ useKonamiCode(() => {
 // ─── Lifecycle ────────────────────────────────────────────────────────────────
 
 onMounted(() => {
+  terminalStore.clearHistory()
   checkMobile()
   window.addEventListener('resize', checkMobile)
   document.addEventListener('keydown', handleGlobalKeydown)

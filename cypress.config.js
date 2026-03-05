@@ -24,5 +24,9 @@ export default defineConfig({
       framework: 'vue',
       bundler: 'vite',
     },
+    specPattern: 'cypress/component/**/*.{cy,spec}.{js,jsx,ts,tsx}',
+    supportFile: 'cypress/support/component.js',
+    screenshotOnRunFailure: true,
+    video: false,
   },
 });

@@ -13,11 +13,11 @@
     import { useRouter } from 'vue-router'
     import { useAuthStore } from '@/stores/auth'
     import AdminLayout from '@/components/AdminLayout.vue'
-    import axios from 'axios'
-    
+    import api from '@/services/api.js'
+
     const router = useRouter()
     const authStore = useAuthStore()
-    
+
     const isLoading = ref(true)
     const messages = ref([])
     const selectedMessage = ref(null)
@@ -25,19 +25,6 @@
     const isDetailOpen = ref(false)
     const isDeleteModalOpen = ref(false)
     const error = ref(null)
-    
-    const api = axios.create({
-      baseURL: '/api/v1',
-      headers: { 'Content-Type': 'application/json' }
-    })
-    
-    api.interceptors.request.use((config) => {
-      const token = localStorage.getItem('auth_token')
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`
-      }
-      return config
-    })
     
     const filters = [
       { key: 'all', label: 'All' },

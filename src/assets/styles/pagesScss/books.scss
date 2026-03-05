@@ -616,6 +616,56 @@
   }
 }
 
+/* Skeleton screens */
+@keyframes shimmer {
+  0% { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+
+%skeleton-base {
+  background: linear-gradient(90deg, var(--terminal-bg-secondary) 25%, var(--terminal-border) 50%, var(--terminal-bg-secondary) 75%);
+  background-size: 800px 100%;
+  animation: shimmer 1.4s infinite;
+  border-radius: 4px;
+}
+
+.books-skeleton {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  padding: 1rem 0;
+
+  @media (min-width: 480px) { grid-template-columns: repeat(3, 1fr); }
+  @media (min-width: 768px) { grid-template-columns: repeat(4, 1fr); }
+  @media (min-width: 1200px) { grid-template-columns: repeat(5, 1fr); }
+}
+
+.book-card-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+
+  .skeleton-cover {
+    @extend %skeleton-base;
+    aspect-ratio: 2/3;
+    width: 100%;
+  }
+
+  .skeleton-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .skeleton-line {
+    @extend %skeleton-base;
+    height: 12px;
+
+    &.title { width: 85%; }
+    &.author { width: 60%; }
+  }
+}
+
 /* Quote Section */
 .quote-section {
   padding: 2rem 1rem;

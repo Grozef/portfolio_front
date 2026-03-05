@@ -57,7 +57,7 @@
                 maxlength="100"
                 placeholder="Your name"
                 aria-required="true"
-                aria-invalid="fieldErrors.name ? 'true' : 'false'"
+                :aria-invalid="fieldErrors.name ? 'true' : 'false'"
                 aria-describedby="name-error"
                 @blur="validateField('name', formData.name)"
                 @input="fieldErrors.name && validateField('name', formData.name)"
@@ -80,7 +80,7 @@
                 maxlength="150"
                 placeholder="your.email@example.com"
                 aria-required="true"
-                aria-invalid="fieldErrors.email ? 'true' : 'false'"
+                :aria-invalid="fieldErrors.email ? 'true' : 'false'"
                 aria-describedby="email-error"
                 @blur="validateField('email', formData.email)"
                 @input="fieldErrors.email && validateField('email', formData.email)"
@@ -103,7 +103,7 @@
                 maxlength="200"
                 placeholder="What's this about?"
                 aria-required="true"
-                aria-invalid="fieldErrors.subject ? 'true' : 'false'"
+                :aria-invalid="fieldErrors.subject ? 'true' : 'false'"
                 aria-describedby="subject-error"
                 @blur="validateField('subject', formData.subject)"
                 @input="fieldErrors.subject && validateField('subject', formData.subject)"
@@ -126,7 +126,7 @@
                 rows="6"
                 placeholder="Your message..."
                 aria-required="true"
-                aria-invalid="fieldErrors.message ? 'true' : 'false'"
+                :aria-invalid="fieldErrors.message ? 'true' : 'false'"
                 aria-describedby="message-error"
                 @blur="validateField('message', formData.message)"
                 @input="fieldErrors.message && validateField('message', formData.message)"
@@ -310,6 +310,7 @@ const handleSubmit = async () => {
     if (result.success) {
       submitMessage.value = 'Message sent successfully! I\'ll get back to you soon.'
       submitStatus.value = 'success'
+      setTimeout(() => { if (submitStatus.value === 'success') closeSubmitMessage() }, 5000)
       recordSubmission()
       
       formData.value = {

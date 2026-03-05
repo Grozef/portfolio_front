@@ -11,6 +11,13 @@ import App from './App.vue'
 import router from './router'
 import './assets/styles/componentsScss/sword-cursor.css'
 
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Tab') document.body.classList.add('keyboard-nav')
+})
+window.addEventListener('mousedown', () => {
+  document.body.classList.remove('keyboard-nav')
+})
+
 const app = createApp(App)
 
 app.use(createPinia())

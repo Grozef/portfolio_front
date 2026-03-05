@@ -1,6 +1,13 @@
 <template>
   <Transition name="slide-up">
-    <div v-if="cookieStore.showBanner" class="cookie-banner">
+    <div
+      v-if="cookieStore.showBanner"
+      ref="bannerRef"
+      class="cookie-banner"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Paramètres des cookies"
+    >
       <div class="cookie-container">
         <div class="cookie-content">
           <div class="cookie-icon">🍪</div>
@@ -91,12 +98,41 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import { useCookieConsentStore } from '@/stores/cookieConsent'
 
 const cookieStore = useCookieConsentStore()
+const bannerRef = ref(null)
 const showDetails = ref(false)
 const currentLang = ref('fr')
+
+const getFocusable = () => bannerRef.value?.querySelectorAll(
+  'a, button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])'
+) ?? []
+
+const trapFocus = (e) => {
+  if (e.key !== 'Tab') return
+  const focusable = Array.from(getFocusable())
+  if (!focusable.length) return
+  const first = focusable[0]
+  const last = focusable[focusable.length - 1]
+  if (e.shiftKey) {
+    if (document.activeElement === first) { e.preventDefault(); last.focus() }
+  } else {
+    if (document.activeElement === last) { e.preventDefault(); first.focus() }
+  }
+}
+
+watch(() => cookieStore.showBanner, (visible) => {
+  if (visible) {
+    nextTick(() => {
+      document.addEventListener('keydown', trapFocus)
+      getFocusable()[0]?.focus()
+    })
+  } else {
+    document.removeEventListener('keydown', trapFocus)
+  }
+})
 
 const localPreferences = ref({
   essential: true,
@@ -147,6 +183,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   document.removeEventListener('keydown', handleBannerEsc)
+  document.removeEventListener('keydown', trapFocus)
 })
 </script>
 

@@ -157,6 +157,7 @@
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { marked } from 'marked'
+import DOMPurify from 'dompurify'
 
 const props = defineProps({
   project: {
@@ -191,7 +192,7 @@ const sections = computed(() => {
 
 const parsedReadme = computed(() => {
   if (!props.project?.readme) return null
-  return marked(props.project.readme)
+  return DOMPurify.sanitize(marked(props.project.readme))
 })
 
 const languageColors = {

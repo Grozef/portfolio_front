@@ -5,88 +5,47 @@ export const useFormValidation = () => {
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
-  const validateField = (fieldName, value) => {
-    switch (fieldName) {
-      case 'name':
-        if (!value || value.trim().length < 2) {
-          fieldErrors.value.name = 'Name must be at least 2 characters'
-          return false
-        }
-        if (value.length > 100) {
-          fieldErrors.value.name = 'Name must not exceed 100 characters'
-          return false
-        }
-        delete fieldErrors.value.name
-        return true
-
-      case 'email':
-        if (!value || !emailRegex.test(value)) {
-          fieldErrors.value.email = 'Please enter a valid email address'
-          return false
-        }
-        if (value.length > 150) {
-          fieldErrors.value.email = 'Email must not exceed 150 characters'
-          return false
-        }
-        delete fieldErrors.value.email
-        return true
-
-      case 'subject':
-        if (!value || value.trim().length < 3) {
-          fieldErrors.value.subject = 'Subject must be at least 3 characters'
-          return false
-        }
-        if (value.length > 200) {
-          fieldErrors.value.subject = 'Subject must not exceed 200 characters'
-          return false
-        }
-        delete fieldErrors.value.subject
-        return true
-
-      case 'message':
-        if (!value || value.trim().length < 10) {
-          fieldErrors.value.message = 'Message must be at least 10 characters'
-          return false
-        }
-        if (value.length > 2000) {
-          fieldErrors.value.message = 'Message must not exceed 2000 characters'
-          return false
-        }
-        delete fieldErrors.value.message
-        return true
-
-      default:
-        return true
+  const RULES = {
+    name: (v) => {
+      if (!v || v.trim().length < 2) return 'Name must be at least 2 characters'
+      if (v.length > 100) return 'Name must not exceed 100 characters'
+      return null
+    },
+    email: (v) => {
+      if (!v || !emailRegex.test(v)) return 'Please enter a valid email address'
+      if (v.length > 150) return 'Email must not exceed 150 characters'
+      return null
+    },
+    subject: (v) => {
+      if (!v || v.trim().length < 3) return 'Subject must be at least 3 characters'
+      if (v.length > 200) return 'Subject must not exceed 200 characters'
+      return null
+    },
+    message: (v) => {
+      if (!v || v.trim().length < 10) return 'Message must be at least 10 characters'
+      if (v.length > 2000) return 'Message must not exceed 2000 characters'
+      return null
     }
+  }
+
+  const validateField = (fieldName, value) => {
+    const rule = RULES[fieldName]
+    if (!rule) return true
+    const error = rule(value)
+    if (error) {
+      fieldErrors.value[fieldName] = error
+      return false
+    }
+    delete fieldErrors.value[fieldName]
+    return true
   }
 
   const validateForm = (formData) => {
     const errors = {}
-
-    if (!formData.name || formData.name.trim().length < 2) {
-      errors.name = 'Name must be at least 2 characters'
-    } else if (formData.name.length > 100) {
-      errors.name = 'Name must not exceed 100 characters'
+    for (const [field, rule] of Object.entries(RULES)) {
+      const error = rule(formData[field])
+      if (error) errors[field] = error
     }
-
-    if (!formData.email || !emailRegex.test(formData.email)) {
-      errors.email = 'Please enter a valid email address'
-    } else if (formData.email.length > 150) {
-      errors.email = 'Email must not exceed 150 characters'
-    }
-
-    if (!formData.subject || formData.subject.trim().length < 3) {
-      errors.subject = 'Subject must be at least 3 characters'
-    } else if (formData.subject.length > 200) {
-      errors.subject = 'Subject must not exceed 200 characters'
-    }
-
-    if (!formData.message || formData.message.trim().length < 10) {
-      errors.message = 'Message must be at least 10 characters'
-    } else if (formData.message.length > 2000) {
-      errors.message = 'Message must not exceed 2000 characters'
-    }
-
     return errors
   }
 

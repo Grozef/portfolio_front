@@ -75,7 +75,12 @@ const router = createRouter({
       children: [
         {
           path: '',
-          redirect: '/Moi/messages'
+          redirect: '/Moi/dashboard'
+        },
+        {
+          path: 'dashboard',
+          name: 'admin-dashboard',
+          component: () => import('@/views/AdminDashboard.vue')
         },
         {
           path: 'books',

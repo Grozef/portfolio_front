@@ -55,7 +55,7 @@ describe('Projects page', () => {
       }
     });
     cy.wait('@getProjects', { timeout: 8000 })
-    cy.get('.loading-state', { timeout: 6000 }).should('not.exist')
+    cy.get('.projects-skeleton', { timeout: 6000 }).should('not.exist')
   })
 
   it('renders the page title', () => {
@@ -76,7 +76,7 @@ describe('Projects page', () => {
       req.reply({ delay: 300, body: { data: projectsFixture } })
     }).as('slowProjects')
     cy.visit('/projects')
-    cy.get('.loading-state').should('exist')
+    cy.get('.projects-skeleton').should('exist')
   })
 
   it('displays project counter after load', () => {

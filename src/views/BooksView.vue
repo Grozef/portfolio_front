@@ -105,8 +105,15 @@
       </div>
 
       <div class="carousel-indicators">
-        <button v-for="(image, index) in carouselImages" :key="image.id" class="carousel-dot"
-          :class="{ active: index === carouselIndex % carouselImages.length }" @click="carouselIndex = index"></button>
+        <button
+          v-for="(image, index) in carouselImages"
+          :key="image.id"
+          class="carousel-dot"
+          :class="{ active: index === carouselIndex % carouselImages.length }"
+          :aria-label="`Image ${index + 1} sur ${carouselImages.length}`"
+          :aria-current="index === carouselIndex % carouselImages.length ? 'true' : 'false'"
+          @click="carouselIndex = index"
+        ></button>
       </div>
     </div>
 
@@ -121,15 +128,26 @@
     </div>
 
     <div class="filters">
-      <button v-for="filter in filters" :key="filter.key" class="filter-btn"
-        :class="{ active: activeFilter === filter.key }" @click="setFilter(filter.key)" data-cursor-hover aria-label="Filter books by category">{{
-          filter.label
-        }}</button>
+      <button
+        v-for="filter in filters"
+        :key="filter.key"
+        class="filter-btn"
+        :class="{ active: activeFilter === filter.key }"
+        :aria-label="`Afficher les livres : ${filter.label}`"
+        :aria-pressed="activeFilter === filter.key ? 'true' : 'false'"
+        @click="setFilter(filter.key)"
+        data-cursor-hover
+      >{{ filter.label }}</button>
     </div>
 
-    <div v-if="isLoading" class="loading-state">
-      <div class="loader"></div>
-      <p>Loading library...</p>
+    <div v-if="isLoading" class="books-skeleton" aria-label="Chargement des livres" aria-busy="true">
+      <div v-for="i in 8" :key="i" class="book-card-skeleton">
+        <div class="skeleton-cover"></div>
+        <div class="skeleton-info">
+          <div class="skeleton-line title"></div>
+          <div class="skeleton-line author"></div>
+        </div>
+      </div>
     </div>
 
     <main v-else class="books-main">

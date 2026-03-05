@@ -1,23 +1,16 @@
 <template>
-  <button @click="toggleLanguage" class="lang-toggle">
-    {{ currentLang === 'fr' ? '🇬🇧 English' : '🇫🇷 Français' }}
+  <button @click="toggle" class="lang-toggle">
+    {{ modelValue === 'fr' ? '🇬🇧 English' : '🇫🇷 Français' }}
   </button>
 </template>
 
 <script setup>
-import { ref, watch, defineEmits } from 'vue'
-
-const emit = defineEmits(['language-changed'])
-const currentLang = ref('fr')
-
-const toggleLanguage = () => {
-  currentLang.value = currentLang.value === 'fr' ? 'en' : 'fr'
-  emit('language-changed', currentLang.value)
-}
-
-watch(currentLang, (newLang) => {
-  emit('language-changed', newLang)
+const props = defineProps({
+  modelValue: { type: String, required: true }
 })
+const emit = defineEmits(['update:modelValue'])
+
+const toggle = () => emit('update:modelValue', props.modelValue === 'fr' ? 'en' : 'fr')
 </script>
 
 <style scoped lang="scss">
@@ -32,13 +25,13 @@ watch(currentLang, (newLang) => {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  
+
   &:hover {
     background: rgba(0, 255, 255, 0.2);
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 255, 255, 0.3);
   }
-  
+
   &:active {
     transform: translateY(0);
   }

@@ -5,9 +5,7 @@
         <h1>{{ t.title }}</h1>
         <p class="last-updated">{{ t.lastUpdated }}: 04/02/2026</p>
         
-        <button @click="toggleLanguage" class="lang-toggle">
-          {{ currentLang === 'fr' ? '🇬🇧 English' : '🇫🇷 Français' }}
-        </button>
+        <LanjuageToggle v-model="currentLang" />
       </div>
 
       <div class="content">
@@ -117,6 +115,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import LanjuageToggle from '@/components/LanjuageToggle.vue'
 
 const currentLang = ref('fr')
 
@@ -265,9 +264,6 @@ const translations = {
 
 const t = computed(() => translations[currentLang.value])
 
-const toggleLanguage = () => {
-  currentLang.value = currentLang.value === 'fr' ? 'en' : 'fr'
-}
 </script>
 
 <style scoped lang="scss">
@@ -310,28 +306,6 @@ const toggleLanguage = () => {
     margin-bottom: 1rem;
   }
   
-  .lang-toggle {
-    margin-top: 1rem;
-    padding: 0.5rem 1.5rem;
-    background: rgba(0, 255, 255, 0.1);
-    border: 2px solid #00ffff;
-    border-radius: 25px;
-    color: #00ffff;
-    font-size: 0.95rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    
-    &:hover {
-      background: rgba(0, 255, 255, 0.2);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0, 255, 255, 0.3);
-    }
-    
-    &:active {
-      transform: translateY(0);
-    }
-  }
 }
 
 .content {
