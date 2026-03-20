@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [ main, dev ]
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   test-and-build:
     runs-on: ubuntu-latest
@@ -27,19 +31,52 @@ jobs:
         run: npm run build
         env:
           VITE_BACKEND_URL: ${{ secrets.VITE_BACKEND_URL }}
+          VITE_API_VERSION: ${{ secrets.VITE_API_VERSION }}
+          VITE_WEATHER_API_KEY: ${{ secrets.VITE_WEATHER_API_KEY }}
 
-      # Étape cruciale : Tests Cypress
       - name: Cypress run
         uses: cypress-io/github-action@v6
         with:
-          # On lance le serveur de dev pour que Cypress puisse tester
           start: npm run dev
-          wait-on: 'http://localhost:5173' # Attend que Vite soit prêt
-          # On peut aussi lancer sur le build si tu as un script "preview"
-          # start: npm run preview
-          # wait-on: 'http://localhost:4173'
+          wait-on: 'http://localhost:5173'
+        env:
+          VITE_BACKEND_URL: ${{ secrets.VITE_BACKEND_URL }}
+          VITE_API_VERSION: ${{ secrets.VITE_API_VERSION }}
+          VITE_WEATHER_API_KEY: ${{ secrets.VITE_WEATHER_API_KEY }}
 
-      # Optionnel : Déploiement (si les tests passent)
-      # - name: Deploy to Vercel/Netlify/S3
-      #   if: success()
-      #   run: ... ton script de déploiement ...
+      # Deploy uniquement sur push vers main (pas sur les PRs)
+      - name: Log in to GitHub Container Registry
+        if: success() && github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build & push Docker image
+        if: success() && github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/portfolio-frontend:latest
+          build-args: |
+            VITE_BACKEND_URL=${{ secrets.VITE_BACKEND_URL }}
+            VITE_API_VERSION=${{ secrets.VITE_API_VERSION }}
+            VITE_WEATHER_API_KEY=${{ secrets.VITE_WEATHER_API_KEY }}
+
+      - name: Deploy on VPS via SSH
+        if: success() && github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            docker pull ghcr.io/${{ github.repository_owner }}/portfolio-frontend:latest
+            docker stop portfolio-frontend || true
+            docker rm portfolio-frontend || true
+            docker run -d --name portfolio-frontend \
+              --restart unless-stopped \
+              -p 8080:80 \
+              ghcr.io/${{ github.repository_owner }}/portfolio-frontend:latest

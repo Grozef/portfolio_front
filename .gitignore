@@ -36,3 +36,5 @@ npm-debug.log*
 /www
 /revue/*
 /cypress/screenshots/*
+
+DEPLOYMENT_PLAN.md

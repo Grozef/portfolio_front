@@ -80,8 +80,7 @@
                     <div v-if="uploadMode === 'file'" class="form-group">
                       <label for="image_file">Select Image *</label>
                       <input id="image_file" type="file" accept="image/*" @change="handleFileSelect"
-                        :required="uploadMode === 'file' && !selectedFile" class="file-input"
-                        :src="getImageUrl(newImage.image_url)" />
+                        :required="uploadMode === 'file' && !selectedFile" class="file-input" />
                       <small>Max 5MB (jpg, png, gif, webp)</small>
 
                       <!-- Preview -->
@@ -181,7 +180,7 @@ import { useRouter } from 'vue-router'
 import { useCarouselStore } from '@/stores/carousel'
 import { useAuthStore } from '@/stores/auth'
 import AdminLayout from '@/components/AdminLayout.vue'
-const BACKEND_URL = 'http://localhost/portfolios/dev_portfolio/backend/public'
+import { BACKEND_URL } from '@/services/api.js'
 const router = useRouter()
 const carouselStore = useCarouselStore()
 const authStore = useAuthStore()
@@ -253,58 +252,35 @@ onUnmounted(() => {
   document.removeEventListener('keydown', handleCarouselEsc)
 });
 const handleFileSelect = (event) => {
-  console.log(' handleFileSelect - Event:', event)
-  console.log(' Files:', event.target.files)
-
   const file = event.target.files[0]
-  console.log(' Selected file:', file)
-
   if (file) {
     selectedFile.value = file
-    console.log(' File stored in selectedFile.value:', selectedFile.value)
-
-    // Prévisualisation
     const reader = new FileReader()
     reader.onload = (e) => {
       newImage.value.image_url = e.target.result
-      console.log(' Preview URL generated')
     }
     reader.readAsDataURL(file)
-  } else {
-    console.error(' No file selected')
   }
 }
 
 const handleAddImage = async () => {
   try {
-    console.log(' handleAddImage - Start')
-    console.log(' Upload mode:', uploadMode.value)
-    console.log(' Selected file:', selectedFile.value)
-    console.log(' New image:', newImage.value)
-
     let imageUrl = newImage.value.image_url
 
-    // Si mode upload, uploader d'abord le fichier
     if (uploadMode.value === 'file' && selectedFile.value) {
-      console.log(' Uploading file...')
       isUploading.value = true
       imageUrl = await carouselStore.uploadImage(selectedFile.value)
-      console.log(' File uploaded, URL:', imageUrl)
     } else if (uploadMode.value === 'file' && !selectedFile.value) {
-      console.error(' Upload mode is "file" but no file selected!')
       carouselStore.error = 'Please select a file to upload'
       return
     }
 
-    // Créer l'entrée en BDD
-    console.log(' Creating image entry with URL:', imageUrl)
     await carouselStore.createImage({
       title: newImage.value.title,
       image_url: imageUrl,
       is_active: newImage.value.is_active
     })
 
-    console.log(' Image created successfully')
     closeAddModal()
   } catch (e) {
     console.error('Failed to add image:', e)
