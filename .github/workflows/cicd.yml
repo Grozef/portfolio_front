@@ -69,13 +69,19 @@ jobs:
             VITE_API_VERSION=${{ secrets.VITE_API_VERSION }}
             VITE_WEATHER_API_KEY=${{ secrets.VITE_WEATHER_API_KEY }}
 
+      - name: Decode SSH key
+        if: success() && github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: |
+          echo "${{ secrets.VPS_SSH_KEY }}" | base64 -d > /tmp/deploy_key
+          chmod 600 /tmp/deploy_key
+
       - name: Deploy on VPS via SSH
         if: success() && github.ref == 'refs/heads/main' && github.event_name == 'push'
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
+          key_path: /tmp/deploy_key
           script: |
             docker pull ghcr.io/${{ env.OWNER }}/portfolio-frontend:latest
             docker stop portfolio-frontend || true
