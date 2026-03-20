@@ -88,5 +88,5 @@ jobs:
             docker rm portfolio-frontend || true
             docker run -d --name portfolio-frontend \
               --restart unless-stopped \
-              -p 8080:80 \
+              -p 8081:80 \
               ghcr.io/${{ env.OWNER }}/portfolio-frontend:latest
