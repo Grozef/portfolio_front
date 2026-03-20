@@ -539,7 +539,7 @@ const getStatusLabel = (status) => ({
 }[status] || status)
 
 const readingInsights = computed(() => {
-  const allBooks = booksStore.books
+  const allBooks = booksStore.books || []
   if (!allBooks.length) return null
   
   const currentYear = new Date().getFullYear()
@@ -568,7 +568,7 @@ const readingInsights = computed(() => {
 })
 
 const topGenre = computed(() => {
-  const allBooks = booksStore.books
+  const allBooks = booksStore.books || []
   if (!allBooks.length) return null
   
   const readBooks = allBooks.filter(b => b.status === 'read' && b.genre)
