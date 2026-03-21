@@ -81,6 +81,7 @@ jobs:
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
+          port: 2222
           key_path: /tmp/deploy_key
           script: |
             docker pull ghcr.io/${{ env.OWNER }}/portfolio-frontend:latest
