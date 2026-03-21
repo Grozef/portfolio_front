@@ -38,3 +38,5 @@ npm-debug.log*
 /cypress/screenshots/*
 
 DEPLOYMENT_PLAN.md
+SESSION_20_03_2026.md
+VPS_SECURITY.md

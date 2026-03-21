@@ -74,6 +74,7 @@ const menuItems = [
   { path: '/Moi/books', icon: '◈', label: 'Books' },
   { path: '/Moi/messages', icon: '◇', label: 'Messages' },
   { path: '/Moi/carousel', icon: '◆', label: 'Carousel' },
+  { path: '/Moi/security', icon: '⊘', label: 'Security' },
 ]
 
 const isActive = (item) => {

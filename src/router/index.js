@@ -96,6 +96,11 @@ const router = createRouter({
           path: 'carousel',
           name: 'admin-carousel',
           component: () => import('@/views/AdminCarouselView.vue')
+        },
+        {
+          path: 'security',
+          name: 'admin-security',
+          component: () => import('@/views/AdminSecurityView.vue')
         }
       ]
     },
